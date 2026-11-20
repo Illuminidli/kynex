@@ -1,0 +1,33 @@
+# Runs on every pull request and on main. A pull request should only be merged
+# when this shows a green tick.
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Generated API code is up to date
+        run: |
+          pnpm codegen
+          git diff --exit-code -- lib/api-client-react/src/generated lib/api-zod/src/generated
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - name: No known high-severity vulnerabilities in dependencies
+        run: pnpm audit --prod --audit-level high

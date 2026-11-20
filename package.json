@@ -1,0 +1,18 @@
+{
+  "name": "kynex",
+  "private": true,
+  "description": "Kynex - camera-based rehab platform (patient app, clinic dashboard, calibration lab).",
+  "packageManager": "pnpm@10.20.0",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @kynex/api-server dev",
+    "build": "pnpm --filter @kynex/web build && pnpm --filter @kynex/api-server build",
+    "start": "pnpm --filter @kynex/api-server start",
+    "codegen": "pnpm --filter @kynex/api-spec codegen",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "check": "pnpm typecheck && pnpm test && pnpm build"
+  }
+}

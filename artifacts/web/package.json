@@ -1,0 +1,27 @@
+{
+  "name": "@kynex/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The screens: patient app, clinic dashboard and calibration lab in one installable web app. Holds no business rules; everything goes through the API.",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kynex/api-client-react": "workspace:*",
+    "@kynex/motion": "workspace:*",
+    "@tanstack/react-query": "^5.90.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.1.0"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "@kynex/api-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Kynex server: the only part that talks to the database. Serves the API under /api and the web app on the same address.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false --exclude \"../web/**\" --exclude \"../../.local-db/**\" src/index.ts",
+    "build": "node build.mjs",
+    "start": "node --enable-source-maps dist/index.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.3.16",
+    "@kynex/api-zod": "workspace:*",
+    "@kynex/db": "workspace:*",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.0",
+    "helmet": "^8.1.0",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.25.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.1.0"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@kynex/db",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Database connection and table definitions (Drizzle ORM on PostgreSQL). Uses DATABASE_URL; without it (local development only) falls back to an embedded Postgres stored in .local-db/.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "generate": "drizzle-kit generate"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.3.0",
+    "drizzle-orm": "^0.45.4",
+    "pg": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.15.0",
+    "drizzle-kit": "^0.31.0",
+    "typescript": "^5.9.0"
+  }
+}
