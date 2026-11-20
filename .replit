@@ -1,13 +1,19 @@
 modules = ["nodejs-24", "postgresql-16"]
-run = "pnpm install --frozen-lockfile && pnpm run dev"
+
+# Replit runs the same built app it would publish: no file watching or
+# auto-restart (all code changes arrive through GitHub, then Git > Pull > Run).
+run = ["sh", "-c", "pnpm install --frozen-lockfile && pnpm run build && NODE_ENV=production pnpm run start"]
 
 [env]
 PORT = "3000"
+# Never pause waiting for a yes/no answer while installing.
+COREPACK_ENABLE_DOWNLOAD_PROMPT = "0"
+CI = "true"
 
 [deployment]
 deploymentTarget = "autoscale"
 build = ["sh", "-c", "pnpm install --frozen-lockfile && pnpm run build"]
-run = ["pnpm", "run", "start"]
+run = ["sh", "-c", "NODE_ENV=production pnpm run start"]
 
 [[ports]]
 localPort = 3000
