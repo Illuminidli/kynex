@@ -5,12 +5,15 @@ import { fileURLToPath } from "node:url";
 import * as schema from "./schema/index.ts";
 
 export { schema };
+export { USER_ROLES, type UserRole } from "./schema/users.ts";
 export type Db = NodePgDatabase<typeof schema>;
 export type DbKind = "postgres" | "local-file";
 
 interface Connection {
   db: Db;
   kind: DbKind;
+  /** Applies any migration files in `folder` not yet applied (recorded in drizzle.__drizzle_migrations). */
+  migrate: (folder: string) => Promise<void>;
   close: () => Promise<void>;
 }
 
@@ -21,7 +24,13 @@ async function connect(): Promise<Connection> {
   if (url) {
     const [{ drizzle }, pg] = await Promise.all([import("drizzle-orm/node-postgres"), import("pg")]);
     const pool = new pg.default.Pool({ connectionString: url, max: 10, idleTimeoutMillis: 30_000 });
-    return { db: drizzle(pool, { schema }), kind: "postgres", close: () => pool.end() };
+    const db = drizzle(pool, { schema });
+    return {
+      db,
+      kind: "postgres",
+      migrate: async (folder) => (await import("drizzle-orm/node-postgres/migrator")).migrate(db, { migrationsFolder: folder }),
+      close: () => pool.end(),
+    };
   }
   if (process.env.NODE_ENV === "production") {
     throw new Error("DATABASE_URL is not set. Add a PostgreSQL database on Replit before deploying.");
@@ -32,8 +41,13 @@ async function connect(): Promise<Connection> {
   const dir = process.env.LOCAL_DB_DIR ?? path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../.local-db");
   const client = new PGlite(dir);
   // Same query builder API as node-postgres, so the rest of the code never knows the difference.
-  const db = drizzle(client, { schema }) as unknown as Db;
-  return { db, kind: "local-file", close: () => client.close() };
+  const local = drizzle(client, { schema });
+  return {
+    db: local as unknown as Db,
+    kind: "local-file",
+    migrate: async (folder) => (await import("drizzle-orm/pglite/migrator")).migrate(local, { migrationsFolder: folder }),
+    close: () => client.close(),
+  };
 }
 
 /** The shared database connection (created on first use). */

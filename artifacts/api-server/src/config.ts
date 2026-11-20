@@ -14,5 +14,7 @@ export const config = {
   inReplitEditor: !!process.env.REPL_ID && process.env.REPLIT_DEPLOYMENT !== "1",
   /** The web app folder. Works from both src/ (dev) and dist/ (production), which sit at the same depth. */
   webRoot: path.resolve(here, "../../web"),
+  /** SQL files that create and change the tables, applied in order at start-up. */
+  migrationsFolder: path.resolve(here, "../../../lib/db/migrations"),
   version: process.env.npm_package_version ?? "0.1.0",
 };

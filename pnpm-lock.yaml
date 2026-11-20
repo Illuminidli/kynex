@@ -19,6 +19,9 @@ importers:
       '@kynex/db':
         specifier: workspace:*
         version: link:../../lib/db
+      drizzle-orm:
+        specifier: ^0.45.4
+        version: 0.45.4(@electric-sql/pglite@0.3.16)(@types/pg@8.23.1)(pg@8.23.1)
       express:
         specifier: ^5.1.0
         version: 5.3.0

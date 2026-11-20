@@ -13,7 +13,12 @@ Camera-based rehab platform: patient app, clinic dashboard and calibration lab, 
 3. Press **Run**. The preview shows "Kynex is running" with three green ticks. Open the preview's https link on your phone too.
 4. When Replit asks about publishing/deploying: optional for now. Check the price it shows before confirming.
 
-To get new changes: merge the pull request on GitHub, then in Replit open **Git** and **Pull**, and press Run again.
+To get new changes: merge the pull request on GitHub, then in the Replit **Shell** run
+`git fetch origin` and `git reset --hard origin/main` (makes Replit match GitHub exactly), and press Run again.
+
+Test accounts (M1): add a secret **DEMO_PASSWORD** (10+ characters, your choice) in Replit → Secrets, then Run.
+Sign in as `admin@kynex.test`, `clinician1@kynex.test` or `patient1@kynex.test` (… `patient5`) with that password.
+`/status` shows whether the accounts are ready.
 
 ## Run on this laptop
 

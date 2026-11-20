@@ -21,5 +21,90 @@ export const GetHealthResponse = zod.object({
   "kind": zod.enum(['postgres', 'local-file']).describe('Which database is in use.'),
   "latencyMs": zod.number().optional(),
   "version": zod.string().optional().describe('Postgres version, e.g. "16.4".')
+}),
+  "testAccounts": zod.int().describe('How many sign-in accounts exist (0 means DEMO_PASSWORD has not been set yet).')
 })
+
+
+/**
+ * @summary Sign in with email and password. Sets the session cookie.
+ */
+export const signInBodyEmailMin = 3;
+export const signInBodyEmailMax = 254;
+
+export const signInBodyPasswordMax = 200;
+
+
+
+export const SignInBody = zod.object({
+  "email": zod.string().min(signInBodyEmailMin).max(signInBodyEmailMax),
+  "password": zod.string().min(1).max(signInBodyPasswordMax)
+})
+
+export const SignInResponse = zod.object({
+  "id": zod.uuid(),
+  "email": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.enum(['patient', 'clinician', 'admin']),
+  "clinic": zod.object({
+  "id": zod.uuid(),
+  "name": zod.string()
+}),
+  "freshSince": zod.iso.datetime({"offset":true}).describe('When this account was created or last reset to start the journey again.')
+})
+
+
+/**
+ * @summary Sign this device out.
+ */
+export const SignOutResponse = zod.void()
+
+
+/**
+ * @summary Who is signed in on this device?
+ */
+export const GetMeResponse = zod.object({
+  "id": zod.uuid(),
+  "email": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.enum(['patient', 'clinician', 'admin']),
+  "clinic": zod.object({
+  "id": zod.uuid(),
+  "name": zod.string()
+}),
+  "freshSince": zod.iso.datetime({"offset":true}).describe('When this account was created or last reset to start the journey again.')
+})
+
+
+/**
+ * @summary Every account in the admin's clinic.
+ */
+export const ListUsersResponse = zod.object({
+  "users": zod.array(zod.object({
+  "id": zod.uuid(),
+  "email": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.enum(['patient', 'clinician', 'admin']),
+  "freshSince": zod.iso.datetime({"offset":true}),
+  "lastSignInAt": zod.iso.datetime({"offset":true}).nullable(),
+  "lockedUntil": zod.iso.datetime({"offset":true}).nullable().describe('Set while the account is locked after too many wrong passwords.')
+}))
+})
+
+
+/**
+ * @summary Reset an account to fresh so its journey starts again. Signs it out everywhere and unlocks it.
+ */
+export const ResetUserParams = zod.object({
+  "userId": zod.uuid()
+})
+
+export const ResetUserResponse = zod.object({
+  "id": zod.uuid(),
+  "email": zod.string(),
+  "displayName": zod.string(),
+  "role": zod.enum(['patient', 'clinician', 'admin']),
+  "freshSince": zod.iso.datetime({"offset":true}),
+  "lastSignInAt": zod.iso.datetime({"offset":true}).nullable(),
+  "lockedUntil": zod.iso.datetime({"offset":true}).nullable().describe('Set while the account is locked after too many wrong passwords.')
 })

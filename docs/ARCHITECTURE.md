@@ -48,7 +48,12 @@ Plain-language version: the "Architecture & security" tab of the Kynex Google Sh
 - Errors never send internal details to the browser.
 - Secrets only in Replit Secrets / environment variables, never in the repository.
 - GitHub Checks (type checks, tests, build, dependency audit) must pass before merging; Dependabot proposes security updates.
-- From M1: proven sign-in library, server-side permission checks on every request, automated tests that one user cannot read another's records.
+- Sign-in (M1): passwords hashed with scrypt (built into Node, no extra package); sign-in held in an
+  `HttpOnly`, `Secure`, `SameSite=Lax` cookie (`__Host-` prefix in production) whose token is stored only as a
+  SHA-256 hash; 5 wrong passwords lock an account for 15 minutes, plus 20 sign-in attempts per 15 minutes per address;
+  changes (POST) coming from other websites are refused.
+- Every API route checks the signed-in role on the server and only reads its own clinic's rows; automated tests
+  prove patients and clinicians can't open admin routes.
 
 ## Avoiding lock-in
 
