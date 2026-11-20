@@ -1,0 +1,65 @@
+openapi: 3.1.0
+info:
+  title: Kynex API
+  version: 0.1.0
+  description: >
+    The single contract between every Kynex app (web, wrapped phone app) and
+    the server. Change this file first, then run `pnpm codegen` to regenerate
+    the client hooks and the server's request/response validators.
+servers:
+  - url: /api
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Is the server running and can it reach the database?
+      tags: [system]
+      responses:
+        "200":
+          description: Status of the server and database.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+        "503":
+          description: The server is running but the database is not reachable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      additionalProperties: false
+      required: [status, version, environment, serverTime, database]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        version:
+          type: string
+        environment:
+          type: string
+          enum: [development, production]
+        serverTime:
+          type: string
+          format: date-time
+        database:
+          $ref: "#/components/schemas/DatabaseStatus"
+    DatabaseStatus:
+      type: object
+      additionalProperties: false
+      required: [ok, kind]
+      properties:
+        ok:
+          type: boolean
+        kind:
+          type: string
+          description: Which database is in use.
+          enum: [postgres, local-file]
+        latencyMs:
+          type: number
+        version:
+          type: string
+          description: Postgres version, e.g. "16.4".

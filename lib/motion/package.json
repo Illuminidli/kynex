@@ -1,0 +1,19 @@
+{
+  "name": "@kynex/motion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Camera engine: turns body landmarks into joint angles, rep counts and form checks for the 25 exercises. No screens, no database, no network, so it runs in the browser, a wrapped phone app or Node.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"test/**/*.test.ts\""
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}

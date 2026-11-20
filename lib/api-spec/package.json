@@ -1,0 +1,13 @@
+{
+  "name": "@kynex/api-spec",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The API contract (openapi.yaml) and the code generator config.",
+  "type": "module",
+  "scripts": {
+    "codegen": "orval --config orval.config.ts"
+  },
+  "devDependencies": {
+    "orval": "^7.11.0"
+  }
+}

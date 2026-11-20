@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+/*
+ * Kynex design tokens (carried over from the first build).
+ * Palette: a softened take on QI Spine's navy (#003F63) and orange (#FF7800).
+ */
+@theme {
+  --color-ink: #16222f;
+  --color-ink-soft: #475569;
+  --color-ink-faint: #8a97a8;
+
+  --color-brand-50: #f0f6fa;
+  --color-brand-100: #dcebf4;
+  --color-brand-200: #b9d6e8;
+  --color-brand-500: #2f789f;
+  --color-brand-600: #1d6189;
+  --color-brand-700: #154e70;
+  --color-brand-800: #123f5a;
+  --color-brand-900: #0e3147;
+
+  --color-accent-50: #fff6ee;
+  --color-accent-500: #f2812e;
+  --color-accent-600: #d96a1c;
+
+  --color-canvas: #f6f8fa;
+  --color-line: #e5eaf0;
+
+  --color-good: #2f9e73;
+  --color-good-soft: #e5f5ee;
+  --color-bad: #cf4b45;
+  --color-bad-soft: #fbe9e8;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --shadow-soft: 0 1px 2px rgb(16 34 51 / 0.04), 0 4px 16px -4px rgb(16 34 51 / 0.08);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  color-scheme: light;
+}
+
+body {
+  @apply bg-canvas font-sans text-ink antialiased;
+}
