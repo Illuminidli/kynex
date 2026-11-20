@@ -27,12 +27,132 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /auth/sign-in:
+    post:
+      operationId: signIn
+      summary: Sign in with email and password. Sets the session cookie.
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignInRequest"
+      responses:
+        "200":
+          description: Signed in.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+        "400":
+          $ref: "#/components/responses/Invalid"
+        "401":
+          description: Email or password is wrong.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "423":
+          description: Too many wrong passwords; the account is locked for a while.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Locked"
+  /auth/sign-out:
+    post:
+      operationId: signOut
+      summary: Sign this device out.
+      tags: [auth]
+      responses:
+        "204":
+          description: Signed out (also returned if already signed out).
+  /auth/me:
+    get:
+      operationId: getMe
+      summary: Who is signed in on this device?
+      tags: [auth]
+      responses:
+        "200":
+          description: The signed-in person.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+        "401":
+          $ref: "#/components/responses/SignedOut"
+  /admin/users:
+    get:
+      operationId: listUsers
+      summary: Every account in the admin's clinic.
+      tags: [admin]
+      responses:
+        "200":
+          description: Accounts, admins first, then clinicians, then patients.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserList"
+        "401":
+          $ref: "#/components/responses/SignedOut"
+        "403":
+          $ref: "#/components/responses/NotAllowed"
+  /admin/users/{userId}/reset:
+    post:
+      operationId: resetUser
+      summary: Reset an account to fresh so its journey starts again. Signs it out everywhere and unlocks it.
+      tags: [admin]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: The account after the reset.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+        "400":
+          $ref: "#/components/responses/Invalid"
+        "401":
+          $ref: "#/components/responses/SignedOut"
+        "403":
+          $ref: "#/components/responses/NotAllowed"
+        "404":
+          description: No such account in this clinic.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
+  responses:
+    Invalid:
+      description: The request was not in the expected shape.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    SignedOut:
+      description: Not signed in (or the sign-in has expired).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotAllowed:
+      description: Signed in, but this role can't do that.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
   schemas:
     HealthStatus:
       type: object
       additionalProperties: false
-      required: [status, version, environment, serverTime, database]
+      required: [status, version, environment, serverTime, database, testAccounts]
       properties:
         status:
           type: string
@@ -47,6 +167,9 @@ components:
           format: date-time
         database:
           $ref: "#/components/schemas/DatabaseStatus"
+        testAccounts:
+          type: integer
+          description: How many sign-in accounts exist (0 means DEMO_PASSWORD has not been set yet).
     DatabaseStatus:
       type: object
       additionalProperties: false
@@ -63,3 +186,100 @@ components:
         version:
           type: string
           description: Postgres version, e.g. "16.4".
+    Role:
+      type: string
+      enum: [patient, clinician, admin]
+    Error:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: string
+          description: A message safe to show to the person.
+    Locked:
+      type: object
+      additionalProperties: false
+      required: [error, lockedUntil]
+      properties:
+        error:
+          type: string
+        lockedUntil:
+          type: string
+          format: date-time
+    SignInRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          minLength: 3
+          maxLength: 254
+        password:
+          type: string
+          minLength: 1
+          maxLength: 200
+    Clinic:
+      type: object
+      additionalProperties: false
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+    Me:
+      type: object
+      additionalProperties: false
+      required: [id, email, displayName, role, clinic, freshSince]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        displayName:
+          type: string
+        role:
+          $ref: "#/components/schemas/Role"
+        clinic:
+          $ref: "#/components/schemas/Clinic"
+        freshSince:
+          type: string
+          format: date-time
+          description: When this account was created or last reset to start the journey again.
+    AdminUser:
+      type: object
+      additionalProperties: false
+      required: [id, email, displayName, role, freshSince, lastSignInAt, lockedUntil]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        displayName:
+          type: string
+        role:
+          $ref: "#/components/schemas/Role"
+        freshSince:
+          type: string
+          format: date-time
+        lastSignInAt:
+          type: [string, "null"]
+          format: date-time
+        lockedUntil:
+          type: [string, "null"]
+          format: date-time
+          description: Set while the account is locked after too many wrong passwords.
+    UserList:
+      type: object
+      additionalProperties: false
+      required: [users]
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminUser"

@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { config } from "./config.ts";
@@ -61,3 +61,26 @@ export function applySecurity(app: Express) {
     }),
   );
 }
+
+/**
+ * Blocks changes (sign-in, reset, later: saving results) that another website tries to
+ * trigger in a signed-in person's browser. Browsers label where a request came from;
+ * anything not from our own page is refused. Reading (GET) is unaffected.
+ */
+export const sameSiteOnly: RequestHandler = (req, res, next) => {
+  if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") return next();
+  const site = req.get("sec-fetch-site");
+  const origin = req.get("origin");
+  const host = req.get("x-forwarded-host") ?? req.get("host");
+  const crossSite = site !== undefined && site !== "same-origin" && site !== "none";
+  let otherOrigin = false;
+  if (origin) {
+    try {
+      otherOrigin = new URL(origin).host !== host;
+    } catch {
+      otherOrigin = true;
+    }
+  }
+  if (crossSite || otherOrigin) return void res.status(403).json({ error: "Request blocked: it didn't come from the Kynex app." });
+  next();
+};

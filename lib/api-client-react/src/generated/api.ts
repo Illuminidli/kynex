@@ -7,16 +7,20 @@
  * OpenAPI spec version: 0.1.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
@@ -63,13 +67,116 @@ export interface HealthStatus {
   environment: HealthStatusEnvironment;
   serverTime: string;
   database: DatabaseStatus;
+  /** How many sign-in accounts exist (0 means DEMO_PASSWORD has not been set yet). */
+  testAccounts: number;
 }
+
+export type Role = typeof Role[keyof typeof Role];
+
+
+export const Role = {
+  patient: 'patient',
+  clinician: 'clinician',
+  admin: 'admin',
+} as const;
+
+export interface Error {
+  /** A message safe to show to the person. */
+  error: string;
+}
+
+export interface Locked {
+  error: string;
+  lockedUntil: string;
+}
+
+export interface SignInRequest {
+  /**
+     * @minLength 3
+     * @maxLength 254
+     */
+  email: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  password: string;
+}
+
+export interface Clinic {
+  id: string;
+  name: string;
+}
+
+export interface Me {
+  id: string;
+  email: string;
+  displayName: string;
+  role: Role;
+  clinic: Clinic;
+  /** When this account was created or last reset to start the journey again. */
+  freshSince: string;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  displayName: string;
+  role: Role;
+  freshSince: string;
+  /** @nullable */
+  lastSignInAt: string | null;
+  /**
+     * Set while the account is locked after too many wrong passwords.
+     * @nullable
+     */
+  lockedUntil: string | null;
+}
+
+export interface UserList {
+  users: AdminUser[];
+}
+
+/**
+ * The request was not in the expected shape.
+ */
+export type InvalidResponse = Error;
+
+/**
+ * Not signed in (or the sign-in has expired).
+ */
+export type SignedOutResponse = Error;
+
+/**
+ * Signed in, but this role can't do that.
+ */
+export type NotAllowedResponse = Error;
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
       type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 
+
+const getHeaders = (...sources: (RequestInit['headers'] | Record<string, string | undefined>)[]) => {
+  const seen = new Set<string>();
+  const layers: [string, string | readonly string[]][][] = [];
+  for (const source of sources.reverse()) {
+    if (!source) continue;
+    const entries = source instanceof Headers
+      ? source.entries()
+      : Symbol.iterator in source
+        ? Array.from(source as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string])
+        : Object.entries<string | readonly string[] | undefined>(source);
+    const layer: [string, string | readonly string[]][] = [];
+    for (const [name, value] of entries) {
+      if (value !== undefined && !seen.has(name.toLowerCase())) layer.push([name, value]);
+    }
+    for (const [name] of layer) seen.add(name.toLowerCase());
+    layers.push(layer);
+  }
+  return Object.fromEntries(layers.reverse().flat()) as Extract<RequestInit['headers'], Record<string, unknown>>;
+};
 
 
 const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
@@ -207,3 +314,580 @@ export function useGetHealth<TData = Awaited<ReturnType<typeof getHealth>>, TErr
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+
+
+export type signInResponse200 = {
+  data: Me
+  status: 200
+}
+
+export type signInResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type signInResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type signInResponse423 = {
+  data: Locked
+  status: 423
+}
+
+export type signInResponseSuccess = (signInResponse200) & {
+  headers: Headers;
+};
+export type signInResponseError = (signInResponse400 | signInResponse401 | signInResponse423) & {
+  headers: Headers;
+};
+
+export type signInResponse = (signInResponseSuccess | signInResponseError)
+
+export const getSignInUrl = () => {
+
+
+
+
+  return `/api/auth/sign-in`
+}
+
+/**
+ * @summary Sign in with email and password. Sets the session cookie.
+ */
+export const signIn = async (signInRequest: SignInRequest, options?: RequestInit): Promise<signInResponse> => {
+
+  const res = await fetch(getSignInUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(signInRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: signInResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as signInResponse
+}
+
+
+
+
+
+export const getSignInMutationKey = () => ['signIn'] as const;
+
+export const getSignInMutationOptions = <TError = InvalidResponse | Error | Locked,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof signIn>>, TError,SignInMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof signIn>>, TError,SignInMutationVariables, TContext> => {
+
+const mutationKey = getSignInMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof signIn>>, SignInMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  signIn(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SignInMutationResult = NonNullable<Awaited<ReturnType<typeof signIn>>>
+    export type SignInMutationBody = SignInRequest
+    export type SignInMutationError = InvalidResponse | Error | Locked
+    export type SignInMutationVariables = {data: SignInRequest}
+
+    /** @summary Sign in with email and password. Sets the session cookie. */
+export const useSignIn = <TError = InvalidResponse | Error | Locked,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof signIn>>, TError,SignInMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof signIn>>,
+        TError,
+        SignInMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSignInMutationOptions(options), queryClient);
+    }
+
+export type signOutResponse204 = {
+  data: void
+  status: 204
+}
+
+export type signOutResponseSuccess = (signOutResponse204) & {
+  headers: Headers;
+};
+;
+
+export type signOutResponse = (signOutResponseSuccess)
+
+export const getSignOutUrl = () => {
+
+
+
+
+  return `/api/auth/sign-out`
+}
+
+/**
+ * @summary Sign this device out.
+ */
+export const signOut = async ( options?: RequestInit): Promise<signOutResponse> => {
+
+  const res = await fetch(getSignOutUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: signOutResponse['data'] = body ? JSON.parse(body) : undefined
+  return { data, status: res.status, headers: res.headers } as signOutResponse
+}
+
+
+
+
+
+export const getSignOutMutationKey = () => ['signOut'] as const;
+
+export const getSignOutMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof signOut>>, TError,void, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof signOut>>, TError,void, TContext> => {
+
+const mutationKey = getSignOutMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof signOut>>, void> = () => {
+
+
+          return  signOut(fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SignOutMutationResult = NonNullable<Awaited<ReturnType<typeof signOut>>>
+
+    export type SignOutMutationError = unknown
+
+
+    /** @summary Sign this device out. */
+export const useSignOut = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof signOut>>, TError,void, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof signOut>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getSignOutMutationOptions(options), queryClient);
+    }
+
+export type getMeResponse200 = {
+  data: Me
+  status: 200
+}
+
+export type getMeResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type getMeResponseSuccess = (getMeResponse200) & {
+  headers: Headers;
+};
+export type getMeResponseError = (getMeResponse401) & {
+  headers: Headers;
+};
+
+export type getMeResponse = (getMeResponseSuccess | getMeResponseError)
+
+export const getGetMeUrl = () => {
+
+
+
+
+  return `/api/auth/me`
+}
+
+/**
+ * @summary Who is signed in on this device?
+ */
+export const getMe = async ( options?: RequestInit): Promise<getMeResponse> => {
+
+  const res = await fetch(getGetMeUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getMeResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getMeResponse
+}
+
+
+
+
+
+export const getGetMeQueryKey = () => {
+    return [
+    `/api/auth/me`
+    ] as const;
+    }
+
+
+export const getGetMeQueryOptions = <TData = Awaited<ReturnType<typeof getMe>>, TError = SignedOutResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMe>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMeQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMe>>> = ({ signal }) => getMe({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMeQueryResult = NonNullable<Awaited<ReturnType<typeof getMe>>>
+export type GetMeQueryError = SignedOutResponse
+
+
+/** @summary Who is signed in on this device? */
+export function useGetMe<TData = Awaited<ReturnType<typeof getMe>>, TError = SignedOutResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMe>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMe>>,
+          TError,
+          Awaited<ReturnType<typeof getMe>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Who is signed in on this device? */
+export function useGetMe<TData = Awaited<ReturnType<typeof getMe>>, TError = SignedOutResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMe>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMe>>,
+          TError,
+          Awaited<ReturnType<typeof getMe>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Who is signed in on this device? */
+export function useGetMe<TData = Awaited<ReturnType<typeof getMe>>, TError = SignedOutResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMe>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Who is signed in on this device? */
+export function useGetMe<TData = Awaited<ReturnType<typeof getMe>>, TError = SignedOutResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMe>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMeQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type listUsersResponse200 = {
+  data: UserList
+  status: 200
+}
+
+export type listUsersResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type listUsersResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type listUsersResponseSuccess = (listUsersResponse200) & {
+  headers: Headers;
+};
+export type listUsersResponseError = (listUsersResponse401 | listUsersResponse403) & {
+  headers: Headers;
+};
+
+export type listUsersResponse = (listUsersResponseSuccess | listUsersResponseError)
+
+export const getListUsersUrl = () => {
+
+
+
+
+  return `/api/admin/users`
+}
+
+/**
+ * @summary Every account in the admin's clinic.
+ */
+export const listUsers = async ( options?: RequestInit): Promise<listUsersResponse> => {
+
+  const res = await fetch(getListUsersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listUsersResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listUsersResponse
+}
+
+
+
+
+
+export const getListUsersQueryKey = () => {
+    return [
+    `/api/admin/users`
+    ] as const;
+    }
+
+
+export const getListUsersQueryOptions = <TData = Awaited<ReturnType<typeof listUsers>>, TError = SignedOutResponse | NotAllowedResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListUsersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listUsers>>> = ({ signal }) => listUsers({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListUsersQueryResult = NonNullable<Awaited<ReturnType<typeof listUsers>>>
+export type ListUsersQueryError = SignedOutResponse | NotAllowedResponse
+
+
+/** @summary Every account in the admin's clinic. */
+export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUsers>>,
+          TError,
+          Awaited<ReturnType<typeof listUsers>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Every account in the admin's clinic. */
+export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUsers>>,
+          TError,
+          Awaited<ReturnType<typeof listUsers>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Every account in the admin's clinic. */
+export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Every account in the admin's clinic. */
+export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListUsersQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type resetUserResponse200 = {
+  data: AdminUser
+  status: 200
+}
+
+export type resetUserResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type resetUserResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type resetUserResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type resetUserResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type resetUserResponseSuccess = (resetUserResponse200) & {
+  headers: Headers;
+};
+export type resetUserResponseError = (resetUserResponse400 | resetUserResponse401 | resetUserResponse403 | resetUserResponse404) & {
+  headers: Headers;
+};
+
+export type resetUserResponse = (resetUserResponseSuccess | resetUserResponseError)
+
+export const getResetUserUrl = (userId: string,) => {
+
+
+
+
+  return `/api/admin/users/${userId}/reset`
+}
+
+/**
+ * @summary Reset an account to fresh so its journey starts again. Signs it out everywhere and unlocks it.
+ */
+export const resetUser = async (userId: string, options?: RequestInit): Promise<resetUserResponse> => {
+
+  const res = await fetch(getResetUserUrl(userId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: resetUserResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as resetUserResponse
+}
+
+
+
+
+
+export const getResetUserMutationKey = () => ['resetUser'] as const;
+
+export const getResetUserMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetUser>>, TError,ResetUserMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof resetUser>>, TError,ResetUserMutationVariables, TContext> => {
+
+const mutationKey = getResetUserMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resetUser>>, ResetUserMutationVariables> = (props) => {
+          const {userId} = props ?? {};
+
+          return  resetUser(userId,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResetUserMutationResult = NonNullable<Awaited<ReturnType<typeof resetUser>>>
+
+    export type ResetUserMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse | Error
+    export type ResetUserMutationVariables = {userId: string}
+
+    /** @summary Reset an account to fresh so its journey starts again. Signs it out everywhere and unlocks it. */
+export const useResetUser = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetUser>>, TError,ResetUserMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof resetUser>>,
+        TError,
+        ResetUserMutationVariables,
+        TContext
+      > => {
+      return useMutation(getResetUserMutationOptions(options), queryClient);
+    }

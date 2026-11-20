@@ -1,8 +1,9 @@
 import { defineConfig } from "drizzle-kit";
 
 // `pnpm --filter @kynex/db generate` writes SQL migration files to ./migrations.
-// As in Spotter, migrations are reviewed, logged in docs/DATABASE_SCHEMA.md and
-// run by hand on Replit; nothing changes the live database automatically.
+// Migrations are reviewed in the pull request and logged in docs/DATABASE_SCHEMA.md.
+// The server applies any new ones when it starts (each runs once, inside a
+// transaction), so Replit never needs SQL typed in by hand.
 export default defineConfig({
   dialect: "postgresql",
   schema: "./src/schema/index.ts",

@@ -1,6 +1,9 @@
 import express, { type ErrorRequestHandler, type Express } from "express";
+import { loadUser } from "./auth/sessions.ts";
+import { adminRouter } from "./routes/admin.ts";
+import { authRouter } from "./routes/auth.ts";
 import { healthRouter } from "./routes/health.ts";
-import { applySecurity } from "./security.ts";
+import { applySecurity, sameSiteOnly } from "./security.ts";
 
 /** Builds the server without starting it, so tests can call it directly. */
 export function createApp(): Express {
@@ -9,7 +12,11 @@ export function createApp(): Express {
   app.use(express.json({ limit: "100kb" }));
 
   const api = express.Router();
+  api.use(sameSiteOnly);
+  api.use(loadUser);
   api.use(healthRouter);
+  api.use(authRouter);
+  api.use(adminRouter);
   api.use((_req, res) => {
     res.status(404).json({ error: "Not found" });
   });
