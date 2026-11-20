@@ -7,7 +7,7 @@ delete process.env.DATABASE_URL;
 process.env.LOCAL_DB_DIR = "memory://";
 
 const { createApp } = await import("../src/app.ts");
-const { getHealthResponse } = await import("@kynex/api-zod");
+const { GetHealthResponse } = await import("@kynex/api-zod");
 
 let base = "";
 let close: () => void = () => {};
@@ -23,7 +23,7 @@ after(() => close());
 test("health reports server and database ok", async () => {
   const res = await fetch(`${base}/api/health`);
   assert.equal(res.status, 200);
-  const body = getHealthResponse.parse(await res.json());
+  const body = GetHealthResponse.parse(await res.json());
   assert.equal(body.status, "ok");
   assert.equal(body.database.ok, true);
   assert.equal(body.database.kind, "local-file");

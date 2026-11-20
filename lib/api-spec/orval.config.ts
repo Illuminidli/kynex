@@ -13,6 +13,7 @@ export default defineConfig({
       mode: "single",
       baseUrl: "/api",
       clean: true,
+      override: { query: { version: 5 } },
     },
   },
   zod: {
