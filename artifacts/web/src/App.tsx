@@ -41,7 +41,7 @@ export function App() {
           ok={serverOk}
           pending={health.isPending}
           title="Server"
-          detail={data ? `Version ${data.version} · ${data.environment === "production" ? "live" : "development"}` : "Not reachable"}
+          detail={data ? `Version ${data.version} · ${data.environment === "production" ? "production build" : "development"}` : "Not reachable"}
         />
         <Check
           ok={dbOk}
@@ -50,7 +50,11 @@ export function App() {
           detail={
             data?.database.ok
               ? `${data.database.kind === "postgres" ? "PostgreSQL" : "Local test database (laptop only)"} ${data.database.version ?? ""} · answered in ${data.database.latencyMs} ms`
-              : "Not reachable"
+              : !data
+                ? "Not reachable"
+                : data.database.kind === "local-file"
+                  ? "No database connected: DATABASE_URL is not set on this server"
+                  : "Database connected but not answering"
           }
         />
         <Check
