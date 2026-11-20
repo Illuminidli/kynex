@@ -1,5 +1,6 @@
 import { createApp, errorHandler } from "./app.ts";
 import { config } from "./config.ts";
+import { listen } from "./listen.ts";
 import { prepareDatabase } from "./setup.ts";
 import { attachWebApp } from "./web.ts";
 
@@ -15,6 +16,10 @@ const app = createApp();
 await attachWebApp(app);
 app.use(errorHandler);
 
-app.listen(config.port, "0.0.0.0", () => {
+try {
+  await listen(app, config.port);
   console.log(`Kynex ${config.isProduction ? "production" : "development"} server on http://localhost:${config.port}`);
-});
+} catch (err) {
+  console.error(err instanceof Error ? err.message : err);
+  process.exit(1);
+}
