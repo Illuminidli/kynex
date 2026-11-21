@@ -8,5 +8,9 @@ dist/
 .DS_Store
 coverage/
 
+# Body-tracking files, put in place by artifacts/web/scripts/pose-assets.mjs
+artifacts/web/public/mediapipe/
+artifacts/web/public/models/
+
 # Local assistant/editor settings
 .claude/

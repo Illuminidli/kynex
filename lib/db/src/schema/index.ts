@@ -8,3 +8,4 @@
 export * from "./clinics.ts";
 export * from "./login-sessions.ts";
 export * from "./users.ts";
+export * from "./exercises.ts";

@@ -3,6 +3,7 @@ import { loadUser } from "./auth/sessions.ts";
 import { adminRouter } from "./routes/admin.ts";
 import { authRouter } from "./routes/auth.ts";
 import { healthRouter } from "./routes/health.ts";
+import { libraryRouter } from "./routes/library.ts";
 import { applySecurity, sameSiteOnly } from "./security.ts";
 
 /** Builds the server without starting it, so tests can call it directly. */
@@ -17,6 +18,7 @@ export function createApp(): Express {
   api.use(healthRouter);
   api.use(authRouter);
   api.use(adminRouter);
+  api.use(libraryRouter);
   api.use((_req, res) => {
     res.status(404).json({ error: "Not found" });
   });

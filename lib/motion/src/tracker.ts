@@ -105,11 +105,11 @@ const FRONT_MAX_TURN = 55;
 /** How long the wrong orientation must persist before tracking pauses (avoids flicker). */
 const VIEW_DEBOUNCE_MS = 700;
 
-const PARTIAL_CUE: LocalisedText = {
+export const PARTIAL_CUE: LocalisedText = {
   en: "Good. Try to go a little further next time.",
   hi: "अच्छा। अगली बार थोड़ा और आगे तक जाइए।",
 };
-const HOLD_CUE: LocalisedText = {
+export const HOLD_CUE: LocalisedText = {
   en: "Hold the end position a little longer.",
   hi: "आख़िरी स्थिति में थोड़ा और रुकिए।",
 };

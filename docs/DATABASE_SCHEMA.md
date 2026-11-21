@@ -2,7 +2,7 @@
 
 Kept up to date with every schema change. Table definitions live in `lib/db/src/schema/`.
 
-Every table: random `uuid` id, `clinic_id` where the row belongs to a clinic, `created_at` / `updated_at`.
+Every table: random `uuid` id (or, for a pure link between two rows, those two ids together as the key), `clinic_id` where the row belongs to a clinic, `created_at` / `updated_at`.
 Status-like columns are plain text checked by the API (no Postgres enums), so adding a value needs no migration.
 
 ## Tables
@@ -42,6 +42,33 @@ One row per signed-in device. Deleting a row signs that device out.
 | last_seen_at | timestamptz | updated at most every 10 minutes |
 | created_at | timestamptz | |
 
+### exercises (M2)
+The exercise library, shared by all clinics. Copied from the camera engine (`lib/motion`) every time the server starts:
+new exercises are added and existing rows get the engine's latest wording; rows are never deleted.
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | primary key |
+| slug | text | unique. The camera engine's exercise id, e.g. `glute-bridge`; links the row to its camera rules |
+| region | text | body area: neck, shoulder, elbow, spine, core, hip, knee, ankle, balance |
+| position | text | standing, seated, supine, prone, quadruped |
+| view | text | `front` or `side`: how the person faces the camera |
+| kind | text | `reps`, `hold` or `timed-balance` |
+| laterality | text | `bilateral`, `unilateral` or `alternating` |
+| content | jsonb | name, summary, setup, steps, precautions (each in English and Hindi), tags, usual dose |
+| calibration | text | `draft`, `lab-tested` or `clinician-reviewed` (camera thresholds) |
+| video_status | text | `none`, `draft` or `approved` (videos arrive in M7) |
+| created_at, updated_at | timestamptz | updated_at changes only when the wording or calibration changes |
+
+### clinic_exercise_settings (M2)
+A clinic's own choices about a library exercise. Key: (clinic_id, exercise_id).
+| Column | Type | Notes |
+|---|---|---|
+| clinic_id | uuid | → clinics.id |
+| exercise_id | uuid | → exercises.id (deleted with the exercise) |
+| hidden | boolean | hidden exercises can't be added to new plans in this clinic |
+| updated_by | uuid | → users.id, the admin who last changed it |
+| created_at, updated_at | timestamptz | |
+
 ## Migrations
 
 Files are in `lib/db/migrations/`, made with `pnpm --filter @kynex/db generate --name <name>` after changing the
@@ -51,8 +78,11 @@ in order, recorded in the `drizzle.__drizzle_migrations` table), so nothing is t
 | # | Date | Module | File | What it does |
 |---|---|---|---|---|
 | 0000 | 21 Nov 2026 | M1 | `0000_m1_sign_in.sql` | Creates `clinics`, `users`, `login_sessions` |
+| 0001 | 21 Nov 2026 | M2 | `0001_m2_exercise_library.sql` | Creates `exercises`, `clinic_exercise_settings` |
 
 ## Start-up data
+
+Every start copies the camera engine's 25 exercises into `exercises` (see above).
 
 When `DEMO_PASSWORD` (10+ characters) is set, the server makes sure the clinic "QI Spine" and 8 test accounts exist
 (`admin@kynex.test`, `clinician1-2@kynex.test`, `patient1-5@kynex.test`), all with that password. Changing the secret

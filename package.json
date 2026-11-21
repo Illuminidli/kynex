@@ -7,7 +7,7 @@
     "node": ">=22.18"
   },
   "scripts": {
-    "dev": "pnpm --filter @kynex/api-server dev",
+    "dev": "pnpm --filter @kynex/web pose-assets && pnpm --filter @kynex/api-server dev",
     "build": "pnpm --filter @kynex/web build && pnpm --filter @kynex/api-server build",
     "start": "pnpm --filter @kynex/api-server start",
     "codegen": "pnpm --filter @kynex/api-spec codegen",

@@ -128,7 +128,80 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /exercises:
+    get:
+      operationId: listExercises
+      summary: The exercise library (clinicians and admins). Includes this clinic's hidden exercises, marked hidden.
+      tags: [library]
+      responses:
+        "200":
+          description: All exercises, grouped by body area.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExerciseList"
+        "401":
+          $ref: "#/components/responses/SignedOut"
+        "403":
+          $ref: "#/components/responses/NotAllowed"
+  /exercises/{slug}:
+    get:
+      operationId: getExercise
+      summary: One exercise with its steps, precautions and usual dose (clinicians and admins).
+      tags: [library]
+      parameters:
+        - $ref: "#/components/parameters/ExerciseSlug"
+      responses:
+        "200":
+          description: The exercise.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExerciseDetail"
+        "401":
+          $ref: "#/components/responses/SignedOut"
+        "403":
+          $ref: "#/components/responses/NotAllowed"
+        "404":
+          $ref: "#/components/responses/NoSuchExercise"
+  /admin/exercises/{slug}/visibility:
+    put:
+      operationId: setExerciseVisibility
+      summary: Hide an exercise from new plans in the admin's clinic, or show it again.
+      tags: [admin, library]
+      parameters:
+        - $ref: "#/components/parameters/ExerciseSlug"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExerciseVisibility"
+      responses:
+        "200":
+          description: The exercise after the change.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExerciseSummary"
+        "400":
+          $ref: "#/components/responses/Invalid"
+        "401":
+          $ref: "#/components/responses/SignedOut"
+        "403":
+          $ref: "#/components/responses/NotAllowed"
+        "404":
+          $ref: "#/components/responses/NoSuchExercise"
 components:
+  parameters:
+    ExerciseSlug:
+      name: slug
+      in: path
+      required: true
+      description: The exercise's short name, e.g. glute-bridge.
+      schema:
+        type: string
+        pattern: "^[a-z0-9-]{1,60}$"
   responses:
     Invalid:
       description: The request was not in the expected shape.
@@ -144,6 +217,12 @@ components:
             $ref: "#/components/schemas/Error"
     NotAllowed:
       description: Signed in, but this role can't do that.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NoSuchExercise:
+      description: No exercise with that name.
       content:
         application/json:
           schema:
@@ -283,3 +362,102 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/AdminUser"
+    Text:
+      type: object
+      description: The same words in English and Hindi.
+      additionalProperties: false
+      required: [en, hi]
+      properties:
+        en:
+          type: string
+        hi:
+          type: string
+    Dose:
+      type: object
+      description: The usual amount, which a clinician can change per patient (M3).
+      additionalProperties: false
+      required: [sets, restSeconds]
+      properties:
+        sets:
+          type: integer
+        reps:
+          type: integer
+        holdSeconds:
+          type: integer
+        restSeconds:
+          type: integer
+    ExerciseSummary:
+      type: object
+      additionalProperties: false
+      required: [slug, name, summary, region, position, view, kind, laterality, calibration, videoStatus, hidden]
+      properties:
+        slug:
+          type: string
+        name:
+          $ref: "#/components/schemas/Text"
+        summary:
+          $ref: "#/components/schemas/Text"
+        region:
+          type: string
+          enum: [neck, shoulder, elbow, spine, hip, knee, ankle, balance, core]
+        position:
+          type: string
+          enum: [standing, seated, supine, prone, quadruped]
+        view:
+          type: string
+          description: How the person stands to the camera.
+          enum: [front, side]
+        kind:
+          type: string
+          enum: [reps, hold, timed-balance]
+        laterality:
+          type: string
+          enum: [bilateral, unilateral, alternating]
+        calibration:
+          type: string
+          description: How far the camera's counting is proven for this exercise.
+          enum: [draft, lab-tested, clinician-reviewed]
+        videoStatus:
+          type: string
+          enum: [none, draft, approved]
+        hidden:
+          type: boolean
+          description: Hidden in this clinic, so it can't be added to new plans.
+    ExerciseDetail:
+      allOf:
+        - $ref: "#/components/schemas/ExerciseSummary"
+        - type: object
+          required: [setup, steps, precautions, tags, dose]
+          properties:
+            setup:
+              $ref: "#/components/schemas/Text"
+            steps:
+              type: array
+              items:
+                $ref: "#/components/schemas/Text"
+            precautions:
+              type: array
+              items:
+                $ref: "#/components/schemas/Text"
+            tags:
+              type: array
+              items:
+                type: string
+            dose:
+              $ref: "#/components/schemas/Dose"
+    ExerciseList:
+      type: object
+      additionalProperties: false
+      required: [exercises]
+      properties:
+        exercises:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExerciseSummary"
+    ExerciseVisibility:
+      type: object
+      additionalProperties: false
+      required: [hidden]
+      properties:
+        hidden:
+          type: boolean
