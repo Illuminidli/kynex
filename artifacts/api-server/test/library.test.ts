@@ -11,7 +11,9 @@ process.env.DEMO_PASSWORD = PASSWORD;
 const { createApp } = await import("../src/app.ts");
 const { prepareDatabase } = await import("../src/setup.ts");
 const { EXERCISES } = await import("@kynex/motion");
-const { GetExerciseResponse, ListExercisesResponse } = await import("@kynex/api-zod");
+const { GetExerciseResponse, GetHealthResponse, ListExercisesResponse } = await import("@kynex/api-zod");
+const { getDb } = await import("@kynex/db");
+const { sql } = await import("drizzle-orm");
 
 let base = "";
 let close: () => void = () => {};
@@ -91,5 +93,21 @@ describe("exercise library", () => {
     assert.equal((await put("/admin/exercises/plank/visibility", { hidden: true }, "clinician1")).status, 403);
     assert.equal((await put("/admin/exercises/plank/visibility", { hidden: "yes" }, "admin")).status, 400);
     assert.equal((await put("/admin/exercises/nope/visibility", { hidden: true }, "admin")).status, 404);
+  });
+});
+
+describe("start-up on a database the host already changed", () => {
+  test("tables copied in without Kynex's migration record: start-up still fills the library", async () => {
+    const { db } = await getDb();
+    // What a host-side schema copy leaves behind: the M2 tables exist (empty), but the
+    // migration log doesn't list them, so the next start re-runs the M2 migration.
+    await db.execute(sql`delete from clinic_exercise_settings`);
+    await db.execute(sql`delete from exercises`);
+    await db.execute(sql`delete from drizzle.__drizzle_migrations where created_at = (select max(created_at) from drizzle.__drizzle_migrations)`);
+
+    await prepareDatabase(); // must not throw
+
+    const health = GetHealthResponse.parse(await (await get("/health")).json());
+    assert.equal(health.exercises, EXERCISES.length);
   });
 });

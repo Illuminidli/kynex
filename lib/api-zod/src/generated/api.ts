@@ -22,7 +22,8 @@ export const GetHealthResponse = zod.object({
   "latencyMs": zod.number().optional(),
   "version": zod.string().optional().describe('Postgres version, e.g. "16.4".')
 }),
-  "testAccounts": zod.int().describe('How many sign-in accounts exist (0 means DEMO_PASSWORD has not been set yet).')
+  "testAccounts": zod.int().describe('How many sign-in accounts exist (0 means DEMO_PASSWORD has not been set yet).'),
+  "exercises": zod.int().describe('How many exercises are in the library (should match the camera engine, 25).')
 })
 
 
