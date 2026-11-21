@@ -69,6 +69,8 @@ export interface HealthStatus {
   database: DatabaseStatus;
   /** How many sign-in accounts exist (0 means DEMO_PASSWORD has not been set yet). */
   testAccounts: number;
+  /** How many exercises are in the library (should match the camera engine, 25). */
+  exercises: number;
 }
 
 export type Role = typeof Role[keyof typeof Role];

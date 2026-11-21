@@ -128,7 +128,7 @@ function Chips({
   const chip = (active: boolean) =>
     `shrink-0 rounded-full border px-3 py-1.5 text-sm font-medium ${active ? "border-brand-700 bg-brand-700 text-white" : "border-line bg-white text-ink-soft"}`;
   return (
-    <div role="group" aria-label={groupLabel} className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
+    <div role="group" aria-label={groupLabel} className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <button type="button" aria-pressed={value === null} className={chip(value === null)} onClick={() => onChange(null)}>
         {all}
       </button>

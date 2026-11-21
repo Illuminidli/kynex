@@ -78,7 +78,14 @@ in order, recorded in the `drizzle.__drizzle_migrations` table), so nothing is t
 | # | Date | Module | File | What it does |
 |---|---|---|---|---|
 | 0000 | 21 Nov 2026 | M1 | `0000_m1_sign_in.sql` | Creates `clinics`, `users`, `login_sessions` |
-| 0001 | 21 Nov 2026 | M2 | `0001_m2_exercise_library.sql` | Creates `exercises`, `clinic_exercise_settings` |
+| 0001 | 21 Nov 2026 | M2 | `0001_m2_exercise_library.sql` | Creates `exercises`, `clinic_exercise_settings`. Safe to re-run: skips anything already there |
+
+**Rule from M2 on:** write every migration so it can run on a database that already has its tables
+(`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, constraints added inside `DO $$ … EXCEPTION WHEN duplicate_object`).
+Replit's Publish can copy the development schema to the production database before Kynex starts, which leaves the
+tables there but not in Kynex's migration record; a plain `CREATE TABLE` then fails and stops the start-up steps.
+Start-up steps (migrations, exercise library, test accounts) now run independently and each logs whether it worked;
+the status page shows the library count.
 
 ## Start-up data
 

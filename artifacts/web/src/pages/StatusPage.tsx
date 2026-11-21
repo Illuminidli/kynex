@@ -15,7 +15,9 @@ export function StatusPage() {
   const serverOk = !!data;
   const dbOk = !!data?.database.ok;
   const accounts = data?.testAccounts ?? 0;
-  const allOk = serverOk && dbOk && EXERCISES.length > 0 && accounts > 0;
+  const library = data?.exercises ?? 0;
+  const libraryOk = library >= EXERCISES.length && EXERCISES.length > 0;
+  const allOk = serverOk && dbOk && EXERCISES.length > 0 && accounts > 0 && libraryOk;
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-xl flex-col gap-6 px-5 py-10">
@@ -66,6 +68,16 @@ export function StatusPage() {
             accounts > 0
               ? `${accounts} test accounts ready`
               : "None yet: add a DEMO_PASSWORD secret (at least 10 characters) in Replit, then restart"
+          }
+        />
+        <Check
+          ok={libraryOk}
+          pending={health.isPending}
+          title="Exercise library"
+          detail={
+            libraryOk
+              ? `${library} exercises in the database`
+              : `${library} of ${EXERCISES.length} exercises in the database: the copy at start-up failed (see the server log, "Start-up step failed")`
           }
         />
         <Check

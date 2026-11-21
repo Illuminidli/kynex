@@ -231,7 +231,7 @@ components:
     HealthStatus:
       type: object
       additionalProperties: false
-      required: [status, version, environment, serverTime, database, testAccounts]
+      required: [status, version, environment, serverTime, database, testAccounts, exercises]
       properties:
         status:
           type: string
@@ -249,6 +249,9 @@ components:
         testAccounts:
           type: integer
           description: How many sign-in accounts exist (0 means DEMO_PASSWORD has not been set yet).
+        exercises:
+          type: integer
+          description: How many exercises are in the library (should match the camera engine, 25).
     DatabaseStatus:
       type: object
       additionalProperties: false
