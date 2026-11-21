@@ -20,7 +20,8 @@ export function applySecurity(app: Express) {
             useDefaults: false,
             directives: {
               defaultSrc: ["'self'"],
-              scriptSrc: ["'self'"],
+              // 'wasm-unsafe-eval' lets the on-device body-tracking model (WebAssembly) run; it does not allow eval().
+              scriptSrc: ["'self'", "'wasm-unsafe-eval'"],
               styleSrc: ["'self'", "'unsafe-inline'"],
               imgSrc: ["'self'", "data:", "blob:"],
               mediaSrc: ["'self'", "blob:"],

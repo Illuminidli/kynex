@@ -19,6 +19,10 @@ export async function attachWebApp(app: Express) {
   const dist = path.join(config.webRoot, "dist");
   if (!fs.existsSync(path.join(dist, "index.html"))) throw new Error(`Web app not built: ${dist} is missing. Run pnpm build.`);
   app.use("/assets", express.static(path.join(dist, "assets"), { immutable: true, maxAge: "1y" }));
+  // Body-tracking model and runtime (about 30 MB): cache for a week so phones download them once.
+  for (const dir of ["models", "mediapipe"]) {
+    app.use(`/${dir}`, express.static(path.join(dist, dir), { maxAge: "7d" }), (_req, res) => void res.status(404).end());
+  }
   app.use(express.static(dist, { index: false, maxAge: 0 }));
   app.get(/^(?!\/api(\/|$)).*/, (_req, res) => {
     res.setHeader("Cache-Control", "no-cache");

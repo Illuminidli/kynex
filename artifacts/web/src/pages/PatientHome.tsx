@@ -9,9 +9,8 @@ export function PatientHome({ me }: { me: Me }) {
       </Card>
       <ComingNext
         items={[
-          { module: "M2", text: "See the exercise library with a short demo of each exercise." },
           { module: "M3", text: "Your plan from your clinician: which exercises, how many sets and reps, which days." },
-          { module: "M4", text: "Do each exercise in front of your phone camera; it counts and checks your form." },
+          { module: "M4", text: "Do each exercise in front of your phone camera: it counts your reps out loud and gives form tips." },
         ]}
       />
     </Shell>

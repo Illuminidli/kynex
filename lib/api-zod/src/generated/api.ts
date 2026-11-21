@@ -108,3 +108,115 @@ export const ResetUserResponse = zod.object({
   "lastSignInAt": zod.iso.datetime({"offset":true}).nullable(),
   "lockedUntil": zod.iso.datetime({"offset":true}).nullable().describe('Set while the account is locked after too many wrong passwords.')
 })
+
+
+/**
+ * @summary The exercise library (clinicians and admins). Includes this clinic's hidden exercises, marked hidden.
+ */
+export const ListExercisesResponse = zod.object({
+  "exercises": zod.array(zod.object({
+  "slug": zod.string(),
+  "name": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "summary": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "region": zod.enum(['neck', 'shoulder', 'elbow', 'spine', 'hip', 'knee', 'ankle', 'balance', 'core']),
+  "position": zod.enum(['standing', 'seated', 'supine', 'prone', 'quadruped']),
+  "view": zod.enum(['front', 'side']).describe('How the person stands to the camera.'),
+  "kind": zod.enum(['reps', 'hold', 'timed-balance']),
+  "laterality": zod.enum(['bilateral', 'unilateral', 'alternating']),
+  "calibration": zod.enum(['draft', 'lab-tested', 'clinician-reviewed']).describe('How far the camera\'s counting is proven for this exercise.'),
+  "videoStatus": zod.enum(['none', 'draft', 'approved']),
+  "hidden": zod.boolean().describe('Hidden in this clinic, so it can\'t be added to new plans.')
+}))
+})
+
+
+/**
+ * @summary One exercise with its steps, precautions and usual dose (clinicians and admins).
+ */
+export const getExercisePathSlugRegExp = new RegExp('^[a-z0-9-]{1,60}$');
+
+
+export const GetExerciseParams = zod.object({
+  "slug": zod.string().regex(getExercisePathSlugRegExp).describe('The exercise\'s short name, e.g. glute-bridge.')
+})
+
+export const GetExerciseResponse = zod.object({
+  "slug": zod.string(),
+  "name": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "summary": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "region": zod.enum(['neck', 'shoulder', 'elbow', 'spine', 'hip', 'knee', 'ankle', 'balance', 'core']),
+  "position": zod.enum(['standing', 'seated', 'supine', 'prone', 'quadruped']),
+  "view": zod.enum(['front', 'side']).describe('How the person stands to the camera.'),
+  "kind": zod.enum(['reps', 'hold', 'timed-balance']),
+  "laterality": zod.enum(['bilateral', 'unilateral', 'alternating']),
+  "calibration": zod.enum(['draft', 'lab-tested', 'clinician-reviewed']).describe('How far the camera\'s counting is proven for this exercise.'),
+  "videoStatus": zod.enum(['none', 'draft', 'approved']),
+  "hidden": zod.boolean().describe('Hidden in this clinic, so it can\'t be added to new plans.')
+}).and(zod.object({
+  "setup": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "steps": zod.array(zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.')),
+  "precautions": zod.array(zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.')),
+  "tags": zod.array(zod.string()),
+  "dose": zod.object({
+  "sets": zod.int(),
+  "reps": zod.int().optional(),
+  "holdSeconds": zod.int().optional(),
+  "restSeconds": zod.int()
+}).describe('The usual amount, which a clinician can change per patient (M3).')
+}))
+
+
+/**
+ * @summary Hide an exercise from new plans in the admin's clinic, or show it again.
+ */
+export const setExerciseVisibilityPathSlugRegExp = new RegExp('^[a-z0-9-]{1,60}$');
+
+
+export const SetExerciseVisibilityParams = zod.object({
+  "slug": zod.string().regex(setExerciseVisibilityPathSlugRegExp).describe('The exercise\'s short name, e.g. glute-bridge.')
+})
+
+export const SetExerciseVisibilityBody = zod.object({
+  "hidden": zod.boolean()
+})
+
+export const SetExerciseVisibilityResponse = zod.object({
+  "slug": zod.string(),
+  "name": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "summary": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "region": zod.enum(['neck', 'shoulder', 'elbow', 'spine', 'hip', 'knee', 'ankle', 'balance', 'core']),
+  "position": zod.enum(['standing', 'seated', 'supine', 'prone', 'quadruped']),
+  "view": zod.enum(['front', 'side']).describe('How the person stands to the camera.'),
+  "kind": zod.enum(['reps', 'hold', 'timed-balance']),
+  "laterality": zod.enum(['bilateral', 'unilateral', 'alternating']),
+  "calibration": zod.enum(['draft', 'lab-tested', 'clinician-reviewed']).describe('How far the camera\'s counting is proven for this exercise.'),
+  "videoStatus": zod.enum(['none', 'draft', 'approved']),
+  "hidden": zod.boolean().describe('Hidden in this clinic, so it can\'t be added to new plans.')
+})

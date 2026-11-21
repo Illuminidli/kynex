@@ -1,7 +1,7 @@
 import { getListUsersQueryKey, useListUsers, useResetUser, type AdminUser, type Me } from "@kynex/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Card, Shell } from "../components/Shell.tsx";
+import { Card, LibraryLink, Shell } from "../components/Shell.tsx";
 
 const ROLE_LABEL: Record<AdminUser["role"], string> = { patient: "Patient", clinician: "Clinician", admin: "Admin" };
 const when = (iso: string) => new Date(iso).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
@@ -31,6 +31,7 @@ export function AdminHome({ me }: { me: Me }) {
 
   return (
     <Shell me={me} title="Test accounts">
+      <LibraryLink />
       <p className="-mt-2 text-sm text-ink-soft">
         Everyone who can sign in to {me.clinic.name}. All share the test password. <b>Reset to fresh</b> lets a tester go through the
         journey again from the start.

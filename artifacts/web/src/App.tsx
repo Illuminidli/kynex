@@ -1,9 +1,13 @@
-import { getGetMeQueryKey, useGetMe } from "@kynex/api-client-react";
+import { getGetMeQueryKey, useGetMe, type Me } from "@kynex/api-client-react";
+import { Route, Switch } from "wouter";
 import { AdminHome } from "./pages/AdminHome.tsx";
 import { ClinicianHome } from "./pages/ClinicianHome.tsx";
+import { ExercisePage } from "./pages/ExercisePage.tsx";
+import { LibraryPage } from "./pages/LibraryPage.tsx";
 import { PatientHome } from "./pages/PatientHome.tsx";
 import { SignIn } from "./pages/SignIn.tsx";
 import { StatusPage } from "./pages/StatusPage.tsx";
+import { TryItPage } from "./pages/TryItPage.tsx";
 
 /**
  * Decides which screen to show: the status page at /status, otherwise the sign-in
@@ -36,12 +40,27 @@ function SignedInArea() {
   if (me.data.status !== 200) return <SignIn />;
 
   const user = me.data.data;
-  switch (user.role) {
+  const staff = user.role === "clinician" || user.role === "admin";
+  return (
+    <Switch>
+      {staff && <Route path="/library">{<LibraryPage me={user} />}</Route>}
+      {staff && <Route path="/library/:slug">{(p) => <ExercisePage me={user} slug={p.slug} />}</Route>}
+      {staff && <Route path="/library/:slug/try">{(p) => <TryItPage slug={p.slug} />}</Route>}
+      <Route>
+        <Home me={user} />
+      </Route>
+    </Switch>
+  );
+}
+
+/** Any other address shows the person's home page. */
+function Home({ me }: { me: Me }) {
+  switch (me.role) {
     case "patient":
-      return <PatientHome me={user} />;
+      return <PatientHome me={me} />;
     case "clinician":
-      return <ClinicianHome me={user} />;
+      return <ClinicianHome me={me} />;
     case "admin":
-      return <AdminHome me={user} />;
+      return <AdminHome me={me} />;
   }
 }

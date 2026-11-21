@@ -56,6 +56,27 @@ export function bodyPartNames(ids: number[], lang: Lang): string {
     .join(", ");
 }
 
+/** Where to put the phone, matched to how the person stands, sits or lies for this exercise. */
+function cameraPlacement(def: ExerciseDefinition): LocalisedText {
+  const front = def.view === "front";
+  switch (def.position) {
+    case "supine":
+    case "prone":
+    case "quadruped":
+      return front
+        ? t("Face the camera, about 2 metres away. Put the phone on the floor or a low step, propped up (don't hold it).", "कैमरे की ओर मुँह करें, लगभग 2 मीटर दूर। फ़ोन को ज़मीन या नीची सीढ़ी पर टिकाकर रखें (हाथ में न पकड़ें)।")
+        : t("Get down side-on to the camera, about 2 metres away, so it sees you from head to feet. Put the phone on the floor or a low step, propped up (don't hold it).", "कैमरे की ओर बगल से, लगभग 2 मीटर दूर, ताकि सिर से पैर तक दिखें। फ़ोन को ज़मीन या नीची सीढ़ी पर टिकाकर रखें (हाथ में न पकड़ें)।");
+    case "seated":
+      return front
+        ? t("Sit facing the camera, about 2 metres away. Prop the phone up at chest height (don't hold it).", "कैमरे की ओर मुँह करके बैठें, लगभग 2 मीटर दूर। फ़ोन को छाती की ऊँचाई पर टिकाकर रखें (हाथ में न पकड़ें)।")
+        : t("Sit side-on to the camera, about 2 metres away. Prop the phone up at chest height (don't hold it).", "कैमरे की ओर बगल से बैठें, लगभग 2 मीटर दूर। फ़ोन को छाती की ऊँचाई पर टिकाकर रखें (हाथ में न पकड़ें)।");
+    default:
+      return front
+        ? t("Face the camera, about 2-3 metres away. Prop the phone up at waist height (don't hold it).", "कैमरे की ओर मुँह करें, लगभग 2-3 मीटर दूर। फ़ोन को कमर की ऊँचाई पर टिकाकर रखें (हाथ में न पकड़ें)।")
+        : t("Turn side-on to the camera, about 2-3 metres away. Prop the phone up at waist height (don't hold it).", "कैमरे की ओर बगल से खड़े हों, लगभग 2-3 मीटर दूर। फ़ोन को कमर की ऊँचाई पर टिकाकर रखें (हाथ में न पकड़ें)।");
+  }
+}
+
 export interface ExerciseExplanation {
   camera: string;
   inView: string;
@@ -76,10 +97,7 @@ export function explainExercise(
   const u = def.metric.unit === "deg" ? "°" : ` ${def.metric.unit}`;
   const n = (v: number) => `${def.metric.unit === "deg" ? Math.round(v) : Math.round(v * 10) / 10}${u}`;
 
-  const camera =
-    def.view === "front"
-      ? L(t("Face the camera, about 2-3 metres away. Prop the phone up at waist height (don't hold it).", "कैमरे की ओर मुँह करें, लगभग 2-3 मीटर दूर। फ़ोन को कमर की ऊँचाई पर टिकाकर रखें (हाथ में न पकड़ें)।"))
-      : L(t("Turn side-on to the camera, about 2-3 metres away. Prop the phone up at waist height (don't hold it).", "कैमरे की ओर बगल से खड़े हों, लगभग 2-3 मीटर दूर। फ़ोन को कमर की ऊँचाई पर टिकाकर रखें (हाथ में न पकड़ें)।"));
+  const camera = L(cameraPlacement(def));
 
   const required = new Set(def.required("left").concat(def.required("right")));
   const parts = PARTS.filter(([ids]) => ids.some((i) => required.has(i))).map(([, name]) => L(name));

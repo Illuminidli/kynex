@@ -138,6 +138,133 @@ export interface UserList {
 }
 
 /**
+ * The same words in English and Hindi.
+ */
+export interface Text {
+  en: string;
+  hi: string;
+}
+
+/**
+ * The usual amount, which a clinician can change per patient (M3).
+ */
+export interface Dose {
+  sets: number;
+  reps?: number;
+  holdSeconds?: number;
+  restSeconds: number;
+}
+
+export type ExerciseSummaryRegion = typeof ExerciseSummaryRegion[keyof typeof ExerciseSummaryRegion];
+
+
+export const ExerciseSummaryRegion = {
+  neck: 'neck',
+  shoulder: 'shoulder',
+  elbow: 'elbow',
+  spine: 'spine',
+  hip: 'hip',
+  knee: 'knee',
+  ankle: 'ankle',
+  balance: 'balance',
+  core: 'core',
+} as const;
+
+export type ExerciseSummaryPosition = typeof ExerciseSummaryPosition[keyof typeof ExerciseSummaryPosition];
+
+
+export const ExerciseSummaryPosition = {
+  standing: 'standing',
+  seated: 'seated',
+  supine: 'supine',
+  prone: 'prone',
+  quadruped: 'quadruped',
+} as const;
+
+/**
+ * How the person stands to the camera.
+ */
+export type ExerciseSummaryView = typeof ExerciseSummaryView[keyof typeof ExerciseSummaryView];
+
+
+export const ExerciseSummaryView = {
+  front: 'front',
+  side: 'side',
+} as const;
+
+export type ExerciseSummaryKind = typeof ExerciseSummaryKind[keyof typeof ExerciseSummaryKind];
+
+
+export const ExerciseSummaryKind = {
+  reps: 'reps',
+  hold: 'hold',
+  'timed-balance': 'timed-balance',
+} as const;
+
+export type ExerciseSummaryLaterality = typeof ExerciseSummaryLaterality[keyof typeof ExerciseSummaryLaterality];
+
+
+export const ExerciseSummaryLaterality = {
+  bilateral: 'bilateral',
+  unilateral: 'unilateral',
+  alternating: 'alternating',
+} as const;
+
+/**
+ * How far the camera's counting is proven for this exercise.
+ */
+export type ExerciseSummaryCalibration = typeof ExerciseSummaryCalibration[keyof typeof ExerciseSummaryCalibration];
+
+
+export const ExerciseSummaryCalibration = {
+  draft: 'draft',
+  'lab-tested': 'lab-tested',
+  'clinician-reviewed': 'clinician-reviewed',
+} as const;
+
+export type ExerciseSummaryVideoStatus = typeof ExerciseSummaryVideoStatus[keyof typeof ExerciseSummaryVideoStatus];
+
+
+export const ExerciseSummaryVideoStatus = {
+  none: 'none',
+  draft: 'draft',
+  approved: 'approved',
+} as const;
+
+export interface ExerciseSummary {
+  slug: string;
+  name: Text;
+  summary: Text;
+  region: ExerciseSummaryRegion;
+  position: ExerciseSummaryPosition;
+  /** How the person stands to the camera. */
+  view: ExerciseSummaryView;
+  kind: ExerciseSummaryKind;
+  laterality: ExerciseSummaryLaterality;
+  /** How far the camera's counting is proven for this exercise. */
+  calibration: ExerciseSummaryCalibration;
+  videoStatus: ExerciseSummaryVideoStatus;
+  /** Hidden in this clinic, so it can't be added to new plans. */
+  hidden: boolean;
+}
+
+export type ExerciseDetail = ExerciseSummary & {
+  setup: Text;
+  steps: Text[];
+  precautions: Text[];
+  tags: string[];
+  dose: Dose;
+};
+
+export interface ExerciseList {
+  exercises: ExerciseSummary[];
+}
+
+export interface ExerciseVisibility {
+  hidden: boolean;
+}
+
+/**
  * The request was not in the expected shape.
  */
 export type InvalidResponse = Error;
@@ -151,6 +278,11 @@ export type SignedOutResponse = Error;
  * Signed in, but this role can't do that.
  */
 export type NotAllowedResponse = Error;
+
+/**
+ * No exercise with that name.
+ */
+export type NoSuchExerciseResponse = Error;
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -890,4 +1022,387 @@ export const useResetUser = <TError = InvalidResponse | SignedOutResponse | NotA
         TContext
       > => {
       return useMutation(getResetUserMutationOptions(options), queryClient);
+    }
+
+export type listExercisesResponse200 = {
+  data: ExerciseList
+  status: 200
+}
+
+export type listExercisesResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type listExercisesResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type listExercisesResponseSuccess = (listExercisesResponse200) & {
+  headers: Headers;
+};
+export type listExercisesResponseError = (listExercisesResponse401 | listExercisesResponse403) & {
+  headers: Headers;
+};
+
+export type listExercisesResponse = (listExercisesResponseSuccess | listExercisesResponseError)
+
+export const getListExercisesUrl = () => {
+
+
+
+
+  return `/api/exercises`
+}
+
+/**
+ * @summary The exercise library (clinicians and admins). Includes this clinic's hidden exercises, marked hidden.
+ */
+export const listExercises = async ( options?: RequestInit): Promise<listExercisesResponse> => {
+
+  const res = await fetch(getListExercisesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listExercisesResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listExercisesResponse
+}
+
+
+
+
+
+export const getListExercisesQueryKey = () => {
+    return [
+    `/api/exercises`
+    ] as const;
+    }
+
+
+export const getListExercisesQueryOptions = <TData = Awaited<ReturnType<typeof listExercises>>, TError = SignedOutResponse | NotAllowedResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExercises>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListExercisesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listExercises>>> = ({ signal }) => listExercises({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listExercises>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListExercisesQueryResult = NonNullable<Awaited<ReturnType<typeof listExercises>>>
+export type ListExercisesQueryError = SignedOutResponse | NotAllowedResponse
+
+
+/** @summary The exercise library (clinicians and admins). Includes this clinic's hidden exercises, marked hidden. */
+export function useListExercises<TData = Awaited<ReturnType<typeof listExercises>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExercises>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listExercises>>,
+          TError,
+          Awaited<ReturnType<typeof listExercises>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The exercise library (clinicians and admins). Includes this clinic's hidden exercises, marked hidden. */
+export function useListExercises<TData = Awaited<ReturnType<typeof listExercises>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExercises>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listExercises>>,
+          TError,
+          Awaited<ReturnType<typeof listExercises>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The exercise library (clinicians and admins). Includes this clinic's hidden exercises, marked hidden. */
+export function useListExercises<TData = Awaited<ReturnType<typeof listExercises>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExercises>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The exercise library (clinicians and admins). Includes this clinic's hidden exercises, marked hidden. */
+export function useListExercises<TData = Awaited<ReturnType<typeof listExercises>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExercises>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListExercisesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type getExerciseResponse200 = {
+  data: ExerciseDetail
+  status: 200
+}
+
+export type getExerciseResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type getExerciseResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type getExerciseResponse404 = {
+  data: NoSuchExerciseResponse
+  status: 404
+}
+
+export type getExerciseResponseSuccess = (getExerciseResponse200) & {
+  headers: Headers;
+};
+export type getExerciseResponseError = (getExerciseResponse401 | getExerciseResponse403 | getExerciseResponse404) & {
+  headers: Headers;
+};
+
+export type getExerciseResponse = (getExerciseResponseSuccess | getExerciseResponseError)
+
+export const getGetExerciseUrl = (slug: string,) => {
+
+
+
+
+  return `/api/exercises/${slug}`
+}
+
+/**
+ * @summary One exercise with its steps, precautions and usual dose (clinicians and admins).
+ */
+export const getExercise = async (slug: string, options?: RequestInit): Promise<getExerciseResponse> => {
+
+  const res = await fetch(getGetExerciseUrl(slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getExerciseResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getExerciseResponse
+}
+
+
+
+
+
+export const getGetExerciseQueryKey = (slug: string,) => {
+    return [
+    `/api/exercises/${slug}`
+    ] as const;
+    }
+
+
+export const getGetExerciseQueryOptions = <TData = Awaited<ReturnType<typeof getExercise>>, TError = SignedOutResponse | NotAllowedResponse | NoSuchExerciseResponse>(slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercise>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetExerciseQueryKey(slug);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExercise>>> = ({ signal }) => getExercise(slug, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: slug !== null && slug !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getExercise>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetExerciseQueryResult = NonNullable<Awaited<ReturnType<typeof getExercise>>>
+export type GetExerciseQueryError = SignedOutResponse | NotAllowedResponse | NoSuchExerciseResponse
+
+
+/** @summary One exercise with its steps, precautions and usual dose (clinicians and admins). */
+export function useGetExercise<TData = Awaited<ReturnType<typeof getExercise>>, TError = SignedOutResponse | NotAllowedResponse | NoSuchExerciseResponse>(
+ slug: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercise>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExercise>>,
+          TError,
+          Awaited<ReturnType<typeof getExercise>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary One exercise with its steps, precautions and usual dose (clinicians and admins). */
+export function useGetExercise<TData = Awaited<ReturnType<typeof getExercise>>, TError = SignedOutResponse | NotAllowedResponse | NoSuchExerciseResponse>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercise>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExercise>>,
+          TError,
+          Awaited<ReturnType<typeof getExercise>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary One exercise with its steps, precautions and usual dose (clinicians and admins). */
+export function useGetExercise<TData = Awaited<ReturnType<typeof getExercise>>, TError = SignedOutResponse | NotAllowedResponse | NoSuchExerciseResponse>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercise>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary One exercise with its steps, precautions and usual dose (clinicians and admins). */
+export function useGetExercise<TData = Awaited<ReturnType<typeof getExercise>>, TError = SignedOutResponse | NotAllowedResponse | NoSuchExerciseResponse>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExercise>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetExerciseQueryOptions(slug,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type setExerciseVisibilityResponse200 = {
+  data: ExerciseSummary
+  status: 200
+}
+
+export type setExerciseVisibilityResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type setExerciseVisibilityResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type setExerciseVisibilityResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type setExerciseVisibilityResponse404 = {
+  data: NoSuchExerciseResponse
+  status: 404
+}
+
+export type setExerciseVisibilityResponseSuccess = (setExerciseVisibilityResponse200) & {
+  headers: Headers;
+};
+export type setExerciseVisibilityResponseError = (setExerciseVisibilityResponse400 | setExerciseVisibilityResponse401 | setExerciseVisibilityResponse403 | setExerciseVisibilityResponse404) & {
+  headers: Headers;
+};
+
+export type setExerciseVisibilityResponse = (setExerciseVisibilityResponseSuccess | setExerciseVisibilityResponseError)
+
+export const getSetExerciseVisibilityUrl = (slug: string,) => {
+
+
+
+
+  return `/api/admin/exercises/${slug}/visibility`
+}
+
+/**
+ * @summary Hide an exercise from new plans in the admin's clinic, or show it again.
+ */
+export const setExerciseVisibility = async (slug: string,
+    exerciseVisibility: ExerciseVisibility, options?: RequestInit): Promise<setExerciseVisibilityResponse> => {
+
+  const res = await fetch(getSetExerciseVisibilityUrl(slug),
+  {
+    ...options,
+    method: 'PUT',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(exerciseVisibility)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: setExerciseVisibilityResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as setExerciseVisibilityResponse
+}
+
+
+
+
+
+export const getSetExerciseVisibilityMutationKey = () => ['setExerciseVisibility'] as const;
+
+export const getSetExerciseVisibilityMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NoSuchExerciseResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setExerciseVisibility>>, TError,SetExerciseVisibilityMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof setExerciseVisibility>>, TError,SetExerciseVisibilityMutationVariables, TContext> => {
+
+const mutationKey = getSetExerciseVisibilityMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setExerciseVisibility>>, SetExerciseVisibilityMutationVariables> = (props) => {
+          const {slug,data} = props ?? {};
+
+          return  setExerciseVisibility(slug,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetExerciseVisibilityMutationResult = NonNullable<Awaited<ReturnType<typeof setExerciseVisibility>>>
+    export type SetExerciseVisibilityMutationBody = ExerciseVisibility
+    export type SetExerciseVisibilityMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NoSuchExerciseResponse
+    export type SetExerciseVisibilityMutationVariables = {slug: string;data: ExerciseVisibility}
+
+    /** @summary Hide an exercise from new plans in the admin's clinic, or show it again. */
+export const useSetExerciseVisibility = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NoSuchExerciseResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setExerciseVisibility>>, TError,SetExerciseVisibilityMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof setExerciseVisibility>>,
+        TError,
+        SetExerciseVisibilityMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSetExerciseVisibilityMutationOptions(options), queryClient);
     }

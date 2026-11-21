@@ -1,10 +1,23 @@
 import { useSignOut, type Me } from "@kynex/api-client-react";
 import type { ReactNode } from "react";
+import { Link } from "wouter";
 
 const ROLE_LABEL: Record<Me["role"], string> = { patient: "Patient", clinician: "Clinician", admin: "Admin" };
 
-/** Frame shared by every signed-in page: logo, who is signed in, sign-out. */
-export function Shell({ me, title, children }: { me: Me; title: string; children: ReactNode }) {
+/** Frame shared by every signed-in page: logo, who is signed in, sign-out, optional back link. */
+export function Shell({
+  me,
+  title,
+  children,
+  back,
+  aside,
+}: {
+  me: Me;
+  title: string;
+  children: ReactNode;
+  back?: { href: string; label: string };
+  aside?: ReactNode;
+}) {
   const signOut = useSignOut({
     mutation: {
       // Reload from scratch so nothing about this person stays in the page's memory.
@@ -16,7 +29,9 @@ export function Shell({ me, title, children }: { me: Me; title: string; children
     <div className="min-h-dvh">
       <header className="border-b border-line bg-white">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-5 py-3">
-          <img src="/icon.svg" alt="" className="size-9 rounded-xl" />
+          <Link href="/" aria-label="Home">
+            <img src="/icon.svg" alt="" className="size-9 rounded-xl" />
+          </Link>
           <div className="min-w-0 flex-1">
             <p className="truncate font-semibold leading-tight">{me.displayName}</p>
             <p className="truncate text-xs text-ink-soft">
@@ -33,7 +48,15 @@ export function Shell({ me, title, children }: { me: Me; title: string; children
         </div>
       </header>
       <main className="mx-auto flex max-w-3xl flex-col gap-5 px-5 py-6">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        {back && (
+          <Link href={back.href} className="-mb-3 self-start text-sm font-medium text-brand-700">
+            ← {back.label}
+          </Link>
+        )}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          {aside}
+        </div>
         {children}
       </main>
     </div>
@@ -63,5 +86,18 @@ export function ComingNext({ items }: { items: { module: string; text: string }[
         ))}
       </ul>
     </Card>
+  );
+}
+
+/** Big link to the exercise library, shown on clinician and admin home pages. */
+export function LibraryLink() {
+  return (
+    <Link href="/library" className="flex items-center justify-between gap-4 rounded-3xl bg-brand-700 p-5 text-white shadow-soft hover:bg-brand-800">
+      <span>
+        <span className="block text-lg font-semibold">Exercise library</span>
+        <span className="block text-sm text-white/80">25 exercises: steps, precautions, what the camera checks, and try each one with the camera.</span>
+      </span>
+      <span aria-hidden className="text-2xl">→</span>
+    </Link>
   );
 }
