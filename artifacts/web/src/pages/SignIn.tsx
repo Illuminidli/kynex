@@ -6,12 +6,8 @@ import { useState, type FormEvent } from "react";
 const TEST_EMAILS = [
   "admin@kynex.test",
   "clinician1@kynex.test",
-  "clinician2@kynex.test",
   "patient1@kynex.test",
   "patient2@kynex.test",
-  "patient3@kynex.test",
-  "patient4@kynex.test",
-  "patient5@kynex.test",
 ];
 
 export function SignIn() {
