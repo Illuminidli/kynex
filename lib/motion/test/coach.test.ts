@@ -59,6 +59,12 @@ test("setup reminders repeat at most every 6 seconds", () => {
   assert.match(c.take(6500, false)!.text.en, /side-on/);
 });
 
+test("a start reading that had to be taken again asks the person to hold still", () => {
+  const c = new VoiceCoach();
+  c.hear([{ type: "baseline-retry" }], 0, () => 0);
+  assert.equal(c.take(0, false)?.text.en, "Hold still in the starting position.");
+});
+
 test("a partial rep is counted with a short nudge; a number is never announced twice", () => {
   const c = new VoiceCoach();
   const rep = {} as RepRecord;

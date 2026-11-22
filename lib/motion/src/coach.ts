@@ -112,6 +112,9 @@ export class VoiceCoach {
         case "baseline-ready":
           this.offer("milestone", t("Good. Now begin.", "ठीक है। अब शुरू कीजिए।"), now);
           break;
+        case "baseline-retry":
+          this.offer("setup", t("Hold still in the starting position.", "शुरुआती स्थिति में स्थिर रहिए।"), now);
+          break;
         case "visibility":
           if (!e.ok) {
             const en = bodyPartNames(e.missing, "en");

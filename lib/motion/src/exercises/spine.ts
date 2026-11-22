@@ -123,6 +123,7 @@ export const trunkRotation: ExerciseDefinition = {
     label: "Trunk rotation",
     unit: "deg",
     baselineOf: (f) => wrap(shouldersYaw(f) - hipsYaw(f)),
+    baselineLimit: 20, // must start with shoulders square to the hips
     compute: (f, side, { baseline }) => {
       const d = wrap(shouldersYaw(f) - hipsYaw(f) - (baseline ?? 0));
       return side === "left" ? Math.max(0, d) : Math.max(0, -d);

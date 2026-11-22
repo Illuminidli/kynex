@@ -65,6 +65,11 @@ export interface MetricDefinition {
    * (median over ~1.5 s while the person stands still) and passes it to compute() as ctx.baseline.
    */
   baselineOf?: (f: PoseFrame, side: Side) => number | null;
+  /**
+   * The start reading must be within this distance of zero (e.g. the head really is facing
+   * the phone). A reading further out is thrown away and taken again.
+   */
+  baselineLimit?: number;
 }
 
 export interface SecondaryMetric {

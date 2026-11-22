@@ -29,6 +29,11 @@ const unit = (def: ExerciseDefinition) => (def.metric.unit === "deg" ? "°" : ` 
 const fmt = (def: ExerciseDefinition, v: number) => `${def.metric.unit === "deg" ? Math.round(v) : Math.round(v * 10) / 10}${unit(def)}`;
 
 const W = (en: string, hi: string) => ({ en, hi });
+/** The measured movement's name; in Hindi the exercise name stands in for it. */
+const metricName = (def: ExerciseDefinition, lang: "en" | "hi") => (lang === "en" ? def.metric.label : def.name.hi);
+/** How long a form tip stays on screen, and how soon the same tip may come back. */
+const TIP_SHOW_MS = 3000;
+const TIP_REPEAT_MS = 10000;
 
 export function TryItPage({ slug }: { slug: string }) {
   const def = getExercise(slug);
@@ -64,6 +69,7 @@ function TryIt({ def }: { def: ExerciseDefinition }) {
   const live = useRef({ lang, voiceOn, facing });
   const lastUi = useRef(0);
   const lastSeen = useRef(0);
+  const tipShownAt = useRef(new Map<string, number>());
   const finished = useRef(false);
   live.current = { lang, voiceOn, facing };
 
@@ -87,8 +93,12 @@ function TryIt({ def }: { def: ExerciseDefinition }) {
         const events = tr.update(frame);
         coach.current.hear(events, now, () => countOf(def, tr.snapshot()));
         for (const e of events) {
-          if (e.type === "fault") setTip({ text: e.fault.message[live.current.lang], at: now });
-          if (e.type === "partial") setTip({ text: e.cue[live.current.lang], at: now });
+          const text = e.type === "fault" ? e.fault.message[live.current.lang] : e.type === "partial" ? e.cue[live.current.lang] : null;
+          // The same tip at most once every 10 s, so it never looks stuck on screen.
+          if (text && now - (tipShownAt.current.get(text) ?? -Infinity) >= TIP_REPEAT_MS) {
+            tipShownAt.current.set(text, now);
+            setTip({ text, at: now });
+          }
         }
         const s = tr.snapshot();
         state = s.activeFaults.length ? "fault" : s.status === "active" || s.status === "holding" ? "good" : "idle";
@@ -143,6 +153,7 @@ function TryIt({ def }: { def: ExerciseDefinition }) {
     lastSeen.current = performance.now();
     setSnap(null);
     setTip(null);
+    tipShownAt.current.clear();
     setResult(null);
     setNoPersonSince(null);
     setPhase("live");
@@ -243,7 +254,7 @@ function TryIt({ def }: { def: ExerciseDefinition }) {
                 <Stat label={lang === "en" ? "Longest hold" : "सबसे लंबा होल्ड"} value={`${Math.max(0, ...(result?.holds.map((h) => h.seconds) ?? [0]))} s`} />
               </>
             )}
-            <Stat label={`${lang === "en" ? "Best" : "सबसे अच्छा"}: ${def.metric.label}`} value={best !== undefined ? fmt(def, best) : "–"} />
+            <Stat label={`${lang === "en" ? "Best" : "सबसे अच्छा"}: ${metricName(def, lang)}`} value={best !== undefined ? fmt(def, best) : "–"} />
             <Stat label={lang === "en" ? "Camera could see you" : "कैमरे को दिखे"} value={`${Math.round((result?.visibleRatio ?? 0) * 100)}%`} />
           </div>
           <div className="rounded-3xl bg-white/10 p-4">
@@ -280,7 +291,7 @@ function TryIt({ def }: { def: ExerciseDefinition }) {
   const s = snap;
   const count = s ? countOf(def, s) : 0;
   const value = s ? Object.values(s.values).find((v) => v !== null && v !== undefined) : undefined;
-  const showTip = tip && performance.now() - tip.at < 3500 ? tip.text : null;
+  const showTip = tip && performance.now() - tip.at < TIP_SHOW_MS ? tip.text : null;
   const status = statusLine(def, s, noPersonSince !== null, camera.status, lang);
 
   return (
@@ -316,7 +327,7 @@ function TryIt({ def }: { def: ExerciseDefinition }) {
             )}
             {value !== undefined && value !== null && (
               <p className="mt-1 text-sm text-white/80">
-                {def.metric.label}: {fmt(def, value)}
+                {metricName(def, lang)}: {fmt(def, value)}
               </p>
             )}
           </div>
