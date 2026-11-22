@@ -192,6 +192,395 @@ paths:
           $ref: "#/components/responses/NotAllowed"
         "404":
           $ref: "#/components/responses/NoSuchExercise"
+  # ---------------------------------------------------------------- M3 plans
+  /patients:
+    get:
+      operationId: listPatients
+      summary: The doctor's patients (admin - every patient), with who needs attention first.
+      tags: [care]
+      responses:
+        "200": {description: Patients, content: {application/json: {schema: {$ref: "#/components/schemas/PatientList"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+  /patients/{patientId}:
+    get:
+      operationId: getPatient
+      summary: Everything about one patient for the doctor - plan, adherence, pain, range of motion, sessions, symptoms, notes, visits.
+      tags: [care]
+      parameters: [{$ref: "#/components/parameters/PatientId"}]
+      responses:
+        "200": {description: The patient, content: {application/json: {schema: {$ref: "#/components/schemas/PatientOverview"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /patients/{patientId}/plan:
+    get:
+      operationId: getPlan
+      summary: A patient's exercise plan (null if none yet).
+      tags: [care]
+      parameters: [{$ref: "#/components/parameters/PatientId"}]
+      responses:
+        "200": {description: The plan, content: {application/json: {schema: {$ref: "#/components/schemas/PlanResponse"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+    put:
+      operationId: savePlan
+      summary: Create or replace a patient's plan. Recorded in the activity log with who and when.
+      tags: [care]
+      parameters: [{$ref: "#/components/parameters/PatientId"}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/PlanInput"}}}}
+      responses:
+        "200": {description: The saved plan, content: {application/json: {schema: {$ref: "#/components/schemas/PlanResponse"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /patients/{patientId}/notes:
+    post:
+      operationId: addNote
+      summary: Add a doctor's note about a patient.
+      tags: [care]
+      parameters: [{$ref: "#/components/parameters/PatientId"}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/NoteInput"}}}}
+      responses:
+        "200": {description: The note, content: {application/json: {schema: {$ref: "#/components/schemas/Note"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /symptoms:
+    post:
+      operationId: reportSymptom
+      summary: The patient reports a symptom (from home or during a session).
+      tags: [sessions]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/SymptomInput"}}}}
+      responses:
+        "200": {description: Saved, content: {application/json: {schema: {$ref: "#/components/schemas/Symptom"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+  /symptoms/{symptomId}/acknowledge:
+    post:
+      operationId: acknowledgeSymptom
+      summary: The doctor marks a symptom report as seen.
+      tags: [care]
+      parameters: [{name: symptomId, in: path, required: true, schema: {type: string, format: uuid}}]
+      responses:
+        "200": {description: Acknowledged, content: {application/json: {schema: {$ref: "#/components/schemas/Symptom"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  # ---------------------------------------------------------------- M4 sessions
+  /me/today:
+    get:
+      operationId: getToday
+      summary: The patient's day - today's exercises, sessions done, a session to resume, next visit, slot offers.
+      tags: [sessions]
+      responses:
+        "200": {description: Today, content: {application/json: {schema: {$ref: "#/components/schemas/Today"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+  /me/sessions:
+    get:
+      operationId: listMySessions
+      summary: The patient's own session reports, newest first.
+      tags: [sessions]
+      responses:
+        "200": {description: Sessions, content: {application/json: {schema: {$ref: "#/components/schemas/SessionRowList"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+  /sessions:
+    post:
+      operationId: startSession
+      summary: Start a session with the pain check-in. A red-flag answer stops it straight away.
+      tags: [sessions]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/StartSessionRequest"}}}}
+      responses:
+        "200": {description: Started (or stopped by a red flag), content: {application/json: {schema: {$ref: "#/components/schemas/SessionStarted"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "409": {$ref: "#/components/responses/Conflict"}
+  /sessions/{sessionId}:
+    get:
+      operationId: getSession
+      summary: A full session report (the patient's own; the doctor's patients; admin any).
+      tags: [sessions]
+      parameters: [{$ref: "#/components/parameters/SessionId"}]
+      responses:
+        "200": {description: The report, content: {application/json: {schema: {$ref: "#/components/schemas/SessionReport"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /sessions/{sessionId}/exercises:
+    post:
+      operationId: saveSessionExercise
+      summary: Save one finished exercise - results rep by rep and the movement as joint positions (never the video).
+      tags: [sessions]
+      parameters: [{$ref: "#/components/parameters/SessionId"}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/SessionExerciseInput"}}}}
+      responses:
+        "200": {description: Saved, content: {application/json: {schema: {$ref: "#/components/schemas/SavedExercise"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+        "409": {$ref: "#/components/responses/Conflict"}
+  /sessions/{sessionId}/finish:
+    post:
+      operationId: finishSession
+      summary: End the session with the pain score after it.
+      tags: [sessions]
+      parameters: [{$ref: "#/components/parameters/SessionId"}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/FinishSessionRequest"}}}}
+      responses:
+        "200": {description: The report, content: {application/json: {schema: {$ref: "#/components/schemas/SessionReport"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /sessions/{sessionId}/review:
+    post:
+      operationId: reviewSession
+      summary: The doctor marks a session as reviewed, with an optional note.
+      tags: [care]
+      parameters: [{$ref: "#/components/parameters/SessionId"}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/ReviewRequest"}}}}
+      responses:
+        "200": {description: The report, content: {application/json: {schema: {$ref: "#/components/schemas/SessionReport"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /session-exercises/{resultId}/track:
+    get:
+      operationId: getMotionTrack
+      summary: The movement of one exercise as joint positions, to replay as an animated figure.
+      tags: [sessions]
+      parameters: [{name: resultId, in: path, required: true, schema: {type: string, format: uuid}}]
+      responses:
+        "200": {description: The track, content: {application/json: {schema: {$ref: "#/components/schemas/MotionTrack"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  # ---------------------------------------------------------------- M5b bookings
+  /visit-types:
+    get:
+      operationId: listVisitTypes
+      summary: Kinds of visit the clinic offers.
+      tags: [bookings]
+      responses:
+        "200": {description: Visit types, content: {application/json: {schema: {$ref: "#/components/schemas/VisitTypeList"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+  /clinicians:
+    get:
+      operationId: listClinicians
+      summary: The clinic's doctors (staff only).
+      tags: [bookings]
+      responses:
+        "200": {description: Doctors, content: {application/json: {schema: {$ref: "#/components/schemas/ClinicianList"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+  /bookings/slots:
+    get:
+      operationId: getSlots
+      summary: Free start times on one day for a visit type with the patient's doctor.
+      tags: [bookings]
+      parameters:
+        - {name: visitTypeId, in: query, required: true, schema: {type: string, format: uuid}}
+        - {name: date, in: query, required: true, schema: {type: string, format: date}}
+        - {name: patientId, in: query, required: false, description: Staff booking for a patient., schema: {type: string, format: uuid}}
+        - {name: ignoreAppointmentId, in: query, required: false, description: "When moving a visit, its own time counts as free.", schema: {type: string, format: uuid}}
+      responses:
+        "200": {description: Free times, content: {application/json: {schema: {$ref: "#/components/schemas/Slots"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /appointments:
+    get:
+      operationId: listAppointments
+      summary: Visits between two dates (patients see their own, doctors theirs, admin all).
+      tags: [bookings]
+      parameters:
+        - {name: from, in: query, required: true, schema: {type: string, format: date}}
+        - {name: to, in: query, required: true, schema: {type: string, format: date}}
+        - {name: patientId, in: query, required: false, schema: {type: string, format: uuid}}
+      responses:
+        "200": {description: Visits, content: {application/json: {schema: {$ref: "#/components/schemas/AppointmentList"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+    post:
+      operationId: bookAppointment
+      summary: Book a visit, once or repeating. With preview true nothing is saved - each date is checked and the clashes shown.
+      tags: [bookings]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/BookRequest"}}}}
+      responses:
+        "200": {description: Booked (or the preview), content: {application/json: {schema: {$ref: "#/components/schemas/BookResult"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+        "409": {$ref: "#/components/responses/Conflict"}
+  /appointments/{appointmentId}:
+    patch:
+      operationId: moveAppointment
+      summary: Move a visit to another time.
+      tags: [bookings]
+      parameters: [{$ref: "#/components/parameters/AppointmentId"}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/MoveRequest"}}}}
+      responses:
+        "200": {description: Moved, content: {application/json: {schema: {$ref: "#/components/schemas/Appointment"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+        "409": {$ref: "#/components/responses/Conflict"}
+  /appointments/{appointmentId}/status:
+    post:
+      operationId: setAppointmentStatus
+      summary: Confirm, mark arrived, completed or no-show, or cancel (with a reason).
+      tags: [bookings]
+      parameters: [{$ref: "#/components/parameters/AppointmentId"}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/AppointmentStatusRequest"}}}}
+      responses:
+        "200": {description: Updated, content: {application/json: {schema: {$ref: "#/components/schemas/Appointment"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+        "409": {$ref: "#/components/responses/Conflict"}
+  /availability:
+    get:
+      operationId: getAvailability
+      summary: A doctor's weekly working hours (doctors - their own; admin - any).
+      tags: [bookings]
+      parameters: [{name: clinicianId, in: query, required: false, schema: {type: string, format: uuid}}]
+      responses:
+        "200": {description: Hours, content: {application/json: {schema: {$ref: "#/components/schemas/WeeklyHours"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+    put:
+      operationId: setAvailability
+      summary: Replace a doctor's weekly working hours.
+      tags: [bookings]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/WeeklyHours"}}}}
+      responses:
+        "200": {description: Saved, content: {application/json: {schema: {$ref: "#/components/schemas/WeeklyHours"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /time-off:
+    get:
+      operationId: listTimeOff
+      summary: Leave days and clinic holidays from today on.
+      tags: [bookings]
+      responses:
+        "200": {description: Time off, content: {application/json: {schema: {$ref: "#/components/schemas/TimeOffList"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+    post:
+      operationId: addTimeOff
+      summary: Add leave for a doctor, or a clinic holiday (admin, no doctor).
+      tags: [bookings]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/TimeOffInput"}}}}
+      responses:
+        "200": {description: Added, content: {application/json: {schema: {$ref: "#/components/schemas/TimeOff"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+  /time-off/{timeOffId}:
+    delete:
+      operationId: deleteTimeOff
+      summary: Remove a leave day or holiday.
+      tags: [bookings]
+      parameters: [{name: timeOffId, in: path, required: true, schema: {type: string, format: uuid}}]
+      responses:
+        "204": {description: Removed}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /waitlist:
+    get:
+      operationId: listWaitlist
+      summary: Waiting list (patients - their own; staff - everyone).
+      tags: [bookings]
+      responses:
+        "200": {description: Entries, content: {application/json: {schema: {$ref: "#/components/schemas/WaitlistList"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+    post:
+      operationId: joinWaitlist
+      summary: Wait for a slot between two dates. If one frees up the patient is offered it in the app.
+      tags: [bookings]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: "#/components/schemas/WaitlistInput"}}}}
+      responses:
+        "200": {description: Added, content: {application/json: {schema: {$ref: "#/components/schemas/WaitlistEntry"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /waitlist/{entryId}:
+    delete:
+      operationId: leaveWaitlist
+      summary: Take an entry off the waiting list.
+      tags: [bookings]
+      parameters: [{$ref: "#/components/parameters/EntryId"}]
+      responses:
+        "204": {description: Removed}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /waitlist/{entryId}/accept:
+    post:
+      operationId: acceptOffer
+      summary: Take the slot offered from the waiting list.
+      tags: [bookings]
+      parameters: [{$ref: "#/components/parameters/EntryId"}]
+      responses:
+        "200": {description: Booked, content: {application/json: {schema: {$ref: "#/components/schemas/Appointment"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+        "409": {$ref: "#/components/responses/Conflict"}
+  /waitlist/{entryId}/decline:
+    post:
+      operationId: declineOffer
+      summary: Say no to an offered slot; it goes to the next person waiting.
+      tags: [bookings]
+      parameters: [{$ref: "#/components/parameters/EntryId"}]
+      responses:
+        "200": {description: Back to waiting, content: {application/json: {schema: {$ref: "#/components/schemas/WaitlistEntry"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  # ---------------------------------------------------------------- M5b admin overview
+  /admin/overview:
+    get:
+      operationId: getOverview
+      summary: The admin's view of the whole clinic - today's numbers, every patient, today's visits.
+      tags: [admin]
+      responses:
+        "200": {description: Overview, content: {application/json: {schema: {$ref: "#/components/schemas/Overview"}}}}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
+  /activity:
+    get:
+      operationId: listActivity
+      summary: Activity feed, newest first (admin - everything; doctors - one of their patients).
+      tags: [admin]
+      parameters:
+        - {name: patientId, in: query, required: false, schema: {type: string, format: uuid}}
+        - {name: area, in: query, required: false, description: "plan, session, symptom, booking, review or note.", schema: {type: string, enum: [plan, session, symptom, booking, review, note]}}
+        - {name: from, in: query, required: false, schema: {type: string, format: date}}
+        - {name: to, in: query, required: false, schema: {type: string, format: date}}
+      responses:
+        "200": {description: Items, content: {application/json: {schema: {$ref: "#/components/schemas/ActivityList"}}}}
+        "400": {$ref: "#/components/responses/Invalid"}
+        "401": {$ref: "#/components/responses/SignedOut"}
+        "403": {$ref: "#/components/responses/NotAllowed"}
 components:
   parameters:
     ExerciseSlug:
@@ -202,7 +591,39 @@ components:
       schema:
         type: string
         pattern: "^[a-z0-9-]{1,60}$"
+    PatientId:
+      name: patientId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    AppointmentId:
+      name: appointmentId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    EntryId:
+      name: entryId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
   responses:
+    NotFound:
+      description: Not found (or not yours to see).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflict:
+      description: Clashes with something already there (e.g. the time is no longer free).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
     Invalid:
       description: The request was not in the expected shape.
       content:
@@ -464,3 +885,639 @@ components:
       properties:
         hidden:
           type: boolean
+    # ------------------------------------------------------------ shared (M3-M5b)
+    PersonRef:
+      type: object
+      additionalProperties: false
+      required: [id, displayName]
+      properties: {id: {type: string, format: uuid}, displayName: {type: string}}
+    Day:
+      type: string
+      format: date
+      description: A clinic day (India time), YYYY-MM-DD.
+    # ------------------------------------------------------------ M3 plans
+    PlanSide: {type: string, enum: [both, left, right]}
+    PlanItem:
+      type: object
+      additionalProperties: false
+      required: [id, exercise, sets, reps, holdSeconds, restSeconds, weekdays, timesPerDay, side, note, today]
+      properties:
+        id: {type: string, format: uuid}
+        exercise: {$ref: "#/components/schemas/ExerciseSummary"}
+        sets: {type: integer}
+        reps: {type: [integer, "null"]}
+        holdSeconds: {type: [integer, "null"]}
+        restSeconds: {type: integer}
+        weekdays: {type: array, description: 0 = Sunday ... 6 = Saturday., items: {type: integer}}
+        timesPerDay: {type: integer}
+        side: {$ref: "#/components/schemas/PlanSide"}
+        note: {type: string}
+        today: {type: boolean, description: Scheduled for today.}
+    Plan:
+      type: object
+      additionalProperties: false
+      required: [id, startDate, endDate, note, updatedAt, updatedByName, items]
+      properties:
+        id: {type: string, format: uuid}
+        startDate: {$ref: "#/components/schemas/Day"}
+        endDate: {type: [string, "null"], format: date}
+        note: {type: string}
+        updatedAt: {type: string, format: date-time}
+        updatedByName: {type: [string, "null"]}
+        items: {type: array, items: {$ref: "#/components/schemas/PlanItem"}}
+    PlanResponse:
+      type: object
+      additionalProperties: false
+      required: [plan]
+      properties: {plan: {oneOf: [{$ref: "#/components/schemas/Plan"}, {type: "null"}]}}
+    PlanItemInput:
+      type: object
+      additionalProperties: false
+      required: [exerciseSlug, sets, reps, holdSeconds, restSeconds, weekdays, timesPerDay, side, note]
+      properties:
+        exerciseSlug: {type: string, pattern: "^[a-z0-9-]{1,60}$"}
+        sets: {type: integer, minimum: 1, maximum: 10}
+        reps: {type: [integer, "null"], minimum: 1, maximum: 50}
+        holdSeconds: {type: [integer, "null"], minimum: 5, maximum: 300}
+        restSeconds: {type: integer, minimum: 0, maximum: 300}
+        weekdays: {type: array, minItems: 1, maxItems: 7, items: {type: integer, minimum: 0, maximum: 6}}
+        timesPerDay: {type: integer, minimum: 1, maximum: 3}
+        side: {$ref: "#/components/schemas/PlanSide"}
+        note: {type: string, maxLength: 300}
+    PlanInput:
+      type: object
+      additionalProperties: false
+      required: [startDate, endDate, note, items]
+      properties:
+        startDate: {type: string, format: date}
+        endDate: {type: [string, "null"], format: date}
+        note: {type: string, maxLength: 1000}
+        items: {type: array, minItems: 1, maxItems: 15, items: {$ref: "#/components/schemas/PlanItemInput"}}
+    NoteInput:
+      type: object
+      additionalProperties: false
+      required: [text]
+      properties: {text: {type: string, minLength: 1, maxLength: 2000}}
+    Note:
+      type: object
+      additionalProperties: false
+      required: [id, text, createdAt, authorName]
+      properties:
+        id: {type: string, format: uuid}
+        text: {type: string}
+        createdAt: {type: string, format: date-time}
+        authorName: {type: [string, "null"]}
+    CheckInFlag:
+      type: string
+      description: Red-flag questions at the check-in (draft until QI Spine approves them).
+      enum: [numbness, bladder, chest, fall, severe]
+    SymptomInput:
+      type: object
+      additionalProperties: false
+      required: [pain, text, sessionId]
+      properties:
+        pain: {type: [integer, "null"], minimum: 0, maximum: 10}
+        text: {type: string, maxLength: 1000}
+        sessionId: {type: [string, "null"], format: uuid}
+    Symptom:
+      type: object
+      additionalProperties: false
+      required: [id, createdAt, source, pain, redFlags, text, sessionId, acknowledgedAt, acknowledgedByName]
+      properties:
+        id: {type: string, format: uuid}
+        createdAt: {type: string, format: date-time}
+        source: {type: string, enum: [check-in, session, home]}
+        pain: {type: [integer, "null"]}
+        redFlags: {type: array, items: {type: string}}
+        text: {type: string}
+        sessionId: {type: [string, "null"], format: uuid}
+        acknowledgedAt: {type: [string, "null"], format: date-time}
+        acknowledgedByName: {type: [string, "null"]}
+    Attention:
+      type: object
+      additionalProperties: false
+      required: [kind, text]
+      properties:
+        kind: {type: string, enum: [red-flag, symptom, pain, painful, missed, form, review]}
+        text: {type: string}
+    PatientRow:
+      type: object
+      additionalProperties: false
+      required: [id, displayName, email, clinicianName, hasPlan, exercises, lastSessionAt, adherence, attention, nextAppointment]
+      properties:
+        id: {type: string, format: uuid}
+        displayName: {type: string}
+        email: {type: string}
+        clinicianName: {type: [string, "null"]}
+        hasPlan: {type: boolean}
+        exercises: {type: integer}
+        lastSessionAt: {type: [string, "null"], format: date-time}
+        adherence: {type: [integer, "null"], description: Percent of planned sessions done in the last 14 days.}
+        attention: {type: array, items: {$ref: "#/components/schemas/Attention"}}
+        nextAppointment: {oneOf: [{$ref: "#/components/schemas/Appointment"}, {type: "null"}]}
+    PatientList:
+      type: object
+      additionalProperties: false
+      required: [patients]
+      properties: {patients: {type: array, items: {$ref: "#/components/schemas/PatientRow"}}}
+    DayAdherence:
+      type: object
+      additionalProperties: false
+      required: [day, planned, done]
+      properties: {day: {$ref: "#/components/schemas/Day"}, planned: {type: integer}, done: {type: integer}}
+    PainPoint:
+      type: object
+      additionalProperties: false
+      required: [day, sessionId, before, after]
+      properties:
+        day: {$ref: "#/components/schemas/Day"}
+        sessionId: {type: string, format: uuid}
+        before: {type: [integer, "null"]}
+        after: {type: [integer, "null"]}
+    RomSeries:
+      type: object
+      additionalProperties: false
+      required: [slug, name, unit, goal, points]
+      properties:
+        slug: {type: string}
+        name: {$ref: "#/components/schemas/Text"}
+        unit: {type: string}
+        goal: {type: [number, "null"]}
+        points:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [day, sessionId, best]
+            properties: {day: {$ref: "#/components/schemas/Day"}, sessionId: {type: string, format: uuid}, best: {type: number}}
+    SessionRow:
+      type: object
+      additionalProperties: false
+      required: [id, day, startedAt, status, exercises, repsFull, repsPartial, holds, quality, painBefore, painAfter, problems, reviewed]
+      properties:
+        id: {type: string, format: uuid}
+        day: {$ref: "#/components/schemas/Day"}
+        startedAt: {type: string, format: date-time}
+        status: {$ref: "#/components/schemas/SessionStatus"}
+        exercises: {type: integer}
+        repsFull: {type: integer}
+        repsPartial: {type: integer}
+        holds: {type: integer}
+        quality: {type: [integer, "null"]}
+        painBefore: {type: [integer, "null"]}
+        painAfter: {type: [integer, "null"]}
+        problems: {type: integer, description: Reps or holds with a form problem.}
+        reviewed: {type: boolean}
+    SessionRowList:
+      type: object
+      additionalProperties: false
+      required: [sessions]
+      properties: {sessions: {type: array, items: {$ref: "#/components/schemas/SessionRow"}}}
+    PatientOverview:
+      type: object
+      additionalProperties: false
+      required: [patient, clinicianName, plan, adherence, adherencePercent, pain, rom, sessions, symptoms, notes, attention, appointments, activity]
+      properties:
+        patient:
+          type: object
+          additionalProperties: false
+          required: [id, displayName, email]
+          properties: {id: {type: string, format: uuid}, displayName: {type: string}, email: {type: string}}
+        clinicianName: {type: [string, "null"]}
+        plan: {oneOf: [{$ref: "#/components/schemas/Plan"}, {type: "null"}]}
+        adherence: {type: array, description: Last 28 days., items: {$ref: "#/components/schemas/DayAdherence"}}
+        adherencePercent: {type: [integer, "null"]}
+        pain: {type: array, items: {$ref: "#/components/schemas/PainPoint"}}
+        rom: {type: array, items: {$ref: "#/components/schemas/RomSeries"}}
+        sessions: {type: array, items: {$ref: "#/components/schemas/SessionRow"}}
+        symptoms: {type: array, items: {$ref: "#/components/schemas/Symptom"}}
+        notes: {type: array, items: {$ref: "#/components/schemas/Note"}}
+        attention: {type: array, items: {$ref: "#/components/schemas/Attention"}}
+        appointments: {type: array, description: Upcoming visits., items: {$ref: "#/components/schemas/Appointment"}}
+        activity: {type: array, items: {$ref: "#/components/schemas/ActivityItem"}}
+    # ------------------------------------------------------------ M4 sessions
+    SessionStatus: {type: string, enum: [in-progress, completed, stopped, red-flag]}
+    Today:
+      type: object
+      additionalProperties: false
+      required: [day, hasPlan, plan, timesPerDay, sessionsDoneToday, inProgress, nextAppointment, offers, lastSession]
+      properties:
+        day: {$ref: "#/components/schemas/Day"}
+        hasPlan: {type: boolean}
+        plan: {oneOf: [{$ref: "#/components/schemas/Plan"}, {type: "null"}]}
+        timesPerDay: {type: integer, description: Sessions planned today (0 = rest day).}
+        sessionsDoneToday: {type: integer}
+        inProgress:
+          oneOf:
+            - type: object
+              additionalProperties: false
+              required: [id, doneItemIds]
+              properties: {id: {type: string, format: uuid}, doneItemIds: {type: array, items: {type: string, format: uuid}}}
+            - {type: "null"}
+        nextAppointment: {oneOf: [{$ref: "#/components/schemas/Appointment"}, {type: "null"}]}
+        offers: {type: array, description: Slots offered from the waiting list., items: {$ref: "#/components/schemas/WaitlistEntry"}}
+        lastSession: {oneOf: [{$ref: "#/components/schemas/SessionRow"}, {type: "null"}]}
+    StartSessionRequest:
+      type: object
+      additionalProperties: false
+      required: [pain, redFlags]
+      properties:
+        pain: {type: integer, minimum: 0, maximum: 10}
+        redFlags: {type: array, maxItems: 5, items: {$ref: "#/components/schemas/CheckInFlag"}}
+    SessionStarted:
+      type: object
+      additionalProperties: false
+      required: [id, status, stopped]
+      properties:
+        id: {type: string, format: uuid}
+        status: {$ref: "#/components/schemas/SessionStatus"}
+        stopped: {type: boolean, description: "A red-flag answer stopped the session; tell the patient to contact the clinic."}
+    Side: {type: [string, "null"], enum: [left, right, null]}
+    SavedRep:
+      type: object
+      additionalProperties: false
+      required: [set, side, startMs, endMs, peak, progress, full, heldMs, faults, quality]
+      properties:
+        set: {type: integer, minimum: 1, maximum: 20}
+        side: {$ref: "#/components/schemas/Side"}
+        startMs: {type: number, description: Milliseconds from the start of the movement track.}
+        endMs: {type: number}
+        peak: {type: number}
+        progress: {type: number}
+        full: {type: boolean}
+        heldMs: {type: number}
+        faults: {type: array, maxItems: 10, items: {type: string, maxLength: 60}}
+        quality: {type: integer, minimum: 0, maximum: 100}
+    SavedHold:
+      type: object
+      additionalProperties: false
+      required: [set, side, startMs, endMs, seconds, completed, best, faults, quality]
+      properties:
+        set: {type: integer, minimum: 1, maximum: 20}
+        side: {$ref: "#/components/schemas/Side"}
+        startMs: {type: number}
+        endMs: {type: number}
+        seconds: {type: number}
+        completed: {type: boolean}
+        best: {type: number}
+        faults: {type: array, maxItems: 10, items: {type: string, maxLength: 60}}
+        quality: {type: integer, minimum: 0, maximum: 100}
+    MotionTrack:
+      type: object
+      additionalProperties: false
+      required: [fps, joints, frames, data]
+      description: Joint positions only (no picture). data is base64 of little-endian int16 millimetres, frame by frame, x y z per joint.
+      properties:
+        fps: {type: integer, minimum: 1, maximum: 30}
+        joints: {type: array, minItems: 1, maxItems: 33, items: {type: integer, minimum: 0, maximum: 32}}
+        frames: {type: integer, minimum: 1, maximum: 20000}
+        data: {type: string, maxLength: 3000000}
+    Feeling: {type: string, enum: [easy, ok, hard, painful]}
+    SessionExerciseInput:
+      type: object
+      additionalProperties: false
+      required: [itemId, exerciseSlug, mode, status, setsDone, repsFull, repsPartial, holdsDone, best, quality, feeling, reps, holds, faultCounts, visibleRatio, videoOnPhone, durationSeconds, track]
+      properties:
+        itemId: {type: [string, "null"], format: uuid}
+        exerciseSlug: {type: string, pattern: "^[a-z0-9-]{1,60}$"}
+        mode: {type: string, enum: [camera, manual]}
+        status: {type: string, enum: [done, skipped, stopped]}
+        setsDone: {type: integer, minimum: 0, maximum: 20}
+        repsFull: {type: integer, minimum: 0, maximum: 1000}
+        repsPartial: {type: integer, minimum: 0, maximum: 1000}
+        holdsDone: {type: integer, minimum: 0, maximum: 100}
+        best: {type: [number, "null"]}
+        quality: {type: [integer, "null"], minimum: 0, maximum: 100}
+        feeling: {oneOf: [{$ref: "#/components/schemas/Feeling"}, {type: "null"}]}
+        reps: {type: array, maxItems: 500, items: {$ref: "#/components/schemas/SavedRep"}}
+        holds: {type: array, maxItems: 100, items: {$ref: "#/components/schemas/SavedHold"}}
+        faultCounts: {type: object, additionalProperties: {type: integer, minimum: 0}}
+        visibleRatio: {type: [number, "null"], minimum: 0, maximum: 1}
+        videoOnPhone: {type: boolean}
+        durationSeconds: {type: integer, minimum: 0, maximum: 7200}
+        track: {oneOf: [{$ref: "#/components/schemas/MotionTrack"}, {type: "null"}]}
+    SavedExercise:
+      type: object
+      additionalProperties: false
+      required: [id]
+      properties: {id: {type: string, format: uuid}}
+    FinishSessionRequest:
+      type: object
+      additionalProperties: false
+      required: [painAfter, status]
+      properties:
+        painAfter: {type: [integer, "null"], minimum: 0, maximum: 10}
+        status: {type: string, enum: [completed, stopped]}
+    ReviewRequest:
+      type: object
+      additionalProperties: false
+      required: [note]
+      properties: {note: {type: string, maxLength: 2000}}
+    ExerciseTarget:
+      type: object
+      additionalProperties: false
+      required: [sets, reps, holdSeconds, side, rest, goal, unit]
+      properties:
+        sets: {type: integer}
+        reps: {type: [integer, "null"]}
+        holdSeconds: {type: [integer, "null"]}
+        side: {$ref: "#/components/schemas/PlanSide"}
+        rest: {type: [number, "null"], description: Camera value at the start position.}
+        goal: {type: [number, "null"], description: Camera value for the full target range.}
+        unit: {type: string}
+    FaultSummary:
+      type: object
+      additionalProperties: false
+      required: [id, message, severity, count]
+      properties:
+        id: {type: string}
+        message: {$ref: "#/components/schemas/Text"}
+        severity: {type: string, enum: [minor, major]}
+        count: {type: integer}
+    ReportExercise:
+      type: object
+      additionalProperties: false
+      required: [id, exercise, mode, status, target, setsDone, repsFull, repsPartial, holdsDone, best, previousBest, quality, feeling, reps, holds, faults, visibleRatio, videoOnPhone, hasTrack, durationSeconds]
+      properties:
+        id: {type: string, format: uuid}
+        exercise: {$ref: "#/components/schemas/ExerciseSummary"}
+        mode: {type: string, enum: [camera, manual]}
+        status: {type: string, enum: [done, skipped, stopped]}
+        target: {$ref: "#/components/schemas/ExerciseTarget"}
+        setsDone: {type: integer}
+        repsFull: {type: integer}
+        repsPartial: {type: integer}
+        holdsDone: {type: integer}
+        best: {type: [number, "null"]}
+        previousBest: {type: [number, "null"], description: Best in the patient's previous session with this exercise.}
+        quality: {type: [integer, "null"]}
+        feeling: {oneOf: [{$ref: "#/components/schemas/Feeling"}, {type: "null"}]}
+        reps: {type: array, items: {$ref: "#/components/schemas/SavedRep"}}
+        holds: {type: array, items: {$ref: "#/components/schemas/SavedHold"}}
+        faults: {type: array, items: {$ref: "#/components/schemas/FaultSummary"}}
+        visibleRatio: {type: [number, "null"]}
+        videoOnPhone: {type: boolean}
+        hasTrack: {type: boolean}
+        durationSeconds: {type: integer}
+    SessionReport:
+      type: object
+      additionalProperties: false
+      required: [id, patient, day, startedAt, endedAt, status, checkIn, painAfter, review, exercises, totals]
+      properties:
+        id: {type: string, format: uuid}
+        patient: {$ref: "#/components/schemas/PersonRef"}
+        day: {$ref: "#/components/schemas/Day"}
+        startedAt: {type: string, format: date-time}
+        endedAt: {type: [string, "null"], format: date-time}
+        status: {$ref: "#/components/schemas/SessionStatus"}
+        checkIn:
+          oneOf:
+            - type: object
+              additionalProperties: false
+              required: [pain, redFlags]
+              properties: {pain: {type: integer}, redFlags: {type: array, items: {type: string}}}
+            - {type: "null"}
+        painAfter: {type: [integer, "null"]}
+        review:
+          oneOf:
+            - type: object
+              additionalProperties: false
+              required: [at, byName, note]
+              properties: {at: {type: string, format: date-time}, byName: {type: [string, "null"]}, note: {type: string}}
+            - {type: "null"}
+        exercises: {type: array, items: {$ref: "#/components/schemas/ReportExercise"}}
+        totals:
+          type: object
+          additionalProperties: false
+          required: [repsFull, repsPartial, holds, quality, problems]
+          properties:
+            repsFull: {type: integer}
+            repsPartial: {type: integer}
+            holds: {type: integer}
+            quality: {type: [integer, "null"]}
+            problems: {type: integer}
+    # ------------------------------------------------------------ M5b bookings
+    VisitMode: {type: string, enum: [clinic, video, home]}
+    VisitType:
+      type: object
+      additionalProperties: false
+      required: [id, code, name, nameHi, minutes, mode]
+      properties:
+        id: {type: string, format: uuid}
+        code: {type: string}
+        name: {type: string}
+        nameHi: {type: string}
+        minutes: {type: integer}
+        mode: {$ref: "#/components/schemas/VisitMode"}
+    VisitTypeList:
+      type: object
+      additionalProperties: false
+      required: [visitTypes]
+      properties: {visitTypes: {type: array, items: {$ref: "#/components/schemas/VisitType"}}}
+    ClinicianList:
+      type: object
+      additionalProperties: false
+      required: [clinicians]
+      properties: {clinicians: {type: array, items: {$ref: "#/components/schemas/PersonRef"}}}
+    Slots:
+      type: object
+      additionalProperties: false
+      required: [date, slots, closed]
+      properties:
+        date: {$ref: "#/components/schemas/Day"}
+        slots:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [startsAt, endsAt]
+            properties: {startsAt: {type: string, format: date-time}, endsAt: {type: string, format: date-time}}
+        closed: {type: [string, "null"], description: "Why nothing can be booked that day (holiday, leave, not a working day, too far ahead)."}
+    AppointmentStatus: {type: string, enum: [booked, confirmed, arrived, completed, no-show, cancelled]}
+    Appointment:
+      type: object
+      additionalProperties: false
+      required: [id, patient, clinician, visitType, startsAt, endsAt, status, seriesId, meetingLink, note, cancelReason, createdByName, canChange]
+      properties:
+        id: {type: string, format: uuid}
+        patient: {$ref: "#/components/schemas/PersonRef"}
+        clinician: {$ref: "#/components/schemas/PersonRef"}
+        visitType: {$ref: "#/components/schemas/VisitType"}
+        startsAt: {type: string, format: date-time}
+        endsAt: {type: string, format: date-time}
+        status: {$ref: "#/components/schemas/AppointmentStatus"}
+        seriesId: {type: [string, "null"], format: uuid}
+        meetingLink: {type: [string, "null"]}
+        note: {type: string}
+        cancelReason: {type: [string, "null"]}
+        createdByName: {type: [string, "null"]}
+        canChange: {type: boolean, description: The signed-in person may still move or cancel it.}
+    AppointmentList:
+      type: object
+      additionalProperties: false
+      required: [appointments]
+      properties: {appointments: {type: array, items: {$ref: "#/components/schemas/Appointment"}}}
+    BookRequest:
+      type: object
+      additionalProperties: false
+      required: [visitTypeId, startsAt]
+      properties:
+        patientId: {type: string, format: uuid, description: Staff booking for a patient. Patients book for themselves.}
+        visitTypeId: {type: string, format: uuid}
+        startsAt: {type: string, format: date-time}
+        note: {type: string, maxLength: 500}
+        meetingLink: {type: [string, "null"], maxLength: 300}
+        repeat:
+          type: object
+          additionalProperties: false
+          required: [weekdays, weeks]
+          properties:
+            weekdays: {type: array, minItems: 1, maxItems: 6, items: {type: integer, minimum: 0, maximum: 6}}
+            weeks: {type: integer, minimum: 1, maximum: 12}
+        preview: {type: boolean}
+    BookResult:
+      type: object
+      additionalProperties: false
+      required: [booked, planned, seriesId]
+      properties:
+        booked: {type: array, items: {$ref: "#/components/schemas/Appointment"}}
+        planned:
+          type: array
+          description: Every date asked for, and whether it can be (or was) booked.
+          items:
+            type: object
+            additionalProperties: false
+            required: [startsAt, ok, reason]
+            properties: {startsAt: {type: string, format: date-time}, ok: {type: boolean}, reason: {type: [string, "null"]}}
+        seriesId: {type: [string, "null"], format: uuid}
+    MoveRequest:
+      type: object
+      additionalProperties: false
+      required: [startsAt]
+      properties: {startsAt: {type: string, format: date-time}}
+    AppointmentStatusRequest:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status: {type: string, enum: [confirmed, arrived, completed, no-show, cancelled]}
+        reason: {type: string, maxLength: 300}
+    WeeklyHours:
+      type: object
+      additionalProperties: false
+      required: [clinicianId, hours]
+      properties:
+        clinicianId: {type: string, format: uuid}
+        hours:
+          type: array
+          maxItems: 21
+          items:
+            type: object
+            additionalProperties: false
+            required: [weekday, startMinute, endMinute]
+            properties:
+              weekday: {type: integer, minimum: 0, maximum: 6}
+              startMinute: {type: integer, minimum: 0, maximum: 1440, description: "Minutes from midnight, India time."}
+              endMinute: {type: integer, minimum: 0, maximum: 1440}
+    TimeOff:
+      type: object
+      additionalProperties: false
+      required: [id, clinicianId, clinicianName, startDate, endDate, reason]
+      properties:
+        id: {type: string, format: uuid}
+        clinicianId: {type: [string, "null"], format: uuid, description: Null = the whole clinic is closed.}
+        clinicianName: {type: [string, "null"]}
+        startDate: {$ref: "#/components/schemas/Day"}
+        endDate: {$ref: "#/components/schemas/Day"}
+        reason: {type: string}
+    TimeOffList:
+      type: object
+      additionalProperties: false
+      required: [timeOff]
+      properties: {timeOff: {type: array, items: {$ref: "#/components/schemas/TimeOff"}}}
+    TimeOffInput:
+      type: object
+      additionalProperties: false
+      required: [clinicianId, startDate, endDate, reason]
+      properties:
+        clinicianId: {type: [string, "null"], format: uuid}
+        startDate: {type: string, format: date}
+        endDate: {type: string, format: date}
+        reason: {type: string, maxLength: 200}
+    TimeOfDay: {type: string, enum: [any, morning, afternoon]}
+    WaitlistEntry:
+      type: object
+      additionalProperties: false
+      required: [id, patient, visitType, fromDate, toDate, timeOfDay, status, offerStartsAt, offerExpiresAt, createdAt]
+      properties:
+        id: {type: string, format: uuid}
+        patient: {$ref: "#/components/schemas/PersonRef"}
+        visitType: {$ref: "#/components/schemas/VisitType"}
+        fromDate: {$ref: "#/components/schemas/Day"}
+        toDate: {$ref: "#/components/schemas/Day"}
+        timeOfDay: {$ref: "#/components/schemas/TimeOfDay"}
+        status: {type: string, enum: [waiting, offered, booked, removed]}
+        offerStartsAt: {type: [string, "null"], format: date-time}
+        offerExpiresAt: {type: [string, "null"], format: date-time}
+        createdAt: {type: string, format: date-time}
+    WaitlistList:
+      type: object
+      additionalProperties: false
+      required: [entries]
+      properties: {entries: {type: array, items: {$ref: "#/components/schemas/WaitlistEntry"}}}
+    WaitlistInput:
+      type: object
+      additionalProperties: false
+      required: [visitTypeId, fromDate, toDate, timeOfDay]
+      properties:
+        patientId: {type: string, format: uuid}
+        visitTypeId: {type: string, format: uuid}
+        fromDate: {type: string, format: date}
+        toDate: {type: string, format: date}
+        timeOfDay: {$ref: "#/components/schemas/TimeOfDay"}
+    # ------------------------------------------------------------ M5b admin overview
+    ActivityItem:
+      type: object
+      additionalProperties: false
+      required: [id, kind, area, summary, createdAt, actorName, actorRole, patient, sessionId, appointmentId]
+      properties:
+        id: {type: string, format: uuid}
+        kind: {type: string, description: "e.g. session.completed, booking.cancelled."}
+        area: {type: string, enum: [plan, session, symptom, booking, review, note, account]}
+        summary: {type: string}
+        createdAt: {type: string, format: date-time}
+        actorName: {type: [string, "null"]}
+        actorRole: {oneOf: [{$ref: "#/components/schemas/Role"}, {type: "null"}]}
+        patient: {oneOf: [{$ref: "#/components/schemas/PersonRef"}, {type: "null"}]}
+        sessionId: {type: [string, "null"], format: uuid}
+        appointmentId: {type: [string, "null"], format: uuid}
+    ActivityList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties: {items: {type: array, items: {$ref: "#/components/schemas/ActivityItem"}}}
+    Overview:
+      type: object
+      additionalProperties: false
+      required: [day, counts, patients, today, recent]
+      properties:
+        day: {$ref: "#/components/schemas/Day"}
+        counts:
+          type: object
+          additionalProperties: false
+          required: [patients, clinicians, sessionsToday, sessionsWeek, adherence7, openAlerts, openSymptoms, appointmentsToday, noShows30, cancellations30, waiting]
+          properties:
+            patients: {type: integer}
+            clinicians: {type: integer}
+            sessionsToday: {type: integer}
+            sessionsWeek: {type: integer}
+            adherence7: {type: [integer, "null"], description: Percent of planned sessions done in the last 7 days, all patients.}
+            openAlerts: {type: integer}
+            openSymptoms: {type: integer}
+            appointmentsToday: {type: integer}
+            noShows30: {type: integer}
+            cancellations30: {type: integer}
+            waiting: {type: integer}
+        patients: {type: array, items: {$ref: "#/components/schemas/PatientRow"}}
+        today: {type: array, items: {$ref: "#/components/schemas/Appointment"}}
+        recent: {type: array, items: {$ref: "#/components/schemas/ActivityItem"}}

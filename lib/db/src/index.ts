@@ -7,6 +7,25 @@ import * as schema from "./schema/index.ts";
 export { schema };
 export { USER_ROLES, type UserRole } from "./schema/users.ts";
 export { VIDEO_STATUSES, type ExerciseContent, type LocalisedText, type VideoStatus } from "./schema/exercises.ts";
+export { PLAN_SIDES, type PlanSide } from "./schema/care.ts";
+export {
+  FEELINGS,
+  SESSION_STATUSES,
+  type CheckIn,
+  type ExerciseTarget,
+  type Feeling,
+  type SavedHold,
+  type SavedRep,
+  type SessionStatus,
+} from "./schema/sessions.ts";
+export {
+  APPOINTMENT_STATUSES,
+  VISIT_MODES,
+  WAITLIST_STATUSES,
+  type AppointmentStatus,
+  type VisitMode,
+  type WaitlistStatus,
+} from "./schema/bookings.ts";
 export type Db = NodePgDatabase<typeof schema>;
 export type DbKind = "postgres" | "local-file";
 

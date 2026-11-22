@@ -221,3 +221,1802 @@ export const SetExerciseVisibilityResponse = zod.object({
   "videoStatus": zod.enum(['none', 'draft', 'approved']),
   "hidden": zod.boolean().describe('Hidden in this clinic, so it can\'t be added to new plans.')
 })
+
+
+/**
+ * @summary The doctor's patients (admin - every patient), with who needs attention first.
+ */
+export const ListPatientsResponse = zod.object({
+  "patients": zod.array(zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string(),
+  "email": zod.string(),
+  "clinicianName": zod.string().nullable(),
+  "hasPlan": zod.boolean(),
+  "exercises": zod.int(),
+  "lastSessionAt": zod.iso.datetime({"offset":true}).nullable(),
+  "adherence": zod.int().nullable().describe('Percent of planned sessions done in the last 14 days.'),
+  "attention": zod.array(zod.object({
+  "kind": zod.enum(['red-flag', 'symptom', 'pain', 'painful', 'missed', 'form', 'review']),
+  "text": zod.string()
+})),
+  "nextAppointment": zod.union([zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "clinician": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "visitType": zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}),
+  "startsAt": zod.iso.datetime({"offset":true}),
+  "endsAt": zod.iso.datetime({"offset":true}),
+  "status": zod.enum(['booked', 'confirmed', 'arrived', 'completed', 'no-show', 'cancelled']),
+  "seriesId": zod.uuid().nullable(),
+  "meetingLink": zod.string().nullable(),
+  "note": zod.string(),
+  "cancelReason": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
+  "canChange": zod.boolean().describe('The signed-in person may still move or cancel it.')
+}),zod.null()])
+}))
+})
+
+
+/**
+ * @summary Everything about one patient for the doctor - plan, adherence, pain, range of motion, sessions, symptoms, notes, visits.
+ */
+export const GetPatientParams = zod.object({
+  "patientId": zod.uuid()
+})
+
+export const GetPatientResponse = zod.object({
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string(),
+  "email": zod.string()
+}),
+  "clinicianName": zod.string().nullable(),
+  "plan": zod.union([zod.object({
+  "id": zod.uuid(),
+  "startDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "endDate": zod.iso.date().nullable(),
+  "note": zod.string(),
+  "updatedAt": zod.iso.datetime({"offset":true}),
+  "updatedByName": zod.string().nullable(),
+  "items": zod.array(zod.object({
+  "id": zod.uuid(),
+  "exercise": zod.object({
+  "slug": zod.string(),
+  "name": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "summary": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "region": zod.enum(['neck', 'shoulder', 'elbow', 'spine', 'hip', 'knee', 'ankle', 'balance', 'core']),
+  "position": zod.enum(['standing', 'seated', 'supine', 'prone', 'quadruped']),
+  "view": zod.enum(['front', 'side']).describe('How the person stands to the camera.'),
+  "kind": zod.enum(['reps', 'hold', 'timed-balance']),
+  "laterality": zod.enum(['bilateral', 'unilateral', 'alternating']),
+  "calibration": zod.enum(['draft', 'lab-tested', 'clinician-reviewed']).describe('How far the camera\'s counting is proven for this exercise.'),
+  "videoStatus": zod.enum(['none', 'draft', 'approved']),
+  "hidden": zod.boolean().describe('Hidden in this clinic, so it can\'t be added to new plans.')
+}),
+  "sets": zod.int(),
+  "reps": zod.int().nullable(),
+  "holdSeconds": zod.int().nullable(),
+  "restSeconds": zod.int(),
+  "weekdays": zod.array(zod.int()).describe('0 = Sunday ... 6 = Saturday.'),
+  "timesPerDay": zod.int(),
+  "side": zod.enum(['both', 'left', 'right']),
+  "note": zod.string(),
+  "today": zod.boolean().describe('Scheduled for today.')
+}))
+}),zod.null()]),
+  "adherence": zod.array(zod.object({
+  "day": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "planned": zod.int(),
+  "done": zod.int()
+})).describe('Last 28 days.'),
+  "adherencePercent": zod.int().nullable(),
+  "pain": zod.array(zod.object({
+  "day": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "sessionId": zod.uuid(),
+  "before": zod.int().nullable(),
+  "after": zod.int().nullable()
+})),
+  "rom": zod.array(zod.object({
+  "slug": zod.string(),
+  "name": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "unit": zod.string(),
+  "goal": zod.number().nullable(),
+  "points": zod.array(zod.object({
+  "day": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "sessionId": zod.uuid(),
+  "best": zod.number()
+}))
+})),
+  "sessions": zod.array(zod.object({
+  "id": zod.uuid(),
+  "day": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "startedAt": zod.iso.datetime({"offset":true}),
+  "status": zod.enum(['in-progress', 'completed', 'stopped', 'red-flag']),
+  "exercises": zod.int(),
+  "repsFull": zod.int(),
+  "repsPartial": zod.int(),
+  "holds": zod.int(),
+  "quality": zod.int().nullable(),
+  "painBefore": zod.int().nullable(),
+  "painAfter": zod.int().nullable(),
+  "problems": zod.int().describe('Reps or holds with a form problem.'),
+  "reviewed": zod.boolean()
+})),
+  "symptoms": zod.array(zod.object({
+  "id": zod.uuid(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "source": zod.enum(['check-in', 'session', 'home']),
+  "pain": zod.int().nullable(),
+  "redFlags": zod.array(zod.string()),
+  "text": zod.string(),
+  "sessionId": zod.uuid().nullable(),
+  "acknowledgedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "acknowledgedByName": zod.string().nullable()
+})),
+  "notes": zod.array(zod.object({
+  "id": zod.uuid(),
+  "text": zod.string(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "authorName": zod.string().nullable()
+})),
+  "attention": zod.array(zod.object({
+  "kind": zod.enum(['red-flag', 'symptom', 'pain', 'painful', 'missed', 'form', 'review']),
+  "text": zod.string()
+})),
+  "appointments": zod.array(zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "clinician": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "visitType": zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}),
+  "startsAt": zod.iso.datetime({"offset":true}),
+  "endsAt": zod.iso.datetime({"offset":true}),
+  "status": zod.enum(['booked', 'confirmed', 'arrived', 'completed', 'no-show', 'cancelled']),
+  "seriesId": zod.uuid().nullable(),
+  "meetingLink": zod.string().nullable(),
+  "note": zod.string(),
+  "cancelReason": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
+  "canChange": zod.boolean().describe('The signed-in person may still move or cancel it.')
+})).describe('Upcoming visits.'),
+  "activity": zod.array(zod.object({
+  "id": zod.uuid(),
+  "kind": zod.string().describe('e.g. session.completed, booking.cancelled.'),
+  "area": zod.enum(['plan', 'session', 'symptom', 'booking', 'review', 'note', 'account']),
+  "summary": zod.string(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "actorName": zod.string().nullable(),
+  "actorRole": zod.union([zod.enum(['patient', 'clinician', 'admin']),zod.null()]),
+  "patient": zod.union([zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),zod.null()]),
+  "sessionId": zod.uuid().nullable(),
+  "appointmentId": zod.uuid().nullable()
+}))
+})
+
+
+/**
+ * @summary A patient's exercise plan (null if none yet).
+ */
+export const GetPlanParams = zod.object({
+  "patientId": zod.uuid()
+})
+
+export const GetPlanResponse = zod.object({
+  "plan": zod.union([zod.object({
+  "id": zod.uuid(),
+  "startDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "endDate": zod.iso.date().nullable(),
+  "note": zod.string(),
+  "updatedAt": zod.iso.datetime({"offset":true}),
+  "updatedByName": zod.string().nullable(),
+  "items": zod.array(zod.object({
+  "id": zod.uuid(),
+  "exercise": zod.object({
+  "slug": zod.string(),
+  "name": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "summary": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "region": zod.enum(['neck', 'shoulder', 'elbow', 'spine', 'hip', 'knee', 'ankle', 'balance', 'core']),
+  "position": zod.enum(['standing', 'seated', 'supine', 'prone', 'quadruped']),
+  "view": zod.enum(['front', 'side']).describe('How the person stands to the camera.'),
+  "kind": zod.enum(['reps', 'hold', 'timed-balance']),
+  "laterality": zod.enum(['bilateral', 'unilateral', 'alternating']),
+  "calibration": zod.enum(['draft', 'lab-tested', 'clinician-reviewed']).describe('How far the camera\'s counting is proven for this exercise.'),
+  "videoStatus": zod.enum(['none', 'draft', 'approved']),
+  "hidden": zod.boolean().describe('Hidden in this clinic, so it can\'t be added to new plans.')
+}),
+  "sets": zod.int(),
+  "reps": zod.int().nullable(),
+  "holdSeconds": zod.int().nullable(),
+  "restSeconds": zod.int(),
+  "weekdays": zod.array(zod.int()).describe('0 = Sunday ... 6 = Saturday.'),
+  "timesPerDay": zod.int(),
+  "side": zod.enum(['both', 'left', 'right']),
+  "note": zod.string(),
+  "today": zod.boolean().describe('Scheduled for today.')
+}))
+}),zod.null()])
+})
+
+
+/**
+ * @summary Create or replace a patient's plan. Recorded in the activity log with who and when.
+ */
+export const SavePlanParams = zod.object({
+  "patientId": zod.uuid()
+})
+
+export const savePlanBodyNoteMax = 1000;
+
+export const savePlanBodyItemsItemExerciseSlugRegExp = new RegExp('^[a-z0-9-]{1,60}$');
+export const savePlanBodyItemsItemSetsMax = 10;
+
+export const savePlanBodyItemsItemRepsMax = 50;
+
+export const savePlanBodyItemsItemHoldSecondsMin = 5;
+export const savePlanBodyItemsItemHoldSecondsMax = 300;
+
+export const savePlanBodyItemsItemRestSecondsMin = 0;
+export const savePlanBodyItemsItemRestSecondsMax = 300;
+
+export const savePlanBodyItemsItemWeekdaysItemMin = 0;
+export const savePlanBodyItemsItemWeekdaysItemMax = 6;
+
+export const savePlanBodyItemsItemWeekdaysMax = 7;
+
+export const savePlanBodyItemsItemTimesPerDayMax = 3;
+
+export const savePlanBodyItemsItemNoteMax = 300;
+
+export const savePlanBodyItemsMax = 15;
+
+
+
+export const SavePlanBody = zod.object({
+  "startDate": zod.iso.date(),
+  "endDate": zod.iso.date().nullable(),
+  "note": zod.string().max(savePlanBodyNoteMax),
+  "items": zod.array(zod.object({
+  "exerciseSlug": zod.string().regex(savePlanBodyItemsItemExerciseSlugRegExp),
+  "sets": zod.int().min(1).max(savePlanBodyItemsItemSetsMax),
+  "reps": zod.int().min(1).max(savePlanBodyItemsItemRepsMax).nullable(),
+  "holdSeconds": zod.int().min(savePlanBodyItemsItemHoldSecondsMin).max(savePlanBodyItemsItemHoldSecondsMax).nullable(),
+  "restSeconds": zod.int().min(savePlanBodyItemsItemRestSecondsMin).max(savePlanBodyItemsItemRestSecondsMax),
+  "weekdays": zod.array(zod.int().min(savePlanBodyItemsItemWeekdaysItemMin).max(savePlanBodyItemsItemWeekdaysItemMax)).min(1).max(savePlanBodyItemsItemWeekdaysMax),
+  "timesPerDay": zod.int().min(1).max(savePlanBodyItemsItemTimesPerDayMax),
+  "side": zod.enum(['both', 'left', 'right']),
+  "note": zod.string().max(savePlanBodyItemsItemNoteMax)
+})).min(1).max(savePlanBodyItemsMax)
+})
+
+export const SavePlanResponse = zod.object({
+  "plan": zod.union([zod.object({
+  "id": zod.uuid(),
+  "startDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "endDate": zod.iso.date().nullable(),
+  "note": zod.string(),
+  "updatedAt": zod.iso.datetime({"offset":true}),
+  "updatedByName": zod.string().nullable(),
+  "items": zod.array(zod.object({
+  "id": zod.uuid(),
+  "exercise": zod.object({
+  "slug": zod.string(),
+  "name": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "summary": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "region": zod.enum(['neck', 'shoulder', 'elbow', 'spine', 'hip', 'knee', 'ankle', 'balance', 'core']),
+  "position": zod.enum(['standing', 'seated', 'supine', 'prone', 'quadruped']),
+  "view": zod.enum(['front', 'side']).describe('How the person stands to the camera.'),
+  "kind": zod.enum(['reps', 'hold', 'timed-balance']),
+  "laterality": zod.enum(['bilateral', 'unilateral', 'alternating']),
+  "calibration": zod.enum(['draft', 'lab-tested', 'clinician-reviewed']).describe('How far the camera\'s counting is proven for this exercise.'),
+  "videoStatus": zod.enum(['none', 'draft', 'approved']),
+  "hidden": zod.boolean().describe('Hidden in this clinic, so it can\'t be added to new plans.')
+}),
+  "sets": zod.int(),
+  "reps": zod.int().nullable(),
+  "holdSeconds": zod.int().nullable(),
+  "restSeconds": zod.int(),
+  "weekdays": zod.array(zod.int()).describe('0 = Sunday ... 6 = Saturday.'),
+  "timesPerDay": zod.int(),
+  "side": zod.enum(['both', 'left', 'right']),
+  "note": zod.string(),
+  "today": zod.boolean().describe('Scheduled for today.')
+}))
+}),zod.null()])
+})
+
+
+/**
+ * @summary Add a doctor's note about a patient.
+ */
+export const AddNoteParams = zod.object({
+  "patientId": zod.uuid()
+})
+
+export const addNoteBodyTextMax = 2000;
+
+
+
+export const AddNoteBody = zod.object({
+  "text": zod.string().min(1).max(addNoteBodyTextMax)
+})
+
+export const AddNoteResponse = zod.object({
+  "id": zod.uuid(),
+  "text": zod.string(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "authorName": zod.string().nullable()
+})
+
+
+/**
+ * @summary The patient reports a symptom (from home or during a session).
+ */
+export const reportSymptomBodyPainMin = 0;
+export const reportSymptomBodyPainMax = 10;
+
+export const reportSymptomBodyTextMax = 1000;
+
+
+
+export const ReportSymptomBody = zod.object({
+  "pain": zod.int().min(reportSymptomBodyPainMin).max(reportSymptomBodyPainMax).nullable(),
+  "text": zod.string().max(reportSymptomBodyTextMax),
+  "sessionId": zod.uuid().nullable()
+})
+
+export const ReportSymptomResponse = zod.object({
+  "id": zod.uuid(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "source": zod.enum(['check-in', 'session', 'home']),
+  "pain": zod.int().nullable(),
+  "redFlags": zod.array(zod.string()),
+  "text": zod.string(),
+  "sessionId": zod.uuid().nullable(),
+  "acknowledgedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "acknowledgedByName": zod.string().nullable()
+})
+
+
+/**
+ * @summary The doctor marks a symptom report as seen.
+ */
+export const AcknowledgeSymptomParams = zod.object({
+  "symptomId": zod.uuid()
+})
+
+export const AcknowledgeSymptomResponse = zod.object({
+  "id": zod.uuid(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "source": zod.enum(['check-in', 'session', 'home']),
+  "pain": zod.int().nullable(),
+  "redFlags": zod.array(zod.string()),
+  "text": zod.string(),
+  "sessionId": zod.uuid().nullable(),
+  "acknowledgedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "acknowledgedByName": zod.string().nullable()
+})
+
+
+/**
+ * @summary The patient's day - today's exercises, sessions done, a session to resume, next visit, slot offers.
+ */
+export const GetTodayResponse = zod.object({
+  "day": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "hasPlan": zod.boolean(),
+  "plan": zod.union([zod.object({
+  "id": zod.uuid(),
+  "startDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "endDate": zod.iso.date().nullable(),
+  "note": zod.string(),
+  "updatedAt": zod.iso.datetime({"offset":true}),
+  "updatedByName": zod.string().nullable(),
+  "items": zod.array(zod.object({
+  "id": zod.uuid(),
+  "exercise": zod.object({
+  "slug": zod.string(),
+  "name": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "summary": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "region": zod.enum(['neck', 'shoulder', 'elbow', 'spine', 'hip', 'knee', 'ankle', 'balance', 'core']),
+  "position": zod.enum(['standing', 'seated', 'supine', 'prone', 'quadruped']),
+  "view": zod.enum(['front', 'side']).describe('How the person stands to the camera.'),
+  "kind": zod.enum(['reps', 'hold', 'timed-balance']),
+  "laterality": zod.enum(['bilateral', 'unilateral', 'alternating']),
+  "calibration": zod.enum(['draft', 'lab-tested', 'clinician-reviewed']).describe('How far the camera\'s counting is proven for this exercise.'),
+  "videoStatus": zod.enum(['none', 'draft', 'approved']),
+  "hidden": zod.boolean().describe('Hidden in this clinic, so it can\'t be added to new plans.')
+}),
+  "sets": zod.int(),
+  "reps": zod.int().nullable(),
+  "holdSeconds": zod.int().nullable(),
+  "restSeconds": zod.int(),
+  "weekdays": zod.array(zod.int()).describe('0 = Sunday ... 6 = Saturday.'),
+  "timesPerDay": zod.int(),
+  "side": zod.enum(['both', 'left', 'right']),
+  "note": zod.string(),
+  "today": zod.boolean().describe('Scheduled for today.')
+}))
+}),zod.null()]),
+  "timesPerDay": zod.int().describe('Sessions planned today (0 = rest day).'),
+  "sessionsDoneToday": zod.int(),
+  "inProgress": zod.union([zod.object({
+  "id": zod.uuid(),
+  "doneItemIds": zod.array(zod.uuid())
+}),zod.null()]),
+  "nextAppointment": zod.union([zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "clinician": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "visitType": zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}),
+  "startsAt": zod.iso.datetime({"offset":true}),
+  "endsAt": zod.iso.datetime({"offset":true}),
+  "status": zod.enum(['booked', 'confirmed', 'arrived', 'completed', 'no-show', 'cancelled']),
+  "seriesId": zod.uuid().nullable(),
+  "meetingLink": zod.string().nullable(),
+  "note": zod.string(),
+  "cancelReason": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
+  "canChange": zod.boolean().describe('The signed-in person may still move or cancel it.')
+}),zod.null()]),
+  "offers": zod.array(zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "visitType": zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}),
+  "fromDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "toDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "timeOfDay": zod.enum(['any', 'morning', 'afternoon']),
+  "status": zod.enum(['waiting', 'offered', 'booked', 'removed']),
+  "offerStartsAt": zod.iso.datetime({"offset":true}).nullable(),
+  "offerExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "createdAt": zod.iso.datetime({"offset":true})
+})).describe('Slots offered from the waiting list.'),
+  "lastSession": zod.union([zod.object({
+  "id": zod.uuid(),
+  "day": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "startedAt": zod.iso.datetime({"offset":true}),
+  "status": zod.enum(['in-progress', 'completed', 'stopped', 'red-flag']),
+  "exercises": zod.int(),
+  "repsFull": zod.int(),
+  "repsPartial": zod.int(),
+  "holds": zod.int(),
+  "quality": zod.int().nullable(),
+  "painBefore": zod.int().nullable(),
+  "painAfter": zod.int().nullable(),
+  "problems": zod.int().describe('Reps or holds with a form problem.'),
+  "reviewed": zod.boolean()
+}),zod.null()])
+})
+
+
+/**
+ * @summary The patient's own session reports, newest first.
+ */
+export const ListMySessionsResponse = zod.object({
+  "sessions": zod.array(zod.object({
+  "id": zod.uuid(),
+  "day": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "startedAt": zod.iso.datetime({"offset":true}),
+  "status": zod.enum(['in-progress', 'completed', 'stopped', 'red-flag']),
+  "exercises": zod.int(),
+  "repsFull": zod.int(),
+  "repsPartial": zod.int(),
+  "holds": zod.int(),
+  "quality": zod.int().nullable(),
+  "painBefore": zod.int().nullable(),
+  "painAfter": zod.int().nullable(),
+  "problems": zod.int().describe('Reps or holds with a form problem.'),
+  "reviewed": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary Start a session with the pain check-in. A red-flag answer stops it straight away.
+ */
+export const startSessionBodyPainMin = 0;
+export const startSessionBodyPainMax = 10;
+
+export const startSessionBodyRedFlagsMax = 5;
+
+
+
+export const StartSessionBody = zod.object({
+  "pain": zod.int().min(startSessionBodyPainMin).max(startSessionBodyPainMax),
+  "redFlags": zod.array(zod.enum(['numbness', 'bladder', 'chest', 'fall', 'severe']).describe('Red-flag questions at the check-in (draft until QI Spine approves them).')).max(startSessionBodyRedFlagsMax)
+})
+
+export const StartSessionResponse = zod.object({
+  "id": zod.uuid(),
+  "status": zod.enum(['in-progress', 'completed', 'stopped', 'red-flag']),
+  "stopped": zod.boolean().describe('A red-flag answer stopped the session; tell the patient to contact the clinic.')
+})
+
+
+/**
+ * @summary A full session report (the patient's own; the doctor's patients; admin any).
+ */
+export const GetSessionParams = zod.object({
+  "sessionId": zod.uuid()
+})
+
+export const getSessionResponseExercisesItemRepsItemSetMax = 20;
+
+export const getSessionResponseExercisesItemRepsItemFaultsItemMax = 60;
+
+export const getSessionResponseExercisesItemRepsItemFaultsMax = 10;
+
+export const getSessionResponseExercisesItemRepsItemQualityMin = 0;
+export const getSessionResponseExercisesItemRepsItemQualityMax = 100;
+
+export const getSessionResponseExercisesItemHoldsItemSetMax = 20;
+
+export const getSessionResponseExercisesItemHoldsItemFaultsItemMax = 60;
+
+export const getSessionResponseExercisesItemHoldsItemFaultsMax = 10;
+
+export const getSessionResponseExercisesItemHoldsItemQualityMin = 0;
+export const getSessionResponseExercisesItemHoldsItemQualityMax = 100;
+
+
+
+export const GetSessionResponse = zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "day": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "startedAt": zod.iso.datetime({"offset":true}),
+  "endedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "status": zod.enum(['in-progress', 'completed', 'stopped', 'red-flag']),
+  "checkIn": zod.union([zod.object({
+  "pain": zod.int(),
+  "redFlags": zod.array(zod.string())
+}),zod.null()]),
+  "painAfter": zod.int().nullable(),
+  "review": zod.union([zod.object({
+  "at": zod.iso.datetime({"offset":true}),
+  "byName": zod.string().nullable(),
+  "note": zod.string()
+}),zod.null()]),
+  "exercises": zod.array(zod.object({
+  "id": zod.uuid(),
+  "exercise": zod.object({
+  "slug": zod.string(),
+  "name": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "summary": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "region": zod.enum(['neck', 'shoulder', 'elbow', 'spine', 'hip', 'knee', 'ankle', 'balance', 'core']),
+  "position": zod.enum(['standing', 'seated', 'supine', 'prone', 'quadruped']),
+  "view": zod.enum(['front', 'side']).describe('How the person stands to the camera.'),
+  "kind": zod.enum(['reps', 'hold', 'timed-balance']),
+  "laterality": zod.enum(['bilateral', 'unilateral', 'alternating']),
+  "calibration": zod.enum(['draft', 'lab-tested', 'clinician-reviewed']).describe('How far the camera\'s counting is proven for this exercise.'),
+  "videoStatus": zod.enum(['none', 'draft', 'approved']),
+  "hidden": zod.boolean().describe('Hidden in this clinic, so it can\'t be added to new plans.')
+}),
+  "mode": zod.enum(['camera', 'manual']),
+  "status": zod.enum(['done', 'skipped', 'stopped']),
+  "target": zod.object({
+  "sets": zod.int(),
+  "reps": zod.int().nullable(),
+  "holdSeconds": zod.int().nullable(),
+  "side": zod.enum(['both', 'left', 'right']),
+  "rest": zod.number().nullable().describe('Camera value at the start position.'),
+  "goal": zod.number().nullable().describe('Camera value for the full target range.'),
+  "unit": zod.string()
+}),
+  "setsDone": zod.int(),
+  "repsFull": zod.int(),
+  "repsPartial": zod.int(),
+  "holdsDone": zod.int(),
+  "best": zod.number().nullable(),
+  "previousBest": zod.number().nullable().describe('Best in the patient\'s previous session with this exercise.'),
+  "quality": zod.int().nullable(),
+  "feeling": zod.union([zod.enum(['easy', 'ok', 'hard', 'painful']),zod.null()]),
+  "reps": zod.array(zod.object({
+  "set": zod.int().min(1).max(getSessionResponseExercisesItemRepsItemSetMax),
+  "side": zod.union([zod.literal('left'),zod.literal('right'),zod.literal(null)]).nullable(),
+  "startMs": zod.number().describe('Milliseconds from the start of the movement track.'),
+  "endMs": zod.number(),
+  "peak": zod.number(),
+  "progress": zod.number(),
+  "full": zod.boolean(),
+  "heldMs": zod.number(),
+  "faults": zod.array(zod.string().max(getSessionResponseExercisesItemRepsItemFaultsItemMax)).max(getSessionResponseExercisesItemRepsItemFaultsMax),
+  "quality": zod.int().min(getSessionResponseExercisesItemRepsItemQualityMin).max(getSessionResponseExercisesItemRepsItemQualityMax)
+})),
+  "holds": zod.array(zod.object({
+  "set": zod.int().min(1).max(getSessionResponseExercisesItemHoldsItemSetMax),
+  "side": zod.union([zod.literal('left'),zod.literal('right'),zod.literal(null)]).nullable(),
+  "startMs": zod.number(),
+  "endMs": zod.number(),
+  "seconds": zod.number(),
+  "completed": zod.boolean(),
+  "best": zod.number(),
+  "faults": zod.array(zod.string().max(getSessionResponseExercisesItemHoldsItemFaultsItemMax)).max(getSessionResponseExercisesItemHoldsItemFaultsMax),
+  "quality": zod.int().min(getSessionResponseExercisesItemHoldsItemQualityMin).max(getSessionResponseExercisesItemHoldsItemQualityMax)
+})),
+  "faults": zod.array(zod.object({
+  "id": zod.string(),
+  "message": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "severity": zod.enum(['minor', 'major']),
+  "count": zod.int()
+})),
+  "visibleRatio": zod.number().nullable(),
+  "videoOnPhone": zod.boolean(),
+  "hasTrack": zod.boolean(),
+  "durationSeconds": zod.int()
+})),
+  "totals": zod.object({
+  "repsFull": zod.int(),
+  "repsPartial": zod.int(),
+  "holds": zod.int(),
+  "quality": zod.int().nullable(),
+  "problems": zod.int()
+})
+})
+
+
+/**
+ * @summary Save one finished exercise - results rep by rep and the movement as joint positions (never the video).
+ */
+export const SaveSessionExerciseParams = zod.object({
+  "sessionId": zod.uuid()
+})
+
+export const saveSessionExerciseBodyExerciseSlugRegExp = new RegExp('^[a-z0-9-]{1,60}$');
+export const saveSessionExerciseBodySetsDoneMin = 0;
+export const saveSessionExerciseBodySetsDoneMax = 20;
+
+export const saveSessionExerciseBodyRepsFullMin = 0;
+export const saveSessionExerciseBodyRepsFullMax = 1000;
+
+export const saveSessionExerciseBodyRepsPartialMin = 0;
+export const saveSessionExerciseBodyRepsPartialMax = 1000;
+
+export const saveSessionExerciseBodyHoldsDoneMin = 0;
+export const saveSessionExerciseBodyHoldsDoneMax = 100;
+
+export const saveSessionExerciseBodyQualityMin = 0;
+export const saveSessionExerciseBodyQualityMax = 100;
+
+export const saveSessionExerciseBodyRepsItemSetMax = 20;
+
+export const saveSessionExerciseBodyRepsItemFaultsItemMax = 60;
+
+export const saveSessionExerciseBodyRepsItemFaultsMax = 10;
+
+export const saveSessionExerciseBodyRepsItemQualityMin = 0;
+export const saveSessionExerciseBodyRepsItemQualityMax = 100;
+
+export const saveSessionExerciseBodyRepsMax = 500;
+
+export const saveSessionExerciseBodyHoldsItemSetMax = 20;
+
+export const saveSessionExerciseBodyHoldsItemFaultsItemMax = 60;
+
+export const saveSessionExerciseBodyHoldsItemFaultsMax = 10;
+
+export const saveSessionExerciseBodyHoldsItemQualityMin = 0;
+export const saveSessionExerciseBodyHoldsItemQualityMax = 100;
+
+export const saveSessionExerciseBodyHoldsMax = 100;
+
+export const saveSessionExerciseBodyFaultCountsMinOne = 0;
+
+export const saveSessionExerciseBodyVisibleRatioMin = 0;
+export const saveSessionExerciseBodyVisibleRatioMax = 1;
+
+export const saveSessionExerciseBodyDurationSecondsMin = 0;
+export const saveSessionExerciseBodyDurationSecondsMax = 7200;
+
+export const saveSessionExerciseBodyTrackOneFpsMax = 30;
+
+export const saveSessionExerciseBodyTrackOneJointsItemMin = 0;
+export const saveSessionExerciseBodyTrackOneJointsItemMax = 32;
+
+export const saveSessionExerciseBodyTrackOneJointsMax = 33;
+
+export const saveSessionExerciseBodyTrackOneFramesMax = 20000;
+
+export const saveSessionExerciseBodyTrackOneDataMax = 3000000;
+
+
+
+export const SaveSessionExerciseBody = zod.object({
+  "itemId": zod.uuid().nullable(),
+  "exerciseSlug": zod.string().regex(saveSessionExerciseBodyExerciseSlugRegExp),
+  "mode": zod.enum(['camera', 'manual']),
+  "status": zod.enum(['done', 'skipped', 'stopped']),
+  "setsDone": zod.int().min(saveSessionExerciseBodySetsDoneMin).max(saveSessionExerciseBodySetsDoneMax),
+  "repsFull": zod.int().min(saveSessionExerciseBodyRepsFullMin).max(saveSessionExerciseBodyRepsFullMax),
+  "repsPartial": zod.int().min(saveSessionExerciseBodyRepsPartialMin).max(saveSessionExerciseBodyRepsPartialMax),
+  "holdsDone": zod.int().min(saveSessionExerciseBodyHoldsDoneMin).max(saveSessionExerciseBodyHoldsDoneMax),
+  "best": zod.number().nullable(),
+  "quality": zod.int().min(saveSessionExerciseBodyQualityMin).max(saveSessionExerciseBodyQualityMax).nullable(),
+  "feeling": zod.union([zod.enum(['easy', 'ok', 'hard', 'painful']),zod.null()]),
+  "reps": zod.array(zod.object({
+  "set": zod.int().min(1).max(saveSessionExerciseBodyRepsItemSetMax),
+  "side": zod.union([zod.literal('left'),zod.literal('right'),zod.literal(null)]).nullable(),
+  "startMs": zod.number().describe('Milliseconds from the start of the movement track.'),
+  "endMs": zod.number(),
+  "peak": zod.number(),
+  "progress": zod.number(),
+  "full": zod.boolean(),
+  "heldMs": zod.number(),
+  "faults": zod.array(zod.string().max(saveSessionExerciseBodyRepsItemFaultsItemMax)).max(saveSessionExerciseBodyRepsItemFaultsMax),
+  "quality": zod.int().min(saveSessionExerciseBodyRepsItemQualityMin).max(saveSessionExerciseBodyRepsItemQualityMax)
+})).max(saveSessionExerciseBodyRepsMax),
+  "holds": zod.array(zod.object({
+  "set": zod.int().min(1).max(saveSessionExerciseBodyHoldsItemSetMax),
+  "side": zod.union([zod.literal('left'),zod.literal('right'),zod.literal(null)]).nullable(),
+  "startMs": zod.number(),
+  "endMs": zod.number(),
+  "seconds": zod.number(),
+  "completed": zod.boolean(),
+  "best": zod.number(),
+  "faults": zod.array(zod.string().max(saveSessionExerciseBodyHoldsItemFaultsItemMax)).max(saveSessionExerciseBodyHoldsItemFaultsMax),
+  "quality": zod.int().min(saveSessionExerciseBodyHoldsItemQualityMin).max(saveSessionExerciseBodyHoldsItemQualityMax)
+})).max(saveSessionExerciseBodyHoldsMax),
+  "faultCounts": zod.record(zod.string(), zod.int().min(saveSessionExerciseBodyFaultCountsMinOne)),
+  "visibleRatio": zod.number().min(saveSessionExerciseBodyVisibleRatioMin).max(saveSessionExerciseBodyVisibleRatioMax).nullable(),
+  "videoOnPhone": zod.boolean(),
+  "durationSeconds": zod.int().min(saveSessionExerciseBodyDurationSecondsMin).max(saveSessionExerciseBodyDurationSecondsMax),
+  "track": zod.union([zod.object({
+  "fps": zod.int().min(1).max(saveSessionExerciseBodyTrackOneFpsMax),
+  "joints": zod.array(zod.int().min(saveSessionExerciseBodyTrackOneJointsItemMin).max(saveSessionExerciseBodyTrackOneJointsItemMax)).min(1).max(saveSessionExerciseBodyTrackOneJointsMax),
+  "frames": zod.int().min(1).max(saveSessionExerciseBodyTrackOneFramesMax),
+  "data": zod.string().max(saveSessionExerciseBodyTrackOneDataMax)
+}).describe('Joint positions only (no picture). data is base64 of little-endian int16 millimetres, frame by frame, x y z per joint.'),zod.null()])
+})
+
+export const SaveSessionExerciseResponse = zod.object({
+  "id": zod.uuid()
+})
+
+
+/**
+ * @summary End the session with the pain score after it.
+ */
+export const FinishSessionParams = zod.object({
+  "sessionId": zod.uuid()
+})
+
+export const finishSessionBodyPainAfterMin = 0;
+export const finishSessionBodyPainAfterMax = 10;
+
+
+
+export const FinishSessionBody = zod.object({
+  "painAfter": zod.int().min(finishSessionBodyPainAfterMin).max(finishSessionBodyPainAfterMax).nullable(),
+  "status": zod.enum(['completed', 'stopped'])
+})
+
+export const finishSessionResponseExercisesItemRepsItemSetMax = 20;
+
+export const finishSessionResponseExercisesItemRepsItemFaultsItemMax = 60;
+
+export const finishSessionResponseExercisesItemRepsItemFaultsMax = 10;
+
+export const finishSessionResponseExercisesItemRepsItemQualityMin = 0;
+export const finishSessionResponseExercisesItemRepsItemQualityMax = 100;
+
+export const finishSessionResponseExercisesItemHoldsItemSetMax = 20;
+
+export const finishSessionResponseExercisesItemHoldsItemFaultsItemMax = 60;
+
+export const finishSessionResponseExercisesItemHoldsItemFaultsMax = 10;
+
+export const finishSessionResponseExercisesItemHoldsItemQualityMin = 0;
+export const finishSessionResponseExercisesItemHoldsItemQualityMax = 100;
+
+
+
+export const FinishSessionResponse = zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "day": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "startedAt": zod.iso.datetime({"offset":true}),
+  "endedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "status": zod.enum(['in-progress', 'completed', 'stopped', 'red-flag']),
+  "checkIn": zod.union([zod.object({
+  "pain": zod.int(),
+  "redFlags": zod.array(zod.string())
+}),zod.null()]),
+  "painAfter": zod.int().nullable(),
+  "review": zod.union([zod.object({
+  "at": zod.iso.datetime({"offset":true}),
+  "byName": zod.string().nullable(),
+  "note": zod.string()
+}),zod.null()]),
+  "exercises": zod.array(zod.object({
+  "id": zod.uuid(),
+  "exercise": zod.object({
+  "slug": zod.string(),
+  "name": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "summary": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "region": zod.enum(['neck', 'shoulder', 'elbow', 'spine', 'hip', 'knee', 'ankle', 'balance', 'core']),
+  "position": zod.enum(['standing', 'seated', 'supine', 'prone', 'quadruped']),
+  "view": zod.enum(['front', 'side']).describe('How the person stands to the camera.'),
+  "kind": zod.enum(['reps', 'hold', 'timed-balance']),
+  "laterality": zod.enum(['bilateral', 'unilateral', 'alternating']),
+  "calibration": zod.enum(['draft', 'lab-tested', 'clinician-reviewed']).describe('How far the camera\'s counting is proven for this exercise.'),
+  "videoStatus": zod.enum(['none', 'draft', 'approved']),
+  "hidden": zod.boolean().describe('Hidden in this clinic, so it can\'t be added to new plans.')
+}),
+  "mode": zod.enum(['camera', 'manual']),
+  "status": zod.enum(['done', 'skipped', 'stopped']),
+  "target": zod.object({
+  "sets": zod.int(),
+  "reps": zod.int().nullable(),
+  "holdSeconds": zod.int().nullable(),
+  "side": zod.enum(['both', 'left', 'right']),
+  "rest": zod.number().nullable().describe('Camera value at the start position.'),
+  "goal": zod.number().nullable().describe('Camera value for the full target range.'),
+  "unit": zod.string()
+}),
+  "setsDone": zod.int(),
+  "repsFull": zod.int(),
+  "repsPartial": zod.int(),
+  "holdsDone": zod.int(),
+  "best": zod.number().nullable(),
+  "previousBest": zod.number().nullable().describe('Best in the patient\'s previous session with this exercise.'),
+  "quality": zod.int().nullable(),
+  "feeling": zod.union([zod.enum(['easy', 'ok', 'hard', 'painful']),zod.null()]),
+  "reps": zod.array(zod.object({
+  "set": zod.int().min(1).max(finishSessionResponseExercisesItemRepsItemSetMax),
+  "side": zod.union([zod.literal('left'),zod.literal('right'),zod.literal(null)]).nullable(),
+  "startMs": zod.number().describe('Milliseconds from the start of the movement track.'),
+  "endMs": zod.number(),
+  "peak": zod.number(),
+  "progress": zod.number(),
+  "full": zod.boolean(),
+  "heldMs": zod.number(),
+  "faults": zod.array(zod.string().max(finishSessionResponseExercisesItemRepsItemFaultsItemMax)).max(finishSessionResponseExercisesItemRepsItemFaultsMax),
+  "quality": zod.int().min(finishSessionResponseExercisesItemRepsItemQualityMin).max(finishSessionResponseExercisesItemRepsItemQualityMax)
+})),
+  "holds": zod.array(zod.object({
+  "set": zod.int().min(1).max(finishSessionResponseExercisesItemHoldsItemSetMax),
+  "side": zod.union([zod.literal('left'),zod.literal('right'),zod.literal(null)]).nullable(),
+  "startMs": zod.number(),
+  "endMs": zod.number(),
+  "seconds": zod.number(),
+  "completed": zod.boolean(),
+  "best": zod.number(),
+  "faults": zod.array(zod.string().max(finishSessionResponseExercisesItemHoldsItemFaultsItemMax)).max(finishSessionResponseExercisesItemHoldsItemFaultsMax),
+  "quality": zod.int().min(finishSessionResponseExercisesItemHoldsItemQualityMin).max(finishSessionResponseExercisesItemHoldsItemQualityMax)
+})),
+  "faults": zod.array(zod.object({
+  "id": zod.string(),
+  "message": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "severity": zod.enum(['minor', 'major']),
+  "count": zod.int()
+})),
+  "visibleRatio": zod.number().nullable(),
+  "videoOnPhone": zod.boolean(),
+  "hasTrack": zod.boolean(),
+  "durationSeconds": zod.int()
+})),
+  "totals": zod.object({
+  "repsFull": zod.int(),
+  "repsPartial": zod.int(),
+  "holds": zod.int(),
+  "quality": zod.int().nullable(),
+  "problems": zod.int()
+})
+})
+
+
+/**
+ * @summary The doctor marks a session as reviewed, with an optional note.
+ */
+export const ReviewSessionParams = zod.object({
+  "sessionId": zod.uuid()
+})
+
+export const reviewSessionBodyNoteMax = 2000;
+
+
+
+export const ReviewSessionBody = zod.object({
+  "note": zod.string().max(reviewSessionBodyNoteMax)
+})
+
+export const reviewSessionResponseExercisesItemRepsItemSetMax = 20;
+
+export const reviewSessionResponseExercisesItemRepsItemFaultsItemMax = 60;
+
+export const reviewSessionResponseExercisesItemRepsItemFaultsMax = 10;
+
+export const reviewSessionResponseExercisesItemRepsItemQualityMin = 0;
+export const reviewSessionResponseExercisesItemRepsItemQualityMax = 100;
+
+export const reviewSessionResponseExercisesItemHoldsItemSetMax = 20;
+
+export const reviewSessionResponseExercisesItemHoldsItemFaultsItemMax = 60;
+
+export const reviewSessionResponseExercisesItemHoldsItemFaultsMax = 10;
+
+export const reviewSessionResponseExercisesItemHoldsItemQualityMin = 0;
+export const reviewSessionResponseExercisesItemHoldsItemQualityMax = 100;
+
+
+
+export const ReviewSessionResponse = zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "day": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "startedAt": zod.iso.datetime({"offset":true}),
+  "endedAt": zod.iso.datetime({"offset":true}).nullable(),
+  "status": zod.enum(['in-progress', 'completed', 'stopped', 'red-flag']),
+  "checkIn": zod.union([zod.object({
+  "pain": zod.int(),
+  "redFlags": zod.array(zod.string())
+}),zod.null()]),
+  "painAfter": zod.int().nullable(),
+  "review": zod.union([zod.object({
+  "at": zod.iso.datetime({"offset":true}),
+  "byName": zod.string().nullable(),
+  "note": zod.string()
+}),zod.null()]),
+  "exercises": zod.array(zod.object({
+  "id": zod.uuid(),
+  "exercise": zod.object({
+  "slug": zod.string(),
+  "name": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "summary": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "region": zod.enum(['neck', 'shoulder', 'elbow', 'spine', 'hip', 'knee', 'ankle', 'balance', 'core']),
+  "position": zod.enum(['standing', 'seated', 'supine', 'prone', 'quadruped']),
+  "view": zod.enum(['front', 'side']).describe('How the person stands to the camera.'),
+  "kind": zod.enum(['reps', 'hold', 'timed-balance']),
+  "laterality": zod.enum(['bilateral', 'unilateral', 'alternating']),
+  "calibration": zod.enum(['draft', 'lab-tested', 'clinician-reviewed']).describe('How far the camera\'s counting is proven for this exercise.'),
+  "videoStatus": zod.enum(['none', 'draft', 'approved']),
+  "hidden": zod.boolean().describe('Hidden in this clinic, so it can\'t be added to new plans.')
+}),
+  "mode": zod.enum(['camera', 'manual']),
+  "status": zod.enum(['done', 'skipped', 'stopped']),
+  "target": zod.object({
+  "sets": zod.int(),
+  "reps": zod.int().nullable(),
+  "holdSeconds": zod.int().nullable(),
+  "side": zod.enum(['both', 'left', 'right']),
+  "rest": zod.number().nullable().describe('Camera value at the start position.'),
+  "goal": zod.number().nullable().describe('Camera value for the full target range.'),
+  "unit": zod.string()
+}),
+  "setsDone": zod.int(),
+  "repsFull": zod.int(),
+  "repsPartial": zod.int(),
+  "holdsDone": zod.int(),
+  "best": zod.number().nullable(),
+  "previousBest": zod.number().nullable().describe('Best in the patient\'s previous session with this exercise.'),
+  "quality": zod.int().nullable(),
+  "feeling": zod.union([zod.enum(['easy', 'ok', 'hard', 'painful']),zod.null()]),
+  "reps": zod.array(zod.object({
+  "set": zod.int().min(1).max(reviewSessionResponseExercisesItemRepsItemSetMax),
+  "side": zod.union([zod.literal('left'),zod.literal('right'),zod.literal(null)]).nullable(),
+  "startMs": zod.number().describe('Milliseconds from the start of the movement track.'),
+  "endMs": zod.number(),
+  "peak": zod.number(),
+  "progress": zod.number(),
+  "full": zod.boolean(),
+  "heldMs": zod.number(),
+  "faults": zod.array(zod.string().max(reviewSessionResponseExercisesItemRepsItemFaultsItemMax)).max(reviewSessionResponseExercisesItemRepsItemFaultsMax),
+  "quality": zod.int().min(reviewSessionResponseExercisesItemRepsItemQualityMin).max(reviewSessionResponseExercisesItemRepsItemQualityMax)
+})),
+  "holds": zod.array(zod.object({
+  "set": zod.int().min(1).max(reviewSessionResponseExercisesItemHoldsItemSetMax),
+  "side": zod.union([zod.literal('left'),zod.literal('right'),zod.literal(null)]).nullable(),
+  "startMs": zod.number(),
+  "endMs": zod.number(),
+  "seconds": zod.number(),
+  "completed": zod.boolean(),
+  "best": zod.number(),
+  "faults": zod.array(zod.string().max(reviewSessionResponseExercisesItemHoldsItemFaultsItemMax)).max(reviewSessionResponseExercisesItemHoldsItemFaultsMax),
+  "quality": zod.int().min(reviewSessionResponseExercisesItemHoldsItemQualityMin).max(reviewSessionResponseExercisesItemHoldsItemQualityMax)
+})),
+  "faults": zod.array(zod.object({
+  "id": zod.string(),
+  "message": zod.object({
+  "en": zod.string(),
+  "hi": zod.string()
+}).describe('The same words in English and Hindi.'),
+  "severity": zod.enum(['minor', 'major']),
+  "count": zod.int()
+})),
+  "visibleRatio": zod.number().nullable(),
+  "videoOnPhone": zod.boolean(),
+  "hasTrack": zod.boolean(),
+  "durationSeconds": zod.int()
+})),
+  "totals": zod.object({
+  "repsFull": zod.int(),
+  "repsPartial": zod.int(),
+  "holds": zod.int(),
+  "quality": zod.int().nullable(),
+  "problems": zod.int()
+})
+})
+
+
+/**
+ * @summary The movement of one exercise as joint positions, to replay as an animated figure.
+ */
+export const GetMotionTrackParams = zod.object({
+  "resultId": zod.uuid()
+})
+
+export const getMotionTrackResponseFpsMax = 30;
+
+export const getMotionTrackResponseJointsItemMin = 0;
+export const getMotionTrackResponseJointsItemMax = 32;
+
+export const getMotionTrackResponseJointsMax = 33;
+
+export const getMotionTrackResponseFramesMax = 20000;
+
+export const getMotionTrackResponseDataMax = 3000000;
+
+
+
+export const GetMotionTrackResponse = zod.object({
+  "fps": zod.int().min(1).max(getMotionTrackResponseFpsMax),
+  "joints": zod.array(zod.int().min(getMotionTrackResponseJointsItemMin).max(getMotionTrackResponseJointsItemMax)).min(1).max(getMotionTrackResponseJointsMax),
+  "frames": zod.int().min(1).max(getMotionTrackResponseFramesMax),
+  "data": zod.string().max(getMotionTrackResponseDataMax)
+}).describe('Joint positions only (no picture). data is base64 of little-endian int16 millimetres, frame by frame, x y z per joint.')
+
+
+/**
+ * @summary Kinds of visit the clinic offers.
+ */
+export const ListVisitTypesResponse = zod.object({
+  "visitTypes": zod.array(zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}))
+})
+
+
+/**
+ * @summary The clinic's doctors (staff only).
+ */
+export const ListCliniciansResponse = zod.object({
+  "clinicians": zod.array(zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}))
+})
+
+
+/**
+ * @summary Free start times on one day for a visit type with the patient's doctor.
+ */
+export const GetSlotsQueryParams = zod.object({
+  "visitTypeId": zod.uuid(),
+  "date": zod.iso.date(),
+  "patientId": zod.uuid().optional().describe('Staff booking for a patient.'),
+  "ignoreAppointmentId": zod.uuid().optional().describe('When moving a visit, its own time counts as free.')
+})
+
+export const GetSlotsResponse = zod.object({
+  "date": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "slots": zod.array(zod.object({
+  "startsAt": zod.iso.datetime({"offset":true}),
+  "endsAt": zod.iso.datetime({"offset":true})
+})),
+  "closed": zod.string().nullable().describe('Why nothing can be booked that day (holiday, leave, not a working day, too far ahead).')
+})
+
+
+/**
+ * @summary Visits between two dates (patients see their own, doctors theirs, admin all).
+ */
+export const ListAppointmentsQueryParams = zod.object({
+  "from": zod.iso.date(),
+  "to": zod.iso.date(),
+  "patientId": zod.uuid().optional()
+})
+
+export const ListAppointmentsResponse = zod.object({
+  "appointments": zod.array(zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "clinician": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "visitType": zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}),
+  "startsAt": zod.iso.datetime({"offset":true}),
+  "endsAt": zod.iso.datetime({"offset":true}),
+  "status": zod.enum(['booked', 'confirmed', 'arrived', 'completed', 'no-show', 'cancelled']),
+  "seriesId": zod.uuid().nullable(),
+  "meetingLink": zod.string().nullable(),
+  "note": zod.string(),
+  "cancelReason": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
+  "canChange": zod.boolean().describe('The signed-in person may still move or cancel it.')
+}))
+})
+
+
+/**
+ * @summary Book a visit, once or repeating. With preview true nothing is saved - each date is checked and the clashes shown.
+ */
+export const bookAppointmentBodyNoteMax = 500;
+
+export const bookAppointmentBodyMeetingLinkMax = 300;
+
+export const bookAppointmentBodyRepeatWeekdaysItemMin = 0;
+export const bookAppointmentBodyRepeatWeekdaysItemMax = 6;
+
+export const bookAppointmentBodyRepeatWeekdaysMax = 6;
+
+export const bookAppointmentBodyRepeatWeeksMax = 12;
+
+
+
+export const BookAppointmentBody = zod.object({
+  "patientId": zod.uuid().optional().describe('Staff booking for a patient. Patients book for themselves.'),
+  "visitTypeId": zod.uuid(),
+  "startsAt": zod.iso.datetime({"offset":true}),
+  "note": zod.string().max(bookAppointmentBodyNoteMax).optional(),
+  "meetingLink": zod.string().max(bookAppointmentBodyMeetingLinkMax).nullish(),
+  "repeat": zod.object({
+  "weekdays": zod.array(zod.int().min(bookAppointmentBodyRepeatWeekdaysItemMin).max(bookAppointmentBodyRepeatWeekdaysItemMax)).min(1).max(bookAppointmentBodyRepeatWeekdaysMax),
+  "weeks": zod.int().min(1).max(bookAppointmentBodyRepeatWeeksMax)
+}).optional(),
+  "preview": zod.boolean().optional()
+})
+
+export const BookAppointmentResponse = zod.object({
+  "booked": zod.array(zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "clinician": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "visitType": zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}),
+  "startsAt": zod.iso.datetime({"offset":true}),
+  "endsAt": zod.iso.datetime({"offset":true}),
+  "status": zod.enum(['booked', 'confirmed', 'arrived', 'completed', 'no-show', 'cancelled']),
+  "seriesId": zod.uuid().nullable(),
+  "meetingLink": zod.string().nullable(),
+  "note": zod.string(),
+  "cancelReason": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
+  "canChange": zod.boolean().describe('The signed-in person may still move or cancel it.')
+})),
+  "planned": zod.array(zod.object({
+  "startsAt": zod.iso.datetime({"offset":true}),
+  "ok": zod.boolean(),
+  "reason": zod.string().nullable()
+})).describe('Every date asked for, and whether it can be (or was) booked.'),
+  "seriesId": zod.uuid().nullable()
+})
+
+
+/**
+ * @summary Move a visit to another time.
+ */
+export const MoveAppointmentParams = zod.object({
+  "appointmentId": zod.uuid()
+})
+
+export const MoveAppointmentBody = zod.object({
+  "startsAt": zod.iso.datetime({"offset":true})
+})
+
+export const MoveAppointmentResponse = zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "clinician": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "visitType": zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}),
+  "startsAt": zod.iso.datetime({"offset":true}),
+  "endsAt": zod.iso.datetime({"offset":true}),
+  "status": zod.enum(['booked', 'confirmed', 'arrived', 'completed', 'no-show', 'cancelled']),
+  "seriesId": zod.uuid().nullable(),
+  "meetingLink": zod.string().nullable(),
+  "note": zod.string(),
+  "cancelReason": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
+  "canChange": zod.boolean().describe('The signed-in person may still move or cancel it.')
+})
+
+
+/**
+ * @summary Confirm, mark arrived, completed or no-show, or cancel (with a reason).
+ */
+export const SetAppointmentStatusParams = zod.object({
+  "appointmentId": zod.uuid()
+})
+
+export const setAppointmentStatusBodyReasonMax = 300;
+
+
+
+export const SetAppointmentStatusBody = zod.object({
+  "status": zod.enum(['confirmed', 'arrived', 'completed', 'no-show', 'cancelled']),
+  "reason": zod.string().max(setAppointmentStatusBodyReasonMax).optional()
+})
+
+export const SetAppointmentStatusResponse = zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "clinician": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "visitType": zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}),
+  "startsAt": zod.iso.datetime({"offset":true}),
+  "endsAt": zod.iso.datetime({"offset":true}),
+  "status": zod.enum(['booked', 'confirmed', 'arrived', 'completed', 'no-show', 'cancelled']),
+  "seriesId": zod.uuid().nullable(),
+  "meetingLink": zod.string().nullable(),
+  "note": zod.string(),
+  "cancelReason": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
+  "canChange": zod.boolean().describe('The signed-in person may still move or cancel it.')
+})
+
+
+/**
+ * @summary A doctor's weekly working hours (doctors - their own; admin - any).
+ */
+export const GetAvailabilityQueryParams = zod.object({
+  "clinicianId": zod.uuid().optional()
+})
+
+export const getAvailabilityResponseHoursItemWeekdayMin = 0;
+export const getAvailabilityResponseHoursItemWeekdayMax = 6;
+
+export const getAvailabilityResponseHoursItemStartMinuteMin = 0;
+export const getAvailabilityResponseHoursItemStartMinuteMax = 1440;
+
+export const getAvailabilityResponseHoursItemEndMinuteMin = 0;
+export const getAvailabilityResponseHoursItemEndMinuteMax = 1440;
+
+export const getAvailabilityResponseHoursMax = 21;
+
+
+
+export const GetAvailabilityResponse = zod.object({
+  "clinicianId": zod.uuid(),
+  "hours": zod.array(zod.object({
+  "weekday": zod.int().min(getAvailabilityResponseHoursItemWeekdayMin).max(getAvailabilityResponseHoursItemWeekdayMax),
+  "startMinute": zod.int().min(getAvailabilityResponseHoursItemStartMinuteMin).max(getAvailabilityResponseHoursItemStartMinuteMax).describe('Minutes from midnight, India time.'),
+  "endMinute": zod.int().min(getAvailabilityResponseHoursItemEndMinuteMin).max(getAvailabilityResponseHoursItemEndMinuteMax)
+})).max(getAvailabilityResponseHoursMax)
+})
+
+
+/**
+ * @summary Replace a doctor's weekly working hours.
+ */
+export const setAvailabilityBodyHoursItemWeekdayMin = 0;
+export const setAvailabilityBodyHoursItemWeekdayMax = 6;
+
+export const setAvailabilityBodyHoursItemStartMinuteMin = 0;
+export const setAvailabilityBodyHoursItemStartMinuteMax = 1440;
+
+export const setAvailabilityBodyHoursItemEndMinuteMin = 0;
+export const setAvailabilityBodyHoursItemEndMinuteMax = 1440;
+
+export const setAvailabilityBodyHoursMax = 21;
+
+
+
+export const SetAvailabilityBody = zod.object({
+  "clinicianId": zod.uuid(),
+  "hours": zod.array(zod.object({
+  "weekday": zod.int().min(setAvailabilityBodyHoursItemWeekdayMin).max(setAvailabilityBodyHoursItemWeekdayMax),
+  "startMinute": zod.int().min(setAvailabilityBodyHoursItemStartMinuteMin).max(setAvailabilityBodyHoursItemStartMinuteMax).describe('Minutes from midnight, India time.'),
+  "endMinute": zod.int().min(setAvailabilityBodyHoursItemEndMinuteMin).max(setAvailabilityBodyHoursItemEndMinuteMax)
+})).max(setAvailabilityBodyHoursMax)
+})
+
+export const setAvailabilityResponseHoursItemWeekdayMin = 0;
+export const setAvailabilityResponseHoursItemWeekdayMax = 6;
+
+export const setAvailabilityResponseHoursItemStartMinuteMin = 0;
+export const setAvailabilityResponseHoursItemStartMinuteMax = 1440;
+
+export const setAvailabilityResponseHoursItemEndMinuteMin = 0;
+export const setAvailabilityResponseHoursItemEndMinuteMax = 1440;
+
+export const setAvailabilityResponseHoursMax = 21;
+
+
+
+export const SetAvailabilityResponse = zod.object({
+  "clinicianId": zod.uuid(),
+  "hours": zod.array(zod.object({
+  "weekday": zod.int().min(setAvailabilityResponseHoursItemWeekdayMin).max(setAvailabilityResponseHoursItemWeekdayMax),
+  "startMinute": zod.int().min(setAvailabilityResponseHoursItemStartMinuteMin).max(setAvailabilityResponseHoursItemStartMinuteMax).describe('Minutes from midnight, India time.'),
+  "endMinute": zod.int().min(setAvailabilityResponseHoursItemEndMinuteMin).max(setAvailabilityResponseHoursItemEndMinuteMax)
+})).max(setAvailabilityResponseHoursMax)
+})
+
+
+/**
+ * @summary Leave days and clinic holidays from today on.
+ */
+export const ListTimeOffResponse = zod.object({
+  "timeOff": zod.array(zod.object({
+  "id": zod.uuid(),
+  "clinicianId": zod.uuid().nullable().describe('Null = the whole clinic is closed.'),
+  "clinicianName": zod.string().nullable(),
+  "startDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "endDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "reason": zod.string()
+}))
+})
+
+
+/**
+ * @summary Add leave for a doctor, or a clinic holiday (admin, no doctor).
+ */
+export const addTimeOffBodyReasonMax = 200;
+
+
+
+export const AddTimeOffBody = zod.object({
+  "clinicianId": zod.uuid().nullable(),
+  "startDate": zod.iso.date(),
+  "endDate": zod.iso.date(),
+  "reason": zod.string().max(addTimeOffBodyReasonMax)
+})
+
+export const AddTimeOffResponse = zod.object({
+  "id": zod.uuid(),
+  "clinicianId": zod.uuid().nullable().describe('Null = the whole clinic is closed.'),
+  "clinicianName": zod.string().nullable(),
+  "startDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "endDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "reason": zod.string()
+})
+
+
+/**
+ * @summary Remove a leave day or holiday.
+ */
+export const DeleteTimeOffParams = zod.object({
+  "timeOffId": zod.uuid()
+})
+
+export const DeleteTimeOffResponse = zod.void()
+
+
+/**
+ * @summary Waiting list (patients - their own; staff - everyone).
+ */
+export const ListWaitlistResponse = zod.object({
+  "entries": zod.array(zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "visitType": zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}),
+  "fromDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "toDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "timeOfDay": zod.enum(['any', 'morning', 'afternoon']),
+  "status": zod.enum(['waiting', 'offered', 'booked', 'removed']),
+  "offerStartsAt": zod.iso.datetime({"offset":true}).nullable(),
+  "offerExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "createdAt": zod.iso.datetime({"offset":true})
+}))
+})
+
+
+/**
+ * @summary Wait for a slot between two dates. If one frees up the patient is offered it in the app.
+ */
+export const JoinWaitlistBody = zod.object({
+  "patientId": zod.uuid().optional(),
+  "visitTypeId": zod.uuid(),
+  "fromDate": zod.iso.date(),
+  "toDate": zod.iso.date(),
+  "timeOfDay": zod.enum(['any', 'morning', 'afternoon'])
+})
+
+export const JoinWaitlistResponse = zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "visitType": zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}),
+  "fromDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "toDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "timeOfDay": zod.enum(['any', 'morning', 'afternoon']),
+  "status": zod.enum(['waiting', 'offered', 'booked', 'removed']),
+  "offerStartsAt": zod.iso.datetime({"offset":true}).nullable(),
+  "offerExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "createdAt": zod.iso.datetime({"offset":true})
+})
+
+
+/**
+ * @summary Take an entry off the waiting list.
+ */
+export const LeaveWaitlistParams = zod.object({
+  "entryId": zod.uuid()
+})
+
+export const LeaveWaitlistResponse = zod.void()
+
+
+/**
+ * @summary Take the slot offered from the waiting list.
+ */
+export const AcceptOfferParams = zod.object({
+  "entryId": zod.uuid()
+})
+
+export const AcceptOfferResponse = zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "clinician": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "visitType": zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}),
+  "startsAt": zod.iso.datetime({"offset":true}),
+  "endsAt": zod.iso.datetime({"offset":true}),
+  "status": zod.enum(['booked', 'confirmed', 'arrived', 'completed', 'no-show', 'cancelled']),
+  "seriesId": zod.uuid().nullable(),
+  "meetingLink": zod.string().nullable(),
+  "note": zod.string(),
+  "cancelReason": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
+  "canChange": zod.boolean().describe('The signed-in person may still move or cancel it.')
+})
+
+
+/**
+ * @summary Say no to an offered slot; it goes to the next person waiting.
+ */
+export const DeclineOfferParams = zod.object({
+  "entryId": zod.uuid()
+})
+
+export const DeclineOfferResponse = zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "visitType": zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}),
+  "fromDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "toDate": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "timeOfDay": zod.enum(['any', 'morning', 'afternoon']),
+  "status": zod.enum(['waiting', 'offered', 'booked', 'removed']),
+  "offerStartsAt": zod.iso.datetime({"offset":true}).nullable(),
+  "offerExpiresAt": zod.iso.datetime({"offset":true}).nullable(),
+  "createdAt": zod.iso.datetime({"offset":true})
+})
+
+
+/**
+ * @summary The admin's view of the whole clinic - today's numbers, every patient, today's visits.
+ */
+export const GetOverviewResponse = zod.object({
+  "day": zod.iso.date().describe('A clinic day (India time), YYYY-MM-DD.'),
+  "counts": zod.object({
+  "patients": zod.int(),
+  "clinicians": zod.int(),
+  "sessionsToday": zod.int(),
+  "sessionsWeek": zod.int(),
+  "adherence7": zod.int().nullable().describe('Percent of planned sessions done in the last 7 days'),
+  "openAlerts": zod.int(),
+  "openSymptoms": zod.int(),
+  "appointmentsToday": zod.int(),
+  "noShows30": zod.int(),
+  "cancellations30": zod.int(),
+  "waiting": zod.int()
+}),
+  "patients": zod.array(zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string(),
+  "email": zod.string(),
+  "clinicianName": zod.string().nullable(),
+  "hasPlan": zod.boolean(),
+  "exercises": zod.int(),
+  "lastSessionAt": zod.iso.datetime({"offset":true}).nullable(),
+  "adherence": zod.int().nullable().describe('Percent of planned sessions done in the last 14 days.'),
+  "attention": zod.array(zod.object({
+  "kind": zod.enum(['red-flag', 'symptom', 'pain', 'painful', 'missed', 'form', 'review']),
+  "text": zod.string()
+})),
+  "nextAppointment": zod.union([zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "clinician": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "visitType": zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}),
+  "startsAt": zod.iso.datetime({"offset":true}),
+  "endsAt": zod.iso.datetime({"offset":true}),
+  "status": zod.enum(['booked', 'confirmed', 'arrived', 'completed', 'no-show', 'cancelled']),
+  "seriesId": zod.uuid().nullable(),
+  "meetingLink": zod.string().nullable(),
+  "note": zod.string(),
+  "cancelReason": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
+  "canChange": zod.boolean().describe('The signed-in person may still move or cancel it.')
+}),zod.null()])
+})),
+  "today": zod.array(zod.object({
+  "id": zod.uuid(),
+  "patient": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "clinician": zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),
+  "visitType": zod.object({
+  "id": zod.uuid(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "nameHi": zod.string(),
+  "minutes": zod.int(),
+  "mode": zod.enum(['clinic', 'video', 'home'])
+}),
+  "startsAt": zod.iso.datetime({"offset":true}),
+  "endsAt": zod.iso.datetime({"offset":true}),
+  "status": zod.enum(['booked', 'confirmed', 'arrived', 'completed', 'no-show', 'cancelled']),
+  "seriesId": zod.uuid().nullable(),
+  "meetingLink": zod.string().nullable(),
+  "note": zod.string(),
+  "cancelReason": zod.string().nullable(),
+  "createdByName": zod.string().nullable(),
+  "canChange": zod.boolean().describe('The signed-in person may still move or cancel it.')
+})),
+  "recent": zod.array(zod.object({
+  "id": zod.uuid(),
+  "kind": zod.string().describe('e.g. session.completed, booking.cancelled.'),
+  "area": zod.enum(['plan', 'session', 'symptom', 'booking', 'review', 'note', 'account']),
+  "summary": zod.string(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "actorName": zod.string().nullable(),
+  "actorRole": zod.union([zod.enum(['patient', 'clinician', 'admin']),zod.null()]),
+  "patient": zod.union([zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),zod.null()]),
+  "sessionId": zod.uuid().nullable(),
+  "appointmentId": zod.uuid().nullable()
+}))
+})
+
+
+/**
+ * @summary Activity feed, newest first (admin - everything; doctors - one of their patients).
+ */
+export const ListActivityQueryParams = zod.object({
+  "patientId": zod.uuid().optional(),
+  "area": zod.enum(['plan', 'session', 'symptom', 'booking', 'review', 'note']).optional().describe('plan, session, symptom, booking, review or note.'),
+  "from": zod.iso.date().optional(),
+  "to": zod.iso.date().optional()
+})
+
+export const ListActivityResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.uuid(),
+  "kind": zod.string().describe('e.g. session.completed, booking.cancelled.'),
+  "area": zod.enum(['plan', 'session', 'symptom', 'booking', 'review', 'note', 'account']),
+  "summary": zod.string(),
+  "createdAt": zod.iso.datetime({"offset":true}),
+  "actorName": zod.string().nullable(),
+  "actorRole": zod.union([zod.enum(['patient', 'clinician', 'admin']),zod.null()]),
+  "patient": zod.union([zod.object({
+  "id": zod.uuid(),
+  "displayName": zod.string()
+}),zod.null()]),
+  "sessionId": zod.uuid().nullable(),
+  "appointmentId": zod.uuid().nullable()
+}))
+})

@@ -15,6 +15,13 @@
       "when": 1795263029303,
       "tag": "0001_m2_exercise_library",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795376064156,
+      "tag": "0002_m3_m5b_care_sessions_bookings",
+      "breakpoints": true
     }
   ]
 }

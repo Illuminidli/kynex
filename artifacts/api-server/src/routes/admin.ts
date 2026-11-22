@@ -4,7 +4,7 @@ import { and, asc, eq, sql } from "drizzle-orm";
 import { Router } from "express";
 import { requireRole } from "../auth/sessions.ts";
 
-const { loginSessions, users } = schema;
+const { activity, appointments, loginSessions, patientNotes, prescriptions, sessions, symptomReports, users, waitlist } = schema;
 
 export const adminRouter = Router();
 adminRouter.use("/admin", requireRole("admin"));
@@ -52,7 +52,13 @@ adminRouter.post("/admin/users/:userId/reset", async (req, res) => {
     .where(and(eq(users.id, params.data.userId), eq(users.clinicId, req.user!.clinicId)))
     .returning(columns);
   if (!row) return void res.status(404).json({ error: "No such account in your clinic." });
-  // Sign the account out on every device. Later modules also clear its plans, sessions and results here.
+  // Sign the account out on every device, and (for a patient) clear their journey: plan, sessions and
+  // results, symptom reports, notes, visits, waiting list and activity. The doctor stays assigned.
   await db.delete(loginSessions).where(eq(loginSessions.userId, row.id));
+  if (row.role === "patient") {
+    for (const table of [prescriptions, sessions, symptomReports, patientNotes, appointments, waitlist, activity]) {
+      await db.delete(table).where(eq(table.patientId, row.id));
+    }
+  }
   res.json(ResetUserResponse.parse(toAdminUser(row)));
 });

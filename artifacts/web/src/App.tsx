@@ -1,9 +1,18 @@
 import { getGetMeQueryKey, useGetMe, type Me } from "@kynex/api-client-react";
 import { Route, Switch } from "wouter";
+import { ActivityPage } from "./pages/admin/ActivityPage.tsx";
+import { AdminOverview } from "./pages/admin/AdminOverview.tsx";
 import { AdminHome } from "./pages/AdminHome.tsx";
-import { ClinicianHome } from "./pages/ClinicianHome.tsx";
+import { CalendarPage } from "./pages/care/CalendarPage.tsx";
+import { DoctorHome } from "./pages/care/DoctorHome.tsx";
+import { HoursPage } from "./pages/care/HoursPage.tsx";
+import { PatientPage } from "./pages/care/PatientPage.tsx";
+import { SessionPage } from "./pages/care/SessionPage.tsx";
 import { ExercisePage } from "./pages/ExercisePage.tsx";
 import { LibraryPage } from "./pages/LibraryPage.tsx";
+import { MyReports } from "./pages/patient/MyReports.tsx";
+import { PatientVisits } from "./pages/patient/PatientVisits.tsx";
+import { SessionPlayer } from "./pages/patient/SessionPlayer.tsx";
 import { PatientHome } from "./pages/PatientHome.tsx";
 import { SignIn } from "./pages/SignIn.tsx";
 import { StatusPage } from "./pages/StatusPage.tsx";
@@ -41,11 +50,22 @@ function SignedInArea() {
 
   const user = me.data.data;
   const staff = user.role === "clinician" || user.role === "admin";
+  const patient = user.role === "patient";
   return (
     <Switch>
       {staff && <Route path="/library">{<LibraryPage me={user} />}</Route>}
       {staff && <Route path="/library/:slug">{(p) => <ExercisePage me={user} slug={p.slug} />}</Route>}
       {staff && <Route path="/library/:slug/try">{(p) => <TryItPage slug={p.slug} />}</Route>}
+      {staff && <Route path="/patients/:id">{(p) => <PatientPage me={user} patientId={p.id} />}</Route>}
+      {staff && <Route path="/sessions/:id">{(p) => <SessionPage me={user} sessionId={p.id} />}</Route>}
+      {staff && <Route path="/calendar">{<CalendarPage me={user} />}</Route>}
+      {staff && <Route path="/hours">{<HoursPage me={user} />}</Route>}
+      {user.role === "admin" && <Route path="/activity">{<ActivityPage me={user} />}</Route>}
+      {user.role === "admin" && <Route path="/accounts">{<AdminHome me={user} />}</Route>}
+      {patient && <Route path="/session">{<SessionPlayer me={user} />}</Route>}
+      {patient && <Route path="/reports">{<MyReports me={user} />}</Route>}
+      {patient && <Route path="/reports/:id">{(p) => <SessionPage me={user} sessionId={p.id} />}</Route>}
+      {patient && <Route path="/visits">{<PatientVisits me={user} />}</Route>}
       <Route>
         <Home me={user} />
       </Route>
@@ -59,8 +79,8 @@ function Home({ me }: { me: Me }) {
     case "patient":
       return <PatientHome me={me} />;
     case "clinician":
-      return <ClinicianHome me={me} />;
+      return <DoctorHome me={me} />;
     case "admin":
-      return <AdminHome me={me} />;
+      return <AdminOverview me={me} />;
   }
 }

@@ -29,6 +29,9 @@ export interface RepRecord {
 
 export interface HoldRecord {
   side: Side | null;
+  /** When the hold started and ended (same clock as the frames, ms). */
+  startMs: number;
+  endMs: number;
   seconds: number;
   completed: boolean;
   best: number;
@@ -535,6 +538,8 @@ export class ExerciseTracker {
     for (const [k, acc] of m.secondary) if (Number.isFinite(acc.value)) secondary[k] = acc.value;
     const rec: HoldRecord = {
       side: this.def.laterality === "bilateral" ? null : m.side,
+      startMs: m.holdStart ?? this.lastT,
+      endMs: this.lastT,
       seconds: Math.round(m.holdAccMs / 100) / 10,
       completed,
       best: m.holdBest,

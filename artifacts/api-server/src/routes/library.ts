@@ -20,7 +20,7 @@ export const libraryRouter = Router();
 libraryRouter.use("/exercises", requireRole("clinician", "admin"));
 
 /** Every exercise with this clinic's hidden flag, optionally just one. */
-async function selectWithSettings(clinicId: string, slug?: string) {
+export async function selectWithSettings(clinicId: string, slug?: string) {
   const { db } = await getDb();
   return db
     .select({ exercise: exercises, hidden: clinicExerciseSettings.hidden })
@@ -32,9 +32,9 @@ async function selectWithSettings(clinicId: string, slug?: string) {
     .where(slug === undefined ? undefined : eq(exercises.slug, slug));
 }
 
-type Row = { exercise: typeof exercises.$inferSelect; hidden: boolean | null };
+export type Row = { exercise: typeof exercises.$inferSelect; hidden: boolean | null };
 
-function toSummary({ exercise: e, hidden }: Row) {
+export function toSummary({ exercise: e, hidden }: Row) {
   return {
     slug: e.slug,
     name: e.content.name,

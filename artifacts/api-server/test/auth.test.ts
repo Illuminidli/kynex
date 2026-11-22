@@ -70,7 +70,7 @@ describe("sign-in", () => {
   });
 
   test("sign-out ends the session", async () => {
-    const { cookie } = await signIn("patient3@kynex.test");
+    const { cookie } = await signIn("patient1@kynex.test");
     assert.equal((await post("/auth/sign-out", undefined, cookie)).status, 204);
     assert.equal((await get("/auth/me", cookie)).status, 401);
   });
@@ -104,25 +104,25 @@ describe("roles", () => {
     assert.equal((await get("/admin/users")).status, 401);
   });
 
-  test("admin sees all 8 accounts, admin first, without password data", async () => {
+  test("admin sees all 4 demo accounts, admin first, without password data", async () => {
     const { cookie } = await signIn("admin@kynex.test");
     const res = await get("/admin/users", cookie);
     assert.equal(res.status, 200);
     const raw = await res.text();
     assert.doesNotMatch(raw, /scrypt|password/i);
     const { users } = ListUsersResponse.parse(JSON.parse(raw));
-    assert.equal(users.length, 8);
+    assert.equal(users.length, 4);
     assert.deepEqual(
       users.map((u) => u.role),
-      ["admin", "clinician", "clinician", "patient", "patient", "patient", "patient", "patient"],
+      ["admin", "clinician", "patient", "patient"],
     );
   });
 
   test("admin reset unlocks an account, signs it out everywhere and starts it fresh", async () => {
     const { cookie: admin } = await signIn("admin@kynex.test");
-    const { cookie: patient } = await signIn("patient4@kynex.test");
+    const { cookie: patient } = await signIn("patient1@kynex.test");
     const { users } = ListUsersResponse.parse(await (await get("/admin/users", admin)).json());
-    const p4 = users.find((u) => u.email === "patient4@kynex.test")!;
+    const p4 = users.find((u) => u.email === "patient1@kynex.test")!;
     const p2 = users.find((u) => u.email === "patient2@kynex.test")!;
     assert.ok(p2.lockedUntil, "patient2 should still be locked from the earlier test");
 
@@ -145,6 +145,6 @@ describe("roles", () => {
 
   test("health counts the accounts", async () => {
     const body = (await (await get("/health")).json()) as { testAccounts: number };
-    assert.equal(body.testAccounts, 8);
+    assert.equal(body.testAccounts, 4);
   });
 });
