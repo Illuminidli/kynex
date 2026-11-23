@@ -47,7 +47,7 @@ export const t = (key: keyof typeof UI, lang: Lang) => UI[key][lang];
 export function doseText(dose: { sets: number; reps?: number; holdSeconds?: number; restSeconds: number }, lang: Lang) {
   const amount = dose.reps
     ? lang === "en"
-      ? `${dose.sets} sets × ${dose.reps} reps`
+      ? `${dose.sets} ${dose.sets === 1 ? "set" : "sets"} × ${dose.reps} reps`
       : `${dose.sets} सेट × ${dose.reps} बार`
     : lang === "en"
       ? `${dose.sets} × ${dose.holdSeconds ?? 0} s hold`

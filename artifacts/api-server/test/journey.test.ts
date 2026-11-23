@@ -142,9 +142,21 @@ describe("M4 sessions and reports", () => {
         await call("POST", `/sessions/${s.id}/exercises`, "patient1", {
           itemId: plank!.id, exerciseSlug: "plank", mode: "manual", status: "done", setsDone: 2, repsFull: 0, repsPartial: 0, holdsDone: 2, best: null, quality: null,
           feeling: n === 2 ? "painful" : "hard", reps: [], holds: [], faultCounts: {}, visibleRatio: null, videoOnPhone: false, durationSeconds: 60, track: null,
+          ...(n === 2 ? { feedbackTags: ["not-counted", "too-hard"], feedbackNote: "  It missed my last hold.  " } : {}),
         }),
       );
-      const report = api.FinishSessionResponse.parse(await json(await call("POST", `/sessions/${s.id}/finish`, "patient1", { painAfter: n === 2 ? 6 : 3, status: "completed" })));
+      const report = api.FinishSessionResponse.parse(
+        await json(await call("POST", `/sessions/${s.id}/finish`, "patient1", { painAfter: n === 2 ? 6 : 3, status: "completed", ...(n === 2 ? { comment: "Sounds were helpful." } : {}) })),
+      );
+      if (n === 2) {
+        // M5c: patient feedback is kept with the exercise and the session, trimmed.
+        const p = report.exercises.find((e) => e.exercise.slug === "plank")!;
+        assert.deepEqual(p.feedbackTags, ["not-counted", "too-hard"]);
+        assert.equal(p.feedbackNote, "It missed my last hold.");
+        assert.equal(report.comment, "Sounds were helpful.");
+      } else {
+        assert.equal(report.comment, null);
+      }
       assert.equal(report.status, "completed");
       assert.equal(report.totals.repsFull, 10);
       assert.equal(report.totals.problems, 1);
@@ -254,6 +266,10 @@ describe("M5b bookings", () => {
     for (const k of ["plan.changed", "session.red-flag", "session.completed", "review.session", "booking.created", "booking.cancelled", "booking.offered"]) {
       assert.ok(kinds.has(k), `feed has ${k}`);
     }
+    // Feedback that says the app let the patient down is flagged as an app problem.
+    const fb = api.ListActivityResponse.parse(await json(await call("GET", "/activity?area=feedback", "admin")));
+    assert.deepEqual(new Set(fb.items.map((i) => i.kind)), new Set(["feedback.app", "feedback.session"]));
+    assert.ok(fb.items.some((i) => i.summary.includes("the app didn't count properly")));
     const bookingsOnly = api.ListActivityResponse.parse(await json(await call("GET", "/activity?area=booking", "admin")));
     assert.ok(bookingsOnly.items.every((i) => i.area === "booking"));
     assert.equal((await call("GET", "/admin/overview", "clinician1")).status, 403);

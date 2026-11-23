@@ -14,3 +14,12 @@ artifacts/web/public/models/
 
 # Local assistant/editor settings
 .claude/
+
+# Recorded voice clips: added once a voice is picked (see kynex-voice)
+artifacts/web/public/voice/
+# Local test clips
+artifacts/web/public/zz-*
+# Review media (your own recordings stay off GitHub)
+docs/previews/*.mp4
+docs/previews/*.jpg
+docs/previews/voices/

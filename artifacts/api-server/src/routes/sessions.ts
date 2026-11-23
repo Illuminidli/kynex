@@ -24,6 +24,16 @@ import { Router, type Request } from "express";
 import { requireRole } from "../auth/sessions.ts";
 import { expireOffers, loadWaitlist, nextAppointment } from "../bookings/rules.ts";
 import { logActivity } from "../care/activity.ts";
+
+/** Plain words for the quick feedback reasons (activity feed). */
+const FEEDBACK_WORDS: Record<string, string> = {
+  unclear: "didn't understand the exercise",
+  "not-counted": "the app didn't count properly",
+  "not-seen": "the camera couldn't see them",
+  hurt: "it hurt",
+  "too-easy": "too easy",
+  "too-hard": "too hard",
+};
 import { patientFor } from "../care/access.ts";
 import { plannedOn, RED_FLAG_WORDS } from "../care/insights.ts";
 import { loadPlan } from "../care/plans.ts";
@@ -183,6 +193,8 @@ sessionsRouter.post("/sessions/:sessionId/exercises", requireRole("patient"), as
         best: input.best,
         quality: input.quality,
         feeling: input.feeling,
+        feedbackTags: input.feedbackTags ?? [],
+        feedbackNote: input.feedbackNote?.trim() || null,
         reps: input.reps,
         holds: input.holds,
         faultCounts: input.faultCounts,
@@ -194,6 +206,20 @@ sessionsRouter.post("/sessions/:sessionId/exercises", requireRole("patient"), as
     if (input.track) await tx.insert(motionTracks).values({ sessionExerciseId: row!.id, ...input.track });
     return row!.id;
   });
+  // Feedback goes to the activity feed so the clinic (and admin) see app problems quickly.
+  const tags = input.feedbackTags ?? [];
+  const note = input.feedbackNote?.trim();
+  if (tags.length || note) {
+    const me = req.user!;
+    await logActivity({
+      user: me,
+      patientId: me.id,
+      // feedback.app = the app or camera let them down; feedback.exercise = anything else.
+      kind: tags.some((t) => t === "not-counted" || t === "not-seen" || t === "unclear") ? "feedback.app" : "feedback.exercise",
+      summary: `${me.displayName} gave feedback on ${exercise.content.name.en}: ${[...tags.map((t) => FEEDBACK_WORDS[t]), ...(note ? [`"${note}"`] : [])].join(", ")}.`,
+      detail: { sessionId: s.id, exercise: exercise.slug, tags, appProblem: tags.some((t) => t === "not-counted" || t === "not-seen" || t === "unclear") },
+    });
+  }
   res.json(SaveSessionExerciseResponse.parse({ id }));
 });
 
@@ -206,7 +232,8 @@ sessionsRouter.post("/sessions/:sessionId/finish", requireRole("patient"), async
   const me = req.user!;
   const { db } = await getDb();
   if (s.status === "in-progress") {
-    await db.update(sessions).set({ status: body.data.status, painAfter: body.data.painAfter, endedAt: clock.now() }).where(eq(sessions.id, s.id));
+    const comment = body.data.comment?.trim() || null;
+    await db.update(sessions).set({ status: body.data.status, painAfter: body.data.painAfter, comment, endedAt: clock.now() }).where(eq(sessions.id, s.id));
     const report = (await sessionReport(s.id, me.clinicId))!;
     const t = report.totals;
     await logActivity({
@@ -219,6 +246,9 @@ sessionsRouter.post("/sessions/:sessionId/finish", requireRole("patient"), async
         `${t.problems ? `, ${t.problems} with form problems` : ""}; pain ${s.checkIn?.pain ?? "?"} → ${body.data.painAfter ?? "?"}.`,
       detail: { sessionId: s.id },
     });
+    if (comment) {
+      await logActivity({ user: me, patientId: me.id, kind: "feedback.session", summary: `${me.displayName} commented on the session: "${comment}"`, detail: { sessionId: s.id, appProblem: false } });
+    }
   }
   res.json(FinishSessionResponse.parse(await sessionReport(s.id, me.clinicId)));
 });

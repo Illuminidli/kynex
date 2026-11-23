@@ -573,7 +573,7 @@ paths:
       tags: [admin]
       parameters:
         - {name: patientId, in: query, required: false, schema: {type: string, format: uuid}}
-        - {name: area, in: query, required: false, description: "plan, session, symptom, booking, review or note.", schema: {type: string, enum: [plan, session, symptom, booking, review, note]}}
+        - {name: area, in: query, required: false, description: "plan, session, symptom, booking, review, note or feedback.", schema: {type: string, enum: [plan, session, symptom, booking, review, note, feedback]}}
         - {name: from, in: query, required: false, schema: {type: string, format: date}}
         - {name: to, in: query, required: false, schema: {type: string, format: date}}
       responses:
@@ -1173,6 +1173,10 @@ components:
         frames: {type: integer, minimum: 1, maximum: 20000}
         data: {type: string, maxLength: 3000000}
     Feeling: {type: string, enum: [easy, ok, hard, painful]}
+    FeedbackTag:
+      type: string
+      enum: [unclear, not-counted, not-seen, hurt, too-easy, too-hard]
+      description: "Quick feedback: didn't understand the exercise, the app didn't count properly, the camera couldn't see me, it hurt, too easy, too hard."
     SessionExerciseInput:
       type: object
       additionalProperties: false
@@ -1189,6 +1193,8 @@ components:
         best: {type: [number, "null"]}
         quality: {type: [integer, "null"], minimum: 0, maximum: 100}
         feeling: {oneOf: [{$ref: "#/components/schemas/Feeling"}, {type: "null"}]}
+        feedbackTags: {type: array, maxItems: 6, uniqueItems: true, items: {$ref: "#/components/schemas/FeedbackTag"}}
+        feedbackNote: {type: [string, "null"], maxLength: 1000}
         reps: {type: array, maxItems: 500, items: {$ref: "#/components/schemas/SavedRep"}}
         holds: {type: array, maxItems: 100, items: {$ref: "#/components/schemas/SavedHold"}}
         faultCounts: {type: object, additionalProperties: {type: integer, minimum: 0}}
@@ -1208,6 +1214,7 @@ components:
       properties:
         painAfter: {type: [integer, "null"], minimum: 0, maximum: 10}
         status: {type: string, enum: [completed, stopped]}
+        comment: {type: [string, "null"], maxLength: 2000, description: The patient's overall comment on the session and the app.}
     ReviewRequest:
       type: object
       additionalProperties: false
@@ -1237,7 +1244,7 @@ components:
     ReportExercise:
       type: object
       additionalProperties: false
-      required: [id, exercise, mode, status, target, setsDone, repsFull, repsPartial, holdsDone, best, previousBest, quality, feeling, reps, holds, faults, visibleRatio, videoOnPhone, hasTrack, durationSeconds]
+      required: [id, exercise, mode, status, target, setsDone, repsFull, repsPartial, holdsDone, best, previousBest, quality, feeling, feedbackTags, feedbackNote, reps, holds, faults, visibleRatio, videoOnPhone, hasTrack, durationSeconds]
       properties:
         id: {type: string, format: uuid}
         exercise: {$ref: "#/components/schemas/ExerciseSummary"}
@@ -1252,6 +1259,8 @@ components:
         previousBest: {type: [number, "null"], description: Best in the patient's previous session with this exercise.}
         quality: {type: [integer, "null"]}
         feeling: {oneOf: [{$ref: "#/components/schemas/Feeling"}, {type: "null"}]}
+        feedbackTags: {type: array, items: {$ref: "#/components/schemas/FeedbackTag"}}
+        feedbackNote: {type: [string, "null"]}
         reps: {type: array, items: {$ref: "#/components/schemas/SavedRep"}}
         holds: {type: array, items: {$ref: "#/components/schemas/SavedHold"}}
         faults: {type: array, items: {$ref: "#/components/schemas/FaultSummary"}}
@@ -1262,7 +1271,7 @@ components:
     SessionReport:
       type: object
       additionalProperties: false
-      required: [id, patient, day, startedAt, endedAt, status, checkIn, painAfter, review, exercises, totals]
+      required: [id, patient, day, startedAt, endedAt, status, checkIn, painAfter, comment, review, exercises, totals]
       properties:
         id: {type: string, format: uuid}
         patient: {$ref: "#/components/schemas/PersonRef"}
@@ -1278,6 +1287,7 @@ components:
               properties: {pain: {type: integer}, redFlags: {type: array, items: {type: string}}}
             - {type: "null"}
         painAfter: {type: [integer, "null"]}
+        comment: {type: [string, "null"]}
         review:
           oneOf:
             - type: object
@@ -1483,7 +1493,7 @@ components:
       properties:
         id: {type: string, format: uuid}
         kind: {type: string, description: "e.g. session.completed, booking.cancelled."}
-        area: {type: string, enum: [plan, session, symptom, booking, review, note, account]}
+        area: {type: string, enum: [plan, session, symptom, booking, review, note, feedback, account]}
         summary: {type: string}
         createdAt: {type: string, format: date-time}
         actorName: {type: [string, "null"]}

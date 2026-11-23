@@ -5,12 +5,12 @@ import { alias } from "drizzle-orm/pg-core";
 
 const { activity, users } = schema;
 
-export type ActivityArea = "plan" | "session" | "symptom" | "booking" | "review" | "note" | "account";
+export type ActivityArea = "plan" | "session" | "symptom" | "booking" | "review" | "note" | "feedback" | "account";
 
 /** Kinds start with their area: plan.changed, session.completed, booking.cancelled ... */
 export const areaOf = (kind: string): ActivityArea => {
   const head = kind.split(".")[0] as ActivityArea;
-  return (["plan", "session", "symptom", "booking", "review", "note", "account"] as const).includes(head) ? head : "account";
+  return (["plan", "session", "symptom", "booking", "review", "note", "feedback", "account"] as const).includes(head) ? head : "account";
 };
 
 /** Adds one line to the activity log (the audit trail and the admin's feed). */

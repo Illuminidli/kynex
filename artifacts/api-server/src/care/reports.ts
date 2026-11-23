@@ -106,6 +106,8 @@ export async function sessionReport(sessionId: string, clinicId: string) {
       previousBest: prev?.best ?? null,
       quality: r.quality,
       feeling: r.feeling,
+      feedbackTags: r.feedbackTags ?? [],
+      feedbackNote: r.feedbackNote ?? null,
       reps: r.reps,
       holds: r.holds,
       faults: Object.entries(r.faultCounts)
@@ -130,6 +132,7 @@ export async function sessionReport(sessionId: string, clinicId: string) {
     status: s.status,
     checkIn: s.checkIn,
     painAfter: s.painAfter,
+    comment: s.comment ?? null,
     review: s.reviewedAt ? { at: s.reviewedAt.toISOString(), byName: reviewerName, note: s.reviewNote ?? "" } : null,
     exercises: exercisesOut,
     totals: {

@@ -12,8 +12,8 @@ import { Badge, Button, feelingWord } from "./ui.tsx";
 type Lang = "en" | "hi";
 const W = (en: string, hi: string) => ({ en, hi });
 const T = {
-  full: W("Full reps", "पूरे रेप"),
-  partial: W("Partial", "आधे"),
+  full: W("Complete reps", "पूरे रेप"),
+  partial: W("Not complete", "अधूरे"),
   holds: W("Holds", "होल्ड"),
   score: W("Form score", "फ़ॉर्म स्कोर"),
   problems: W("Form problems", "फ़ॉर्म की गलतियाँ"),
@@ -30,6 +30,19 @@ const T = {
   manual: W("Counted by tapping (no camera)", "टैप करके गिना (कैमरा नहीं)"),
   skipped: W("Skipped", "छोड़ा गया"),
   stopped: W("Stopped part-way", "बीच में रोका"),
+  longest: W("Longest hold", "सबसे लंबा होल्ड"),
+  feedback: W("Patient feedback", "मरीज़ की प्रतिक्रिया"),
+  myFeedback: W("Your feedback", "आपकी प्रतिक्रिया"),
+  comment: W("Comment on the session", "सेशन पर टिप्पणी"),
+};
+
+const FEEDBACK_WORDS: Record<string, { en: string; hi: string }> = {
+  unclear: W("Didn't understand the exercise", "व्यायाम समझ नहीं आया"),
+  "not-counted": W("The app didn't count properly", "ऐप ने ठीक से नहीं गिना"),
+  "not-seen": W("The camera couldn't see me", "कैमरा मुझे नहीं देख पाया"),
+  hurt: W("It hurt", "दर्द हुआ"),
+  "too-easy": W("Too easy", "बहुत आसान"),
+  "too-hard": W("Too hard", "बहुत कठिन"),
 };
 
 const SESSION_STATUS: Record<SessionReport["status"], { en: string; hi: string; tone: "good" | "warn" | "bad" | "brand" }> = {
@@ -54,6 +67,19 @@ function faultJoints(slug: string, faultIds: string[], side: Side | null): numbe
   ];
 }
 
+/** Why a rep didn't count: reached the end but not held long enough, or not far enough. */
+function shortReason(slug: string, r: { progress: number; heldMs: number }, lang: Lang): { key: "hold" | "range"; text: string } {
+  const def = getExercise(slug);
+  const holdMs = def?.reps?.holdMs ?? 0;
+  if (r.progress >= 0.85 && holdMs > 0) {
+    return {
+      key: "hold",
+      text: lang === "en" ? `not held long enough (${(r.heldMs / 1000).toFixed(1)} of ${holdMs / 1000} s)` : `काफ़ी देर नहीं रोका (${(r.heldMs / 1000).toFixed(1)} / ${holdMs / 1000} सेकंड)`,
+    };
+  }
+  return { key: "range", text: lang === "en" ? `not far enough (${Math.round(r.progress * 100)}% of the target)` : `पूरा नहीं पहुँचे (लक्ष्य का ${Math.round(r.progress * 100)}%)` };
+}
+
 const faultText = (slug: string, ids: string[], lang: Lang) => ids.map((id) => getExercise(slug)?.faults.find((f) => f.id === id)?.message[lang] ?? id).join("; ");
 
 /** Reps and holds as marks on the replay timeline. */
@@ -63,7 +89,7 @@ export function marksOf(e: ReportExercise, lang: Lang): Mark[] {
     startMs: r.startMs,
     endMs: r.endMs,
     tone: r.faults.length ? ("problem" as const) : r.full ? ("good" as const) : ("partial" as const),
-    label: `${lang === "en" ? "Rep" : "रेप"} ${i + 1}${r.side ? ` (${r.side})` : ""}${r.faults.length ? `: ${faultText(slug, r.faults, lang)}` : r.full ? "" : lang === "en" ? ": short of target" : ": लक्ष्य से कम"}`,
+    label: `${lang === "en" ? "Rep" : "रेप"} ${i + 1}${r.side ? ` (${r.side})` : ""}${r.faults.length ? `: ${faultText(slug, r.faults, lang)}` : ""}${r.full ? "" : `${r.faults.length ? ";" : ":"} ${lang === "en" ? "didn't count, " : "गिना नहीं गया, "}${shortReason(slug, r, lang).text}`}`,
     joints: faultJoints(slug, r.faults, r.side),
   }));
   const holds = e.holds.map((h, i) => ({
@@ -102,6 +128,11 @@ export function SessionReportView({ report, lang, viewer }: { report: SessionRep
         <Tile label={T.score[lang]} value={t.quality ?? "–"} />
         <Tile label={T.pain[lang]} value={`${report.checkIn?.pain ?? "–"} → ${report.painAfter ?? "–"}`} />
       </div>
+      {report.comment && (
+        <p className="rounded-xl bg-brand-50 p-3 text-sm">
+          <b>{viewer === "doctor" ? T.comment[lang] : T.myFeedback[lang]}:</b> "{report.comment}"
+        </p>
+      )}
       {report.review?.note && (
         <p className="rounded-xl bg-good-soft p-3 text-sm">
           <b>{lang === "en" ? "Doctor's note:" : "डॉक्टर का नोट:"}</b> {report.review.note}
@@ -134,23 +165,64 @@ function ExerciseResult({ e, lang, viewer }: { e: ReportExercise; lang: Lang; vi
   const def = getExercise(e.exercise.slug);
   const lowerIsBetter = e.target.goal !== null && e.target.rest !== null && e.target.goal < e.target.rest;
   const improved = e.best !== null && e.previousBest !== null ? (lowerIsBetter ? e.best < e.previousBest : e.best > e.previousBest) : null;
+  // Plan per side: one-side exercises prescribed "both" do every set on the left, then the right.
+  const sides = def?.laterality === "unilateral" && e.target.side === "both" ? 2 : 1;
+  const sideNote = sides === 2 ? (lang === "en" ? " (left and right)" : " (बायाँ और दायाँ)") : "";
   const doseDone =
-    e.target.reps !== null
-      ? `${e.repsFull + e.repsPartial} / ${e.target.sets * e.target.reps} ${lang === "en" ? "reps" : "रेप"}`
-      : `${e.holdsDone} / ${e.target.sets} ${lang === "en" ? "holds" : "होल्ड"}`;
+    e.status === "skipped"
+      ? null
+      : e.target.reps !== null
+        ? `${e.repsFull} / ${e.target.sets * e.target.reps * sides} ${lang === "en" ? "complete reps" : "पूरे रेप"}${sideNote}` +
+          (e.repsPartial ? (lang === "en" ? ` · ${e.repsPartial} not complete` : ` · ${e.repsPartial} अधूरे`) : "")
+        : `${e.holdsDone} / ${e.target.sets * sides} ${lang === "en" ? "holds" : "होल्ड"}${sideNote}`;
+  const longest = e.holds.length ? Math.max(...e.holds.map((h) => h.seconds)) : null;
+  // Problem reps grouped by problem ("Heels lifting: reps 1, 2, 5") instead of a long list.
+  const groups = useMemo(() => {
+    const g = new Map<string, { label: string; items: { i: number; n: number }[] }>();
+    e.reps.forEach((r, i) => {
+      for (const id of r.faults) {
+        const label = def?.faults.find((f) => f.id === id)?.message[lang] ?? id;
+        const x = g.get(id) ?? { label, items: [] };
+        x.items.push({ i, n: i + 1 });
+        g.set(id, x);
+      }
+    });
+    e.holds.forEach((h, j) => {
+      for (const id of h.faults) {
+        const label = def?.faults.find((f) => f.id === id)?.message[lang] ?? id;
+        const x = g.get(id) ?? { label, items: [] };
+        x.items.push({ i: e.reps.length + j, n: j + 1 });
+        g.set(id, x);
+      }
+    });
+    // Reps that didn't count, grouped by why.
+    e.reps.forEach((r, i) => {
+      if (r.full) return;
+      const why = shortReason(e.exercise.slug, r, lang);
+      const id = `short-${why.key}`;
+      const label = lang === "en" ? `Didn't count: ${why.key === "hold" ? "not held long enough at the end" : "not far enough"}` : `गिना नहीं गया: ${why.key === "hold" ? "आख़िर में काफ़ी देर नहीं रोका" : "पूरा नहीं पहुँचे"}`;
+      const x = g.get(id) ?? { label, items: [] };
+      x.items.push({ i, n: i + 1 });
+      g.set(id, x);
+    });
+    return [...g.entries()];
+  }, [e, def, lang]);
 
   return (
     <section className="flex flex-col gap-3 rounded-3xl bg-white p-5 shadow-soft">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="text-lg font-semibold">{e.exercise.name[lang]}</h3>
-          <p className="text-sm text-ink-soft">
-            {doseDone} · {e.setsDone}/{e.target.sets} {lang === "en" ? "sets" : "सेट"}
-            {e.mode === "manual" ? ` · ${T.manual[lang]}` : ""}
-          </p>
+          {doseDone && (
+            <p className="text-sm text-ink-soft">
+              {doseDone}
+              {e.mode === "manual" ? ` · ${T.manual[lang]}` : ""}
+            </p>
+          )}
         </div>
         <div className="flex flex-wrap gap-1.5">
           {e.status !== "done" && <Badge tone="warn">{e.status === "skipped" ? T.skipped[lang] : T.stopped[lang]}</Badge>}
+          {e.status === "done" && e.mode === "camera" && <Badge tone="good">{lang === "en" ? "Camera" : "कैमरा"}</Badge>}
           {e.feeling && (
             <Badge tone={e.feeling === "painful" ? "bad" : e.feeling === "hard" ? "warn" : "good"}>
               {T.feeling[lang]}: {feelingWord(e.feeling, lang)}
@@ -161,14 +233,21 @@ function ExerciseResult({ e, lang, viewer }: { e: ReportExercise; lang: Lang; vi
 
       {e.mode === "camera" && (
         <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
-          <Def label={T.best[lang]}>
-            {valueText(e.best, e.target.unit)}
-            {e.previousBest !== null && (
-              <span className={`ml-1 text-xs ${improved ? "text-good" : "text-ink-faint"}`}>
-                ({improved ? "▲" : "▼"} {T.last[lang]} {valueText(e.previousBest, e.target.unit)})
-              </span>
-            )}
-          </Def>
+          {e.target.reps !== null ? (
+            <Def label={T.best[lang]}>
+              {valueText(e.best, e.target.unit)}
+              {e.previousBest !== null && (
+                <span className={`ml-1 text-xs ${improved ? "text-good" : "text-ink-faint"}`}>
+                  ({improved ? "▲" : "▼"} {T.last[lang]} {valueText(e.previousBest, e.target.unit)})
+                </span>
+              )}
+            </Def>
+          ) : (
+            <Def label={T.longest[lang]}>
+              {longest !== null ? `${longest} s` : "–"}
+              {e.target.holdSeconds ? <span className="ml-1 text-xs text-ink-faint">/ {e.target.holdSeconds} s</span> : null}
+            </Def>
+          )}
           <Def label={T.score[lang]}>{e.quality ?? "–"}/100</Def>
           <Def label={T.problems[lang]}>{problems.length}</Def>
           <Def label={T.seen[lang]}>{e.visibleRatio !== null ? `${Math.round(e.visibleRatio * 100)}%` : "–"}</Def>
@@ -212,34 +291,63 @@ function ExerciseResult({ e, lang, viewer }: { e: ReportExercise; lang: Lang; vi
       )}
       {viewer === "doctor" && e.mode === "camera" && !e.hasTrack && <p className="text-sm text-ink-faint">No movement track was saved for this exercise.</p>}
 
-      {viewer === "patient" && problems.length > 0 && (
+      {viewer === "patient" && groups.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-semibold">{T.problemReps[lang]}</p>
+          <p className="text-sm font-semibold">{lang === "en" ? "Reps to improve" : "सुधारने वाले रेप"}</p>
           <ul className="flex flex-col gap-2">
-            {problems.map(({ m, i }) => (
-              <li key={i} className="rounded-2xl border border-line p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm">⚠ {m.label}</span>
+            {groups.map(([id, g]) => {
+              const holdS = (def?.reps?.holdMs ?? 0) / 1000;
+              const cue =
+                id === "short-hold"
+                  ? lang === "en" ? `Hold the end position for ${holdS} seconds before coming back.` : `वापस आने से पहले आख़िरी स्थिति ${holdS} सेकंड रोकिए।`
+                  : id === "short-range"
+                    ? lang === "en" ? "Go a little further each time." : "हर बार थोड़ा और आगे जाइए।"
+                    : def?.faults.find((f) => f.id === id)?.cue[lang];
+              return (
+                <li key={id} className="rounded-2xl border border-line p-3">
+                  <p className="text-sm font-semibold">⚠ {g.label}</p>
+                  {cue && <p className="text-sm text-ink-soft">{lang === "en" ? "Next time: " : "अगली बार: "}{cue}</p>}
                   {track && (
-                    <Button tone="plain" className="px-3 py-1.5" onClick={() => setOpen(open === i ? null : i)}>
-                      {T.see[lang]}
-                    </Button>
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                      <span className="text-xs text-ink-soft">{e.target.reps !== null ? (lang === "en" ? "See rep" : "रेप देखिए") : lang === "en" ? "See hold" : "होल्ड देखिए"}</span>
+                      {g.items.map(({ i, n }) => (
+                        <button
+                          key={i}
+                          type="button"
+                          aria-pressed={open === i}
+                          onClick={() => setOpen(open === i ? null : i)}
+                          className={`min-w-9 rounded-lg border px-2 py-1 text-sm font-semibold ${open === i ? "border-brand-700 bg-brand-700 text-white" : "border-line bg-white"}`}
+                        >
+                          {n}
+                        </button>
+                      ))}
+                    </div>
                   )}
-                </div>
-                {open === i && track && (
-                  <div className="mt-2">
-                    <FigurePlayer track={track} marks={marks} startMs={Math.max(0, m.startMs - 500)} endMs={m.endMs + 500} compact />
-                  </div>
-                )}
-              </li>
-            ))}
+                  {open !== null && g.items.some((x) => x.i === open) && track && marks[open] && (
+                    <div className="mt-2">
+                      <FigurePlayer track={track} marks={marks} startMs={Math.max(0, marks[open].startMs - 500)} endMs={marks[open].endMs + 500} compact title={marks[open].label} />
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
-          {def && (
-            <p className="text-sm text-ink-soft">
-              {lang === "en" ? "Tip: " : "सुझाव: "}
-              {def.faults.find((f) => e.faults.some((x) => x.id === f.id))?.cue[lang]}
-            </p>
+        </div>
+      )}
+
+      {(e.feedbackTags.length > 0 || e.feedbackNote) && (
+        <div className="rounded-2xl bg-brand-50 p-3 text-sm">
+          <p className="font-semibold">{viewer === "doctor" ? T.feedback[lang] : T.myFeedback[lang]}</p>
+          {e.feedbackTags.length > 0 && (
+            <ul className="mt-1 flex flex-wrap gap-1.5">
+              {e.feedbackTags.map((t) => (
+                <li key={t}>
+                  <Badge tone={t === "hurt" ? "bad" : t === "not-counted" || t === "not-seen" || t === "unclear" ? "warn" : "brand"}>{FEEDBACK_WORDS[t]?.[lang] ?? t}</Badge>
+                </li>
+              ))}
+            </ul>
           )}
+          {e.feedbackNote && <p className="mt-1">"{e.feedbackNote}"</p>}
         </div>
       )}
 

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kynex sound picker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: calm, clinical, friendly; a tool you use with the sound on.
+   IDEA: the Kynex exercise screen itself: the timer preview is the picture.
+   PICTURE: a phone-sized camera screen with the big rep count and the new hold timer ring.
+   COLOUR and TYPE: Kynex navy panels, brand orange for actions, amber for the timer; Inter.
+   LAYOUT: preview on top, then one card per sound with three options, then my picks. */
+:root{color-scheme:light dark;--bg:light-dark(#eef3f6,#0c1e2a);--ink:light-dark(#10232f,#e8f0f4);--soft:light-dark(#4b6170,#9fb3c0);
+--card:light-dark(#ffffff,#132c3b);--line:light-dark(#d6e1e8,#24465a);--navy:#163d52;--orange:#f08a24;--amber:#ffc23d;--pick:light-dark(#163d52,#ffc23d);--pickink:light-dark(#fff,#10232f)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,4vw,48px) max(5vw,16px);max-width:1240px;margin:0 auto}
+h1{font-size:clamp(30px,5vw,44px);line-height:1.05;margin:0 0 8px;text-wrap:balance;font-weight:800}
+h2{font-size:22px;margin:0 0 12px}
+p{margin:0 0 12px;max-width:68ch}
+.lead{color:var(--soft)}
+.top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:center}
+.phone{background:#0b2433;border-radius:28px;padding:14px;max-width:360px;margin:0 auto;box-shadow:0 18px 40px #0004}
+.cam{position:relative;aspect-ratio:9/14;border-radius:18px;overflow:hidden;background:linear-gradient(#cfc6b8,#b3aa9c 60%,#9b927f)}
+.cam .who{position:absolute;left:50%;bottom:0;width:46%;transform:translateX(-50%)}
+.cam .lbl{position:absolute;left:12px;top:10px;font-size:13px;color:#fff;background:#0006;padding:2px 8px;border-radius:8px}
+.cam .count{position:absolute;right:12px;top:4px;color:#fff;font-weight:800;font-size:44px;text-shadow:0 2px 6px #0007}
+.cam .count small{font-size:20px;opacity:.85}
+.ring{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:62%;aspect-ratio:1}
+.ring svg{width:100%;height:100%}
+.ring .num{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#fff;font-weight:800;font-size:clamp(54px,16vw,84px);line-height:1;text-shadow:0 3px 10px #0008}
+.ring .num span{display:block;font-size:15px;font-weight:600;letter-spacing:0}
+.box{position:absolute;inset:8% 22% 3%;border:4px dashed #ffffffaa;border-radius:16px;transition:border-color .3s}
+.box.in{border:4px solid #3ddc84}.box.out{border:4px solid #ff5a4e}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+button{font:inherit;min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 16px;cursor:pointer}
+button:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+button.go{background:var(--orange);border-color:var(--orange);color:#fff;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
+.card h3{margin:0 0 2px;font-size:18px}
+.card .when{color:var(--soft);font-size:14px;margin-bottom:12px}
+.opt{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.opt .play{width:44px;padding:0;font-size:18px}
+.opt .name{font-size:15px}
+.opt .pick.on{background:var(--pick);color:var(--pickink);border-color:var(--pick);font-weight:600}
+.picks{background:var(--navy);color:#fff;border-radius:18px;padding:18px}
+.picks ul{margin:0 0 12px;padding-left:20px}
+.note{font-size:13px;color:var(--soft)}
+@media(max-width:700px){.top{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){.box{transition:none}}
+</style>
+</head>
+<body>
+<div class="band top">
+  <div>
+    <h1>Choose Kynex's sounds</h1>
+    <p class="lead">Each sound means one thing, so a patient learns it in a session or two and doesn't need the voice. Turn your sound on, tap ▶ to hear each option, and tap <b>Pick</b> on the one you like. All of these are made inside the app, so there are no sound files and no licences.</p>
+    <p class="lead">On the right is the new <b>hold timer</b>: as big as the rep count, in its own amber colour, counting down with a ring that empties. Tap <b>Start a 20 s hold</b>, then <b>Foot touched down</b> to hear the reset.</p>
+  </div>
+  <div>
+    <div class="phone">
+      <div class="cam" aria-label="Preview of the exercise camera screen">
+        <div class="box" id="box"></div>
+        <svg class="who" viewBox="0 0 100 220" aria-hidden="true"><circle cx="50" cy="26" r="17" fill="#6b4a3a"/><rect x="26" y="46" width="48" height="74" rx="18" fill="#cfe1ee"/><rect x="30" y="118" width="40" height="40" rx="10" fill="#3a3f46"/><rect x="33" y="156" width="12" height="60" rx="6" fill="#8a6352"/><rect x="55" y="156" width="12" height="44" rx="6" fill="#8a6352" id="leg"/></svg>
+        <div class="lbl">Single-leg balance · Left side</div>
+        <div class="count" id="reps">1<small> / 2</small></div>
+        <div class="ring" id="ring" hidden>
+          <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="#0b243399" stroke="#ffffff33" stroke-width="10"/><circle id="arc" cx="60" cy="60" r="52" fill="none" stroke="var(--amber)" stroke-width="10" stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="326.7" stroke-dashoffset="0"/></svg>
+          <div class="num"><div><b id="secs">20</b><span>seconds left</span></div></div>
+        </div>
+      </div>
+      <div class="btns">
+        <button class="go" id="hold">Start a 20 s hold</button>
+        <button id="touch">Foot touched down</button>
+        <button id="inbox">Step in the box</button>
+        <button id="outbox">Step out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="band">
+  <h2>The sounds</h2>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="band">
+  <div class="picks">
+    <h2>My picks</h2>
+    <ul id="mine"></ul>
+    <button class="go" id="copy">Copy my picks</button>
+    <p class="note" id="copied" style="color:#cfe1ee;margin-top:10px">Paste them to Claude in the chat (or just say e.g. "In place B, Form problem A").</p>
+  </div>
+</div>
+
+<script>
+{
+const KINDS = [
+  { id: "in", name: "In place", when: "You're fully inside the box: counting can start." },
+  { id: "out", name: "Out of the box", when: "You've stepped out: counting pauses until you're back." },
+  { id: "form", name: "Form problem", when: "During a rep, when something is wrong (e.g. elbow bending). The correction is spoken after the rep." },
+  { id: "rep", name: "Rep counted", when: "A full, correct rep (the voice also says the number)." },
+  { id: "redo", name: "Rep not complete", when: "That rep didn't count: not high enough or not held. Please redo it." },
+  { id: "reset", name: "Hold reset", when: "Your foot touched down: the hold timer goes back to the start." },
+  { id: "done", name: "Set or hold done", when: "Set finished, or the hold reached zero." },
+];
+// Each option: [label, notes] with notes [freqHz, startSec, lengthSec, wave, volume, slideToHz?]
+const OPTS = {
+  in: [["A · Soft rising chime", [[784,0,.5,"sine",.35],[1175,.12,.7,"sine",.3]]],
+       ["B · Warm wooden ting", [[660,0,.25,"triangle",.4],[1320,.06,.6,"sine",.18]]],
+       ["C · Three gentle notes", [[523,0,.4,"sine",.3],[659,.12,.4,"sine",.3],[784,.24,.7,"sine",.3]]]],
+  out: [["A · Falling two-note", [[784,0,.3,"triangle",.4],[523,.22,.45,"triangle",.4]]],
+        ["B · Soft double bump", [[330,0,.16,"sine",.55],[330,.22,.16,"sine",.55]]],
+        ["C · Gentle wobble", [[600,0,.7,"sine",.35,450]]]],
+  form: [["A · Low soft buzz ×2", [[220,0,.12,"square",.12],[220,.18,.12,"square",.12]]],
+         ["B · Wooden knock", [[180,0,.09,"triangle",.6],[150,.12,.09,"triangle",.6]]],
+         ["C · Short low tone", [[294,0,.28,"sawtooth",.1,262]]]],
+  rep: [["A · Bright tick", [[1320,0,.12,"sine",.35]]],
+        ["B · Soft pop", [[900,0,.09,"sine",.45,500]]],
+        ["C · Pluck", [[988,0,.22,"triangle",.4]]]],
+  redo: [["A · Two flat tones", [[392,0,.18,"triangle",.4],[392,.24,.3,"triangle",.4]]],
+         ["B · Uh-oh slide", [[523,0,.18,"sine",.4],[392,.2,.35,"sine",.4,349]]],
+         ["C · Muted thud", [[140,0,.25,"sine",.7,90]]]],
+  reset: [["A · Quick rewind", [[900,0,.35,"sine",.3,300]]],
+          ["B · Single low bell", [[440,0,.6,"sine",.35]]],
+          ["C · Double tap", [[700,0,.07,"square",.1],[700,.11,.07,"square",.1]]]],
+  done: [["A · Happy arpeggio", [[523,0,.3,"sine",.3],[659,.1,.3,"sine",.3],[784,.2,.3,"sine",.3],[1047,.3,.7,"sine",.3]]],
+         ["B · Bell chord", [[523,0,1.1,"sine",.2],[659,0,1.1,"sine",.2],[784,0,1.1,"sine",.2]]],
+         ["C · Two-step finish", [[659,0,.2,"triangle",.35],[988,.18,.6,"triangle",.35]]]],
+};
+let ctx = null;
+const audio = () => (ctx ??= new (window.AudioContext || window.webkitAudioContext)());
+function play(notes) {
+  try {
+    const a = audio(); if (a.state === "suspended") a.resume();
+    const t0 = a.currentTime + 0.02;
+    for (const [f, s, len, wave, vol, slide] of notes) {
+      const o = a.createOscillator(), g = a.createGain();
+      o.type = wave; o.frequency.setValueAtTime(f, t0 + s);
+      if (slide) o.frequency.exponentialRampToValueAtTime(slide, t0 + s + len);
+      g.gain.setValueAtTime(0.0001, t0 + s);
+      g.gain.exponentialRampToValueAtTime(vol, t0 + s + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + s + len);
+      o.connect(g).connect(a.destination); o.start(t0 + s); o.stop(t0 + s + len + 0.05);
+    }
+  } catch { /* no audio available */ }
+}
+let picks = {};
+try { picks = JSON.parse(localStorage.getItem("kynex-sound-picks") || "{}"); } catch {}
+const save = () => { try { localStorage.setItem("kynex-sound-picks", JSON.stringify(picks)); } catch {} };
+const grid = document.getElementById("grid"), mine = document.getElementById("mine");
+function render() {
+  grid.innerHTML = KINDS.map(k => `<div class="card"><h3>${k.name}</h3><div class="when">${k.when}</div>${
+    OPTS[k.id].map(([label], i) => `<div class="opt"><button class="play" data-k="${k.id}" data-i="${i}" aria-label="Play ${k.name} ${label}">▶</button><span class="name">${label}</span><button class="pick${picks[k.id] === i ? " on" : ""}" data-pk="${k.id}" data-i="${i}">${picks[k.id] === i ? "Picked" : "Pick"}</button></div>`).join("")}</div>`).join("");
+  mine.innerHTML = KINDS.map(k => `<li>${k.name}: <b>${picks[k.id] === undefined ? "not picked yet" : OPTS[k.id][picks[k.id]][0]}</b></li>`).join("");
+}
+grid.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.k) play(OPTS[b.dataset.k][+b.dataset.i][1]);
+  if (b.dataset.pk) { picks[b.dataset.pk] = +b.dataset.i; save(); play(OPTS[b.dataset.pk][+b.dataset.i][1]); render(); }
+});
+const sound = id => play(OPTS[id][picks[id] ?? 0][1]);
+document.getElementById("copy").addEventListener("click", async () => {
+  const text = "Kynex sounds: " + KINDS.map(k => `${k.name} ${picks[k.id] === undefined ? "?" : "ABC"[picks[k.id]]}`).join(", ");
+  const note = document.getElementById("copied");
+  try { await navigator.clipboard.writeText(text); note.textContent = "Copied. Paste it to Claude in the chat."; }
+  catch { note.textContent = text; }
+});
+// Timer preview
+const ring = document.getElementById("ring"), arc = document.getElementById("arc"), secs = document.getElementById("secs");
+const box = document.getElementById("box"), leg = document.getElementById("leg");
+const FULL = 326.7, TOTAL = 20;
+let left = TOTAL, timer = null, last = 0;
+function draw() { secs.textContent = Math.ceil(left); arc.setAttribute("stroke-dashoffset", String(FULL * (1 - left / TOTAL))); }
+function tick(now) {
+  if (!timer) return;
+  left = Math.max(0, left - (now - last) / 1000); last = now; draw();
+  if (left <= 0) { timer = null; leg.setAttribute("height", "60"); sound("done"); return; }
+  timer = requestAnimationFrame(tick);
+}
+document.getElementById("hold").addEventListener("click", () => {
+  audio(); ring.hidden = false; left = TOTAL; draw(); leg.setAttribute("height", "40");
+  cancelAnimationFrame(timer); last = performance.now(); timer = requestAnimationFrame(tick);
+});
+document.getElementById("touch").addEventListener("click", () => {
+  if (ring.hidden) return;
+  left = TOTAL; draw(); sound("reset");
+});
+document.getElementById("inbox").addEventListener("click", () => { box.className = "box in"; sound("in"); });
+document.getElementById("outbox").addEventListener("click", () => { box.className = "box out"; sound("out"); });
+render();
+}
+</script>
+</body>
+</html>

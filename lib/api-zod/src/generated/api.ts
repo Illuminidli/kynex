@@ -418,7 +418,7 @@ export const GetPatientResponse = zod.object({
   "activity": zod.array(zod.object({
   "id": zod.uuid(),
   "kind": zod.string().describe('e.g. session.completed, booking.cancelled.'),
-  "area": zod.enum(['plan', 'session', 'symptom', 'booking', 'review', 'note', 'account']),
+  "area": zod.enum(['plan', 'session', 'symptom', 'booking', 'review', 'note', 'feedback', 'account']),
   "summary": zod.string(),
   "createdAt": zod.iso.datetime({"offset":true}),
   "actorName": zod.string().nullable(),
@@ -853,6 +853,7 @@ export const GetSessionResponse = zod.object({
   "redFlags": zod.array(zod.string())
 }),zod.null()]),
   "painAfter": zod.int().nullable(),
+  "comment": zod.string().nullable(),
   "review": zod.union([zod.object({
   "at": zod.iso.datetime({"offset":true}),
   "byName": zod.string().nullable(),
@@ -898,6 +899,8 @@ export const GetSessionResponse = zod.object({
   "previousBest": zod.number().nullable().describe('Best in the patient\'s previous session with this exercise.'),
   "quality": zod.int().nullable(),
   "feeling": zod.union([zod.enum(['easy', 'ok', 'hard', 'painful']),zod.null()]),
+  "feedbackTags": zod.array(zod.enum(['unclear', 'not-counted', 'not-seen', 'hurt', 'too-easy', 'too-hard']).describe('Quick feedback: didn\'t understand the exercise, the app didn\'t count properly, the camera couldn\'t see me, it hurt, too easy, too hard.')),
+  "feedbackNote": zod.string().nullable(),
   "reps": zod.array(zod.object({
   "set": zod.int().min(1).max(getSessionResponseExercisesItemRepsItemSetMax),
   "side": zod.union([zod.literal('left'),zod.literal('right'),zod.literal(null)]).nullable(),
@@ -968,6 +971,10 @@ export const saveSessionExerciseBodyHoldsDoneMax = 100;
 export const saveSessionExerciseBodyQualityMin = 0;
 export const saveSessionExerciseBodyQualityMax = 100;
 
+export const saveSessionExerciseBodyFeedbackTagsMax = 6;
+
+export const saveSessionExerciseBodyFeedbackNoteMax = 1000;
+
 export const saveSessionExerciseBodyRepsItemSetMax = 20;
 
 export const saveSessionExerciseBodyRepsItemFaultsItemMax = 60;
@@ -1023,6 +1030,8 @@ export const SaveSessionExerciseBody = zod.object({
   "best": zod.number().nullable(),
   "quality": zod.int().min(saveSessionExerciseBodyQualityMin).max(saveSessionExerciseBodyQualityMax).nullable(),
   "feeling": zod.union([zod.enum(['easy', 'ok', 'hard', 'painful']),zod.null()]),
+  "feedbackTags": zod.array(zod.enum(['unclear', 'not-counted', 'not-seen', 'hurt', 'too-easy', 'too-hard']).describe('Quick feedback: didn\'t understand the exercise, the app didn\'t count properly, the camera couldn\'t see me, it hurt, too easy, too hard.')).max(saveSessionExerciseBodyFeedbackTagsMax).optional(),
+  "feedbackNote": zod.string().max(saveSessionExerciseBodyFeedbackNoteMax).nullish(),
   "reps": zod.array(zod.object({
   "set": zod.int().min(1).max(saveSessionExerciseBodyRepsItemSetMax),
   "side": zod.union([zod.literal('left'),zod.literal('right'),zod.literal(null)]).nullable(),
@@ -1073,11 +1082,14 @@ export const FinishSessionParams = zod.object({
 export const finishSessionBodyPainAfterMin = 0;
 export const finishSessionBodyPainAfterMax = 10;
 
+export const finishSessionBodyCommentMax = 2000;
+
 
 
 export const FinishSessionBody = zod.object({
   "painAfter": zod.int().min(finishSessionBodyPainAfterMin).max(finishSessionBodyPainAfterMax).nullable(),
-  "status": zod.enum(['completed', 'stopped'])
+  "status": zod.enum(['completed', 'stopped']),
+  "comment": zod.string().max(finishSessionBodyCommentMax).nullish().describe('The patient\'s overall comment on the session and the app.')
 })
 
 export const finishSessionResponseExercisesItemRepsItemSetMax = 20;
@@ -1115,6 +1127,7 @@ export const FinishSessionResponse = zod.object({
   "redFlags": zod.array(zod.string())
 }),zod.null()]),
   "painAfter": zod.int().nullable(),
+  "comment": zod.string().nullable(),
   "review": zod.union([zod.object({
   "at": zod.iso.datetime({"offset":true}),
   "byName": zod.string().nullable(),
@@ -1160,6 +1173,8 @@ export const FinishSessionResponse = zod.object({
   "previousBest": zod.number().nullable().describe('Best in the patient\'s previous session with this exercise.'),
   "quality": zod.int().nullable(),
   "feeling": zod.union([zod.enum(['easy', 'ok', 'hard', 'painful']),zod.null()]),
+  "feedbackTags": zod.array(zod.enum(['unclear', 'not-counted', 'not-seen', 'hurt', 'too-easy', 'too-hard']).describe('Quick feedback: didn\'t understand the exercise, the app didn\'t count properly, the camera couldn\'t see me, it hurt, too easy, too hard.')),
+  "feedbackNote": zod.string().nullable(),
   "reps": zod.array(zod.object({
   "set": zod.int().min(1).max(finishSessionResponseExercisesItemRepsItemSetMax),
   "side": zod.union([zod.literal('left'),zod.literal('right'),zod.literal(null)]).nullable(),
@@ -1257,6 +1272,7 @@ export const ReviewSessionResponse = zod.object({
   "redFlags": zod.array(zod.string())
 }),zod.null()]),
   "painAfter": zod.int().nullable(),
+  "comment": zod.string().nullable(),
   "review": zod.union([zod.object({
   "at": zod.iso.datetime({"offset":true}),
   "byName": zod.string().nullable(),
@@ -1302,6 +1318,8 @@ export const ReviewSessionResponse = zod.object({
   "previousBest": zod.number().nullable().describe('Best in the patient\'s previous session with this exercise.'),
   "quality": zod.int().nullable(),
   "feeling": zod.union([zod.enum(['easy', 'ok', 'hard', 'painful']),zod.null()]),
+  "feedbackTags": zod.array(zod.enum(['unclear', 'not-counted', 'not-seen', 'hurt', 'too-easy', 'too-hard']).describe('Quick feedback: didn\'t understand the exercise, the app didn\'t count properly, the camera couldn\'t see me, it hurt, too easy, too hard.')),
+  "feedbackNote": zod.string().nullable(),
   "reps": zod.array(zod.object({
   "set": zod.int().min(1).max(reviewSessionResponseExercisesItemRepsItemSetMax),
   "side": zod.union([zod.literal('left'),zod.literal('right'),zod.literal(null)]).nullable(),
@@ -1978,7 +1996,7 @@ export const GetOverviewResponse = zod.object({
   "recent": zod.array(zod.object({
   "id": zod.uuid(),
   "kind": zod.string().describe('e.g. session.completed, booking.cancelled.'),
-  "area": zod.enum(['plan', 'session', 'symptom', 'booking', 'review', 'note', 'account']),
+  "area": zod.enum(['plan', 'session', 'symptom', 'booking', 'review', 'note', 'feedback', 'account']),
   "summary": zod.string(),
   "createdAt": zod.iso.datetime({"offset":true}),
   "actorName": zod.string().nullable(),
@@ -1998,7 +2016,7 @@ export const GetOverviewResponse = zod.object({
  */
 export const ListActivityQueryParams = zod.object({
   "patientId": zod.uuid().optional(),
-  "area": zod.enum(['plan', 'session', 'symptom', 'booking', 'review', 'note']).optional().describe('plan, session, symptom, booking, review or note.'),
+  "area": zod.enum(['plan', 'session', 'symptom', 'booking', 'review', 'note', 'feedback']).optional().describe('plan, session, symptom, booking, review, note or feedback.'),
   "from": zod.iso.date().optional(),
   "to": zod.iso.date().optional()
 })
@@ -2007,7 +2025,7 @@ export const ListActivityResponse = zod.object({
   "items": zod.array(zod.object({
   "id": zod.uuid(),
   "kind": zod.string().describe('e.g. session.completed, booking.cancelled.'),
-  "area": zod.enum(['plan', 'session', 'symptom', 'booking', 'review', 'note', 'account']),
+  "area": zod.enum(['plan', 'session', 'symptom', 'booking', 'review', 'note', 'feedback', 'account']),
   "summary": zod.string(),
   "createdAt": zod.iso.datetime({"offset":true}),
   "actorName": zod.string().nullable(),

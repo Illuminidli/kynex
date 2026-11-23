@@ -614,6 +614,7 @@ export const ActivityItemArea = {
   booking: 'booking',
   review: 'review',
   note: 'note',
+  feedback: 'feedback',
   account: 'account',
 } as const;
 
@@ -820,6 +821,21 @@ export const Feeling = {
   painful: 'painful',
 } as const;
 
+/**
+ * Quick feedback: didn't understand the exercise, the app didn't count properly, the camera couldn't see me, it hurt, too easy, too hard.
+ */
+export type FeedbackTag = typeof FeedbackTag[keyof typeof FeedbackTag];
+
+
+export const FeedbackTag = {
+  unclear: 'unclear',
+  'not-counted': 'not-counted',
+  'not-seen': 'not-seen',
+  hurt: 'hurt',
+  'too-easy': 'too-easy',
+  'too-hard': 'too-hard',
+} as const;
+
 export type SessionExerciseInputMode = typeof SessionExerciseInputMode[keyof typeof SessionExerciseInputMode];
 
 
@@ -875,6 +891,13 @@ export interface SessionExerciseInput {
      */
   quality: number | null;
   feeling: Feeling | null;
+  /** @maxItems 6 */
+  feedbackTags?: FeedbackTag[];
+  /**
+     * @maxLength 1000
+     * @nullable
+     */
+  feedbackNote?: string | null;
   /** @maxItems 500 */
   reps: SavedRep[];
   /** @maxItems 100 */
@@ -915,6 +938,12 @@ export interface FinishSessionRequest {
      */
   painAfter: number | null;
   status: FinishSessionRequestStatus;
+  /**
+     * The patient's overall comment on the session and the app.
+     * @maxLength 2000
+     * @nullable
+     */
+  comment?: string | null;
 }
 
 export interface ReviewRequest {
@@ -994,6 +1023,9 @@ export interface ReportExercise {
   /** @nullable */
   quality: number | null;
   feeling: Feeling | null;
+  feedbackTags: FeedbackTag[];
+  /** @nullable */
+  feedbackNote: string | null;
   reps: SavedRep[];
   holds: SavedHold[];
   faults: FaultSummary[];
@@ -1036,6 +1068,8 @@ export interface SessionReport {
   checkIn: SessionReportCheckIn;
   /** @nullable */
   painAfter: number | null;
+  /** @nullable */
+  comment: string | null;
   review: SessionReportReview;
   exercises: ReportExercise[];
   totals: SessionReportTotals;
@@ -1280,7 +1314,7 @@ export type GetAvailabilityParams = {
 
 export type ListActivityParams = {
   patientId?: string;
-  /** plan, session, symptom, booking, review or note. */
+  /** plan, session, symptom, booking, review, note or feedback. */
   area?: ListActivityArea;
   from?: string;
   to?: string;
@@ -1296,6 +1330,7 @@ export const ListActivityArea = {
   booking: 'booking',
   review: 'review',
   note: 'note',
+  feedback: 'feedback',
 } as const;
 
 type AwaitedInput<T> = PromiseLike<T> | T;

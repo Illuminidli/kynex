@@ -123,6 +123,14 @@ export interface FaultRule {
    * skipped, so a guessed (hidden) joint never triggers a false cue.
    */
   uses?: (side: Side) => number[];
+  /**
+   * Optional: judge the fault as a CHANGE from the person's own resting value instead of a
+   * fixed limit, so the camera angle and body shape don't matter (e.g. heel height). The
+   * fault is hit when `measure` rises more than `rise` above its median over the last
+   * second at rest. `test` is ignored when this is set.
+   */
+  measure?: (f: PoseFrame, side: Side) => number | null;
+  rise?: number;
 }
 
 export interface Dose {
