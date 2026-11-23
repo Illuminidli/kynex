@@ -34,11 +34,17 @@ export const sessions = pgTable(
     reviewedBy: uuid("reviewed_by").references(() => users.id, { onDelete: "set null" }),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
     reviewNote: text("review_note"),
+    /** The patient's overall comment on the session and the app (M5c). */
+    comment: text("comment"),
   },
   (t) => [index("sessions_patient_day_idx").on(t.patientId, t.day), index("sessions_clinic_idx").on(t.clinicId, t.startedAt)],
 );
 
 export const FEELINGS = ["easy", "ok", "hard", "painful"] as const;
+/** Quick feedback reasons a patient can tap after an exercise. */
+export const FEEDBACK_TAGS = ["unclear", "not-counted", "not-seen", "hurt", "too-easy", "too-hard"] as const;
+export type FeedbackTag = (typeof FEEDBACK_TAGS)[number];
+
 export type Feeling = (typeof FEELINGS)[number];
 
 /** A rep as saved: the camera engine's record, plus which set it belongs to. Times are ms from the track start. */
@@ -106,6 +112,9 @@ export const sessionExercises = pgTable(
     /** Average form score 0-100, camera mode only. */
     quality: integer("quality"),
     feeling: text("feeling").$type<Feeling>(),
+    /** Patient feedback on this exercise (M5c): quick reasons plus an optional note. */
+    feedbackTags: text("feedback_tags").array().$type<FeedbackTag[]>().notNull().default([]),
+    feedbackNote: text("feedback_note"),
     reps: jsonb("reps").$type<SavedRep[]>().notNull().default([]),
     holds: jsonb("holds").$type<SavedHold[]>().notNull().default([]),
     faultCounts: jsonb("fault_counts").$type<Record<string, number>>().notNull().default({}),

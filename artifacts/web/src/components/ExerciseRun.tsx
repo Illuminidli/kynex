@@ -1,7 +1,9 @@
 import type { PlanItem, SessionExerciseInput } from "@kynex/api-client-react";
-import { ExerciseTracker, VoiceCoach, type ExerciseDefinition, type PoseFrame, type SessionResult, type Side, type TrackerSnapshot } from "@kynex/motion";
+import { boxFor, ExerciseTracker, HOLD_CUE, VoiceCoach, type ExerciseDefinition, type PoseFrame, type SessionResult, type Side, type TrackerSnapshot } from "@kynex/motion";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { keyPoints } from "../lib/keypoints.ts";
 import { drawPose, useCamera } from "../lib/pose.ts";
+import { playSound } from "../lib/sounds.ts";
 import { TrackRecorder } from "../lib/track.ts";
 import { CameraRecorder } from "../lib/videos.ts";
 import { isSpeaking, speak, stopSpeaking } from "../lib/voice.ts";
@@ -32,12 +34,14 @@ function roundsOf(def: ExerciseDefinition, item: PlanItem): (Side | undefined)[]
   return item.side === "both" ? ["left", "right"] : [item.side];
 }
 
+/** Only complete reps count (an incomplete one is announced and has to be done again). */
 function countOf(def: ExerciseDefinition, s: TrackerSnapshot): number {
   if (def.kind !== "reps") return s.holdsCompleted;
-  return def.laterality === "alternating" ? Math.min(s.reps.left, s.reps.right) : s.reps.total;
+  return def.laterality === "alternating" ? Math.min(s.reps.fullLeft, s.reps.fullRight) : s.reps.full;
 }
 
 const SIDE_WORD = { left: W("left side", "बायाँ"), right: W("right side", "दायाँ") };
+const SIDE_LABEL = { left: W("Left side", "बायाँ हिस्सा"), right: W("Right side", "दायाँ हिस्सा") };
 
 export function ExerciseRun(props: Props) {
   return props.mode === "camera" ? <CameraRun {...props} /> : <ManualRun {...props} />;
@@ -56,6 +60,7 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
   const [snap, setSnap] = useState<TrackerSnapshot | null>(null);
   const [tip, setTip] = useState<{ text: string; at: number } | null>(null);
   const [seen, setSeen] = useState(true);
+  const [everPlaced, setEverPlaced] = useState(false);
 
   const live = useRef({ phase, round, set, lang, voiceOn });
   live.current = { phase, round, set, lang, voiceOn };
@@ -72,6 +77,7 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
   const startedAt = useRef(Date.now());
   const finished = useRef(false);
   const tipShownAt = useRef(new Map<string, number>());
+  const everPlacedRef = useRef(false);
   const globalSet = (r: number, s: number) => r * item.sets + s;
 
   const say = useCallback((t: { en: string; hi: string }) => {
@@ -81,6 +87,7 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
   const newTracker = useCallback(
     (side: Side | undefined) => {
       tracker.current = new ExerciseTracker(def, {
+        placement: true,
         ...(side ? { side } : {}),
         ...(def.kind !== "reps" ? { overrides: { hold: { targetSeconds: holdSeconds } } } : {}),
       });
@@ -182,8 +189,8 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
       setPhase("rest");
       say(
         lastSet
-          ? W(`Good. Rest ${restS} seconds, then the ${SIDE_WORD[rounds[r + 1]!].en}.`, `ठीक है। ${restS} सेकंड आराम, फिर ${SIDE_WORD[rounds[r + 1]!].hi}।`)
-          : W(`Set ${s} done. Rest ${restS} seconds.`, `सेट ${s} पूरा। ${restS} सेकंड आराम।`),
+          ? W(`Set done. Rest ${restS} seconds. Then the ${SIDE_WORD[rounds[r + 1]!].en}.`, `सेट पूरा। ${restS} सेकंड आराम। फिर ${SIDE_LABEL[rounds[r + 1]!].hi}।`)
+          : W(`Set done. Rest ${restS} seconds.`, `सेट पूरा। ${restS} सेकंड आराम।`),
       );
     },
     [def.kind, finish, item.restSeconds, item.sets, rounds, say],
@@ -200,7 +207,7 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
     setRound(nr);
     setSet(ns);
     setPhase("live");
-    say(lastSet ? W(`Now the ${SIDE_WORD[rounds[nr]!].en}. Begin.`, `अब ${SIDE_WORD[rounds[nr]!].hi}। शुरू कीजिए।`) : W(`Set ${ns}. Begin.`, `सेट ${ns}। शुरू कीजिए।`));
+    say(lastSet ? W(`Now the ${SIDE_WORD[rounds[nr]!].en}. Begin.`, `अब ${SIDE_LABEL[rounds[nr]!].hi}। शुरू कीजिए।`) : W("Next set. Begin.", "अगला सेट। शुरू कीजिए।"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [def, item.sets, newTracker, rounds, say]);
 
@@ -229,10 +236,30 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
         if (tr && live.current.phase === "live") {
           const events = tr.update(frame);
           const inSet = () => countOf(def, tr.snapshot()) - setStart.current;
-          coach.current.hear(events, now, inSet);
+          coach.current.hear(events, now, inSet, def.faults);
+          const L = live.current.lang;
           for (const e of events) {
-            const text = e.type === "fault" ? e.fault.message[live.current.lang] : e.type === "partial" ? e.cue[live.current.lang] : null;
-            if (text && now - (tipShownAt.current.get(text) ?? -Infinity) >= 10_000) {
+            // Each meaning has its own sound; words only come after the rep (see VoiceCoach).
+            const sound = VoiceCoach.soundFor(e);
+            if (sound) playSound(sound);
+            if (e.type === "placement") everPlacedRef.current ||= e.ok;
+            if (e.type === "placement" && e.ok) setEverPlaced(true);
+            // On screen: the same one line the voice says after a rep, never tips during it.
+            let text: string | null = null;
+            if (e.type === "partial") {
+              const why = e.rep.faults.length ? def.faults.find((f) => f.id === e.rep.faults[0])?.cue[L] : null;
+              const reason =
+                why ??
+                (e.cue === HOLD_CUE
+                  ? L === "en" ? "hold the top a little longer" : "ऊपर थोड़ा और रुकिए"
+                  : L === "en" ? "go a little further" : "थोड़ा और आगे जाइए");
+              text = L === "en" ? `Not complete: ${reason}. Do that one again.` : `पूरा नहीं: ${reason}। फिर से कीजिए।`;
+            } else if (e.type === "rep" && e.rep.faults.length) {
+              text = def.faults.find((f) => f.id === e.rep.faults[0])?.cue[L] ?? null;
+            } else if (e.type === "hold-broken") {
+              text = L === "en" ? "Out of position: the timer starts again." : "स्थिति टूटी: टाइमर फिर से शुरू।";
+            }
+            if (text && now - (tipShownAt.current.get(text) ?? -Infinity) >= 2000) {
               tipShownAt.current.set(text, now);
               setTip({ text, at: now });
             }
@@ -254,7 +281,15 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
       }
       const cue = coach.current.take(now, live.current.voiceOn && isSpeaking());
       if (cue && live.current.voiceOn) speak(cue.text, live.current.lang);
-      if (canvas.current) drawPose(canvas.current, video, frame, { mirror: facing === "user", focus, state });
+      if (canvas.current) {
+        const placed = tracker.current?.snapshot().placed ?? false;
+        drawPose(canvas.current, video, frame, {
+          mirror: facing === "user",
+          focus,
+          state,
+          box: { rect: boxFor(def.position), state: placed ? "in" : everPlacedRef.current ? "out" : "wait" },
+        });
+      }
     },
     // `camera` is created just below; only its stable video ref is read here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -271,7 +306,11 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
       const stream = camera.videoRef.current?.srcObject;
       recorder.current.start(stream instanceof MediaStream ? stream : null);
     });
-    say(rounds[0] ? W(`Start with the ${SIDE_WORD[rounds[0]].en}. Get into position.`, `${SIDE_WORD[rounds[0]].hi} से शुरू कीजिए। स्थिति में आइए।`) : W("Get into position.", "अपनी स्थिति में आइए।"));
+    say(
+      rounds[0]
+        ? W(`Start with the ${SIDE_WORD[rounds[0]].en}. Get into position.`, rounds[0] === "left" ? "बाएँ हिस्से से शुरू कीजिए। स्थिति में आइए।" : "दाएँ हिस्से से शुरू कीजिए। स्थिति में आइए।")
+        : W("Get into position.", "अपनी स्थिति में आइए।"),
+    );
     return () => {
       camera.stop();
       stopSpeaking();
@@ -279,19 +318,45 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keep the screen awake.
+  // The phone's Back gesture during an exercise = Stop, so what was done is saved
+  // (on 23 Nov a Back gesture lost a back-extension attempt).
+  const finishRef = useRef(finish);
+  finishRef.current = finish;
+  useEffect(() => {
+    // One extra history entry per exercise. It is left in place afterwards (popping it here
+    // would race with a quick re-mount); a later Back on it simply does nothing.
+    if (!(history.state as { kynexRun?: boolean } | null)?.kynexRun) history.pushState({ kynexRun: true }, "");
+    const onBack = () => {
+      if (!(history.state as { kynexRun?: boolean } | null)?.kynexRun) void finishRef.current("stopped");
+    };
+    window.addEventListener("popstate", onBack);
+    return () => window.removeEventListener("popstate", onBack);
+  }, []);
+
+  // Keep the screen awake (the phone locked mid-exercise on 23 Nov). The browser drops the
+  // lock whenever the page is hidden, so ask again when it comes back.
   useEffect(() => {
     if (camera.status !== "running" || !("wakeLock" in navigator)) return;
     let lock: WakeLockSentinel | null = null;
-    navigator.wakeLock.request("screen").then((l) => (lock = l), () => {});
-    return () => void lock?.release();
+    const ask = () => {
+      if (document.visibilityState === "visible") navigator.wakeLock.request("screen").then((l) => (lock = l), () => {});
+    };
+    ask();
+    document.addEventListener("visibilitychange", ask);
+    return () => {
+      document.removeEventListener("visibilitychange", ask);
+      void lock?.release();
+    };
   }, [camera.status]);
 
   const s = snap;
   const count = s ? Math.max(0, countOf(def, s) - setStart.current) : 0;
-  const showTip = tip && performance.now() - tip.at < 3000 ? tip.text : null;
-  const totalSets = item.sets * rounds.length;
+  const showTip = tip && performance.now() - tip.at < 3500 ? tip.text : null;
   const side = rounds[round];
+  const placed = s?.placed ?? false;
+  const holdLeft = Math.max(0, holdSeconds - Math.floor(s?.holdSeconds ?? 0));
+  const holdFrac = Math.min(1, (s?.holdSeconds ?? 0) / holdSeconds);
+  const points = keyPoints(def, lang, holdSeconds);
 
   return (
     <main className="fixed inset-0 z-20 flex flex-col bg-black text-white">
@@ -300,31 +365,59 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
         <canvas ref={canvas} className="pointer-events-none absolute inset-0 size-full" aria-hidden />
         <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 bg-gradient-to-b from-black/70 to-transparent p-4">
           <div className="min-w-0">
-            <p className="truncate text-sm text-white/80">
-              {def.name[lang]}
-              {side ? ` · ${SIDE_WORD[side][lang]}` : ""}
-            </p>
-            <p className="mt-1 inline-block rounded-full bg-white/15 px-3 py-1 text-sm font-semibold">
-              {lang === "en" ? `Set ${globalSet(round, set)} of ${totalSets}` : `सेट ${globalSet(round, set)} / ${totalSets}`}
-            </p>
+            <p className="truncate text-sm text-white/80">{def.name[lang]}</p>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              {side && <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-brand-900">{SIDE_LABEL[side][lang]}</span>}
+              {item.sets > 1 && (
+                <span className="rounded-full bg-white/15 px-3 py-1 text-sm font-semibold">{lang === "en" ? `Set ${set} of ${item.sets}` : `सेट ${set} / ${item.sets}`}</span>
+              )}
+            </div>
             {!seen && <p className="mt-1 text-sm text-accent-500">{lang === "en" ? "Step into view" : "कैमरे के सामने आइए"}</p>}
-            {s?.status === "calibrating" && <p className="mt-1 text-sm">{lang === "en" ? "Hold still…" : "स्थिर रहिए…"}</p>}
+            {placed && s?.status === "calibrating" && <p className="mt-1 text-sm">{lang === "en" ? "Hold still…" : "स्थिर रहिए…"}</p>}
           </div>
           <div className="text-right" aria-live="polite">
             {def.kind === "reps" ? (
-              <p className="text-5xl font-bold tabular-nums leading-none">
+              <p className="text-6xl font-extrabold tabular-nums leading-none">
                 {count}
                 <span className="text-2xl text-white/60"> / {perSet}</span>
               </p>
             ) : (
-              <p className="text-4xl font-bold tabular-nums leading-none">
-                {Math.floor(s?.holdSeconds ?? 0)}
-                <span className="text-xl text-white/60"> / {holdSeconds} s</span>
-              </p>
+              // Hold timer: as big as the rep count, in its own colour, counting down with a ring that empties.
+              <div className="relative size-28" role="timer" aria-label={lang === "en" ? `${holdLeft} seconds left` : `${holdLeft} सेकंड बाकी`}>
+                <svg viewBox="0 0 120 120" className="absolute inset-0 size-full -rotate-90" aria-hidden>
+                  <circle cx="60" cy="60" r="52" fill="rgba(11,36,51,0.6)" stroke="rgba(255,255,255,0.2)" strokeWidth="10" />
+                  <circle cx="60" cy="60" r="52" fill="none" stroke="#ffc23d" strokeWidth="10" strokeLinecap="round" strokeDasharray="326.7" strokeDashoffset={326.7 * holdFrac} />
+                </svg>
+                <div className="absolute inset-0 grid place-items-center text-center leading-none">
+                  <div>
+                    <p className="text-5xl font-extrabold tabular-nums text-[#ffc23d]">{holdLeft}</p>
+                    <p className="text-xs font-semibold text-white/80">{lang === "en" ? "seconds" : "सेकंड"}</p>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
         {showTip && <p role="status" className="absolute inset-x-4 bottom-24 rounded-2xl bg-accent-500/95 px-4 py-3 text-center text-lg font-semibold">{showTip}</p>}
+        {camera.status === "running" && !placed && phase === "live" && (
+          <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-brand-900/90 p-4 shadow-lg">
+            <p className="text-lg font-bold">
+              {everPlaced
+                ? lang === "en"
+                  ? "Step back into the box: counting is paused."
+                  : "बॉक्स में वापस आइए: गिनती रुकी है।"
+                : lang === "en"
+                  ? "Get your whole body inside the box."
+                  : "पूरा शरीर बॉक्स के अंदर लाइए।"}
+            </p>
+            <p className="mt-2 text-xs font-bold uppercase tracking-wide text-[#ffc23d]">{lang === "en" ? "Remember" : "याद रखिए"}</p>
+            <ul className="mt-1 space-y-1 text-sm text-white/90">
+              {points.slice(1).map((p) => (
+                <li key={p}>• {p}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         {camera.status === "loading" && <p className="absolute inset-0 grid place-items-center text-white/80">{lang === "en" ? "Starting camera…" : "कैमरा शुरू हो रहा है…"}</p>}
         {camera.error && (
           <div className="absolute inset-0 grid place-items-center p-6 text-center">
@@ -404,7 +497,7 @@ function ManualRun({ def, item, lang, voiceOn, setVoiceOn, onFinish }: Props) {
       done("done", r, h, totalSets);
       return;
     }
-    say(W(`Set ${setNo} done. Rest.`, `सेट ${setNo} पूरा। आराम।`));
+    say(W(`Set done. Rest ${item.restSeconds} seconds.`, `सेट पूरा। ${item.restSeconds} सेकंड आराम।`));
     setRestLeft(item.restSeconds);
   };
 
@@ -439,11 +532,15 @@ function ManualRun({ def, item, lang, voiceOn, setVoiceOn, onFinish }: Props) {
   return (
     <main className="fixed inset-0 z-20 flex flex-col bg-brand-900 text-white">
       <div className="flex flex-1 flex-col items-center justify-center gap-6 p-6 text-center">
-        <p className="text-white/80">
-          {def.name[lang]}
-          {side ? ` · ${SIDE_WORD[side][lang]}` : ""}
-        </p>
-        <p className="rounded-full bg-white/15 px-3 py-1 text-sm font-semibold">{lang === "en" ? `Set ${setNo} of ${totalSets}` : `सेट ${setNo} / ${totalSets}`}</p>
+        <p className="text-white/80">{def.name[lang]}</p>
+        <div className="flex flex-wrap justify-center gap-1.5">
+          {side && <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-brand-900">{SIDE_LABEL[side][lang]}</span>}
+          {item.sets > 1 && (
+            <span className="rounded-full bg-white/15 px-3 py-1 text-sm font-semibold">
+              {lang === "en" ? `Set ${((setNo - 1) % item.sets) + 1} of ${item.sets}` : `सेट ${((setNo - 1) % item.sets) + 1} / ${item.sets}`}
+            </span>
+          )}
+        </div>
         {restLeft !== null ? (
           <div>
             <p className="text-lg">{lang === "en" ? "Rest" : "आराम"}</p>

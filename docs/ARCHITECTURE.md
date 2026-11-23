@@ -31,6 +31,25 @@ Plain-language version: the "Architecture & security" tab of the Kynex Google Sh
 | `artifacts/api-server` | Express server. Only thing that touches the database. Serves the web app on the same address. | Every route validates input and checks permissions. |
 | `artifacts/web` | Vite + React screens, installable on phones (PWA). | No business rules. Wrapped into store apps later with Capacitor. |
 
+## How a camera exercise runs (M5c)
+
+1. **The box.** The camera screen shows a box: tall for standing and sitting exercises, wide and low for floor
+   exercises (`boxFor` in `lib/motion`). Counting starts only when the whole body (head to feet; seated: head to
+   knees) has been inside it, in the exercise's starting position (upright, or lying / on all fours), for 1 second.
+   Leaving the box for more than 0.6 s pauses counting and drops the rep or hold under way. This stops walking to
+   the mat from counting as reps, and makes people stand far enough back for their feet to be seen.
+2. **Only complete reps count.** A rep that isn't complete (not far enough, or the end position not held) is
+   recorded as "not complete" and the patient is told why and asked to do it again.
+3. **Sounds and words.** Each meaning has its own sound (in place, out of the box, form problem, rep counted, not
+   complete, timer reset, done), generated in the browser (`artifacts/web/src/lib/sounds.ts`, no sound files).
+   Nothing is spoken during a rep; after it, one line: the count, the count plus one correction, or "not complete"
+   with the reason (`VoiceCoach` in `lib/motion`). Holds count down with a big amber ring and start again if the
+   position breaks.
+4. **Form rules that depend on the camera angle** (e.g. heels lifting with the phone on the floor) compare with the
+   person's own resting value instead of a fixed limit (`FaultRule.measure` / `rise`).
+5. Every rule change is checked by replaying real phone recordings through the engine (MediaPipe landmarks →
+   tracker) before and after.
+
 ## Database rules
 
 - `id` is a random UUID primary key.

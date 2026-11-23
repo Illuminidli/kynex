@@ -12,6 +12,7 @@ import { ExercisePage } from "./pages/ExercisePage.tsx";
 import { LibraryPage } from "./pages/LibraryPage.tsx";
 import { MyReports } from "./pages/patient/MyReports.tsx";
 import { PatientVisits } from "./pages/patient/PatientVisits.tsx";
+import { SettingsPage } from "./pages/patient/SettingsPage.tsx";
 import { SessionPlayer } from "./pages/patient/SessionPlayer.tsx";
 import { PatientHome } from "./pages/PatientHome.tsx";
 import { SignIn } from "./pages/SignIn.tsx";
@@ -66,6 +67,7 @@ function SignedInArea() {
       {patient && <Route path="/reports">{<MyReports me={user} />}</Route>}
       {patient && <Route path="/reports/:id">{(p) => <SessionPage me={user} sessionId={p.id} />}</Route>}
       {patient && <Route path="/visits">{<PatientVisits me={user} />}</Route>}
+      {patient && <Route path="/settings">{<SettingsPage me={user} />}</Route>}
       <Route>
         <Home me={user} />
       </Route>

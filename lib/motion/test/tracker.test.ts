@@ -164,3 +164,60 @@ test("tracking pauses and names the joints when part of the body is off-screen",
   assert.equal(s.status, "not-visible");
   assert.deepEqual([...s.missing].sort(), [27, 28]);
 });
+
+/* ---------------- M5c: the box, complete reps, timer reset (23 Nov 2026 phone tests) ---------------- */
+
+/** Moves the person sideways in the picture (e.g. out of the box) for frames where `when` is true. */
+function shifted(frames: ReturnType<typeof run>, dx: number, when: (t: number) => boolean) {
+  return frames.map((f) => (when(f.t) ? { ...f, image: f.image.map((p) => ({ ...p, x: p.x + dx })) } : f));
+}
+
+test("box: reps done before the person is in the box don't count; counting starts once in place", () => {
+  // 4 squats outside the box (shifted off to the side), then 4 inside it.
+  const frames = shifted(
+    run(16000, (t) => ({ kneeFlex: wave(t % 2000, 0, 90, 2000) })),
+    0.7,
+    (t) => t < 8000,
+  );
+  const { result, events } = feed("squat", frames, { placement: true });
+  assert.ok(events.some((e) => e.type === "placement" && e.ok));
+  const full = result.reps.filter((r) => r.full).length;
+  assert.ok(full >= 2 && full <= 4, `only reps inside the box count (got ${full})`);
+  assert.ok(result.reps.every((r) => r.startMs >= 8000), "nothing counted while outside the box");
+});
+
+test("box: stepping out pauses counting and says so; coming back resumes", () => {
+  const frames = shifted(
+    run(20000, (t) => ({ kneeFlex: wave(t % 2000, 0, 90, 2000) })),
+    0.7,
+    (t) => t >= 8000 && t < 12000,
+  );
+  const { result, events } = feed("squat", frames, { placement: true });
+  const placements = events.filter((e) => e.type === "placement").map((e) => (e as { ok: boolean }).ok);
+  assert.deepEqual(placements, [true, false, true]);
+  assert.ok(result.reps.every((r) => r.endMs < 8000 || r.startMs >= 12000), "no rep counted while out of the box");
+});
+
+test("without the placement option, behaviour is unchanged (always in place)", () => {
+  const frames = run(8000, (t) => ({ kneeFlex: wave(t % 2000, 0, 90, 2000) }));
+  const { tr, events } = feed("squat", frames);
+  assert.ok(!events.some((e) => e.type === "placement"));
+  assert.equal(tr.snapshot().placed, true);
+});
+
+test("balance: a foot touching down before the target gives hold-broken (the timer starts again)", () => {
+  // Lift for 3 s, put the foot down, lift again for the full 30 s.
+  const frames = run(36000, (t) => ({ liftR: (t > 500 && t < 3500) || t > 4500 ? 0.1 : 0 }));
+  const { events, result } = feed("single-leg-stance", frames, { side: "right" });
+  const broken = events.filter((e) => e.type === "hold-broken");
+  assert.equal(broken.length, 1);
+  assert.ok(Math.abs((broken[0] as { seconds: number }).seconds - 3) < 0.5);
+  assert.ok(result.holds.some((h) => h.completed && h.seconds >= 30));
+});
+
+test("only complete reps count toward the snapshot's full totals", () => {
+  const frames = run(8000, (t) => ({ kneeFlex: wave(t % 2000, 0, t < 4000 ? 90 : 55, 2000) }));
+  const { tr } = feed("squat", frames);
+  const s = tr.snapshot();
+  assert.ok(s.reps.full >= 1 && s.reps.full < s.reps.total, `full ${s.reps.full} of ${s.reps.total}`);
+});

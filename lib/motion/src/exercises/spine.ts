@@ -166,9 +166,12 @@ export const backExtension: ExerciseDefinition = {
     label: "Trunk extension",
     unit: "deg",
     baselineOf: (f) => -trunkForward(f),
+    // The start reading must be taken standing upright (not bent forward).
+    baselineLimit: 10,
     compute: (f, _s, { baseline }) => -trunkForward(f) - (baseline ?? 0),
   },
-  reps: { rest: 0, target: 20, minRepMs: 800 },
+  // Back to upright = within 6 degrees of the start (people rarely return exactly).
+  reps: { rest: 0, target: 20, minRepMs: 800, exit: 0.3 },
   faults: [kneeBent(150)],
   dose: { sets: 2, reps: 10, restSeconds: 30 },
   calibration: "draft",
@@ -247,7 +250,8 @@ export const gluteBridge: ExerciseDefinition = {
   precautions: [t("Don't over-arch your lower back.", "कमर को ज़्यादा मत मोड़िए।")],
   required: req("Shoulder", "Hip", "Knee", "Ankle"),
   metric: { label: "Hip extension", unit: "deg", compute: (f, s) => joint(f, s, "Shoulder", "Hip", "Knee") },
-  reps: { rest: 125, target: 168, holdMs: 1500, minRepMs: 1200 },
+  // Full rep: hips up to about 160 degrees (shoulders-hips-knees nearly straight), held 1.5 s.
+  reps: { rest: 125, target: 165, holdMs: 1500, minRepMs: 1200 },
   faults: [
     {
       id: "heel-lift",
@@ -255,7 +259,12 @@ export const gluteBridge: ExerciseDefinition = {
       cue: t("Keep your feet flat", "पैर ज़मीन पर सपाट रखिए"),
       severity: "minor",
       phase: "active",
-      test: (f, s) => imgToCm(f, img(f, LM[`${s}FootIndex`]).y - img(f, LM[`${s}Heel`]).y) > 4,
+      test: () => false,
+      // Heel height above the toes, compared with the person's own resting value: a fixed
+      // limit gave false alarms with the phone on the floor (23 Nov 2026 phone test).
+      measure: (f, s) => imgToCm(f, img(f, LM[`${s}FootIndex`]).y - img(f, LM[`${s}Heel`]).y),
+      rise: 6,
+      uses: (s) => [LM[`${s}Heel`], LM[`${s}FootIndex`]],
     },
   ],
   dose: { sets: 2, reps: 10, restSeconds: 45 },

@@ -4,6 +4,7 @@ import type {
   ExerciseDefinition,
   ExerciseOverrides,
   FaultRule,
+  Position,
   HoldRule,
   LocalisedText,
   PoseFrame,
@@ -50,9 +51,13 @@ export type TrackerEvent =
   | { type: "view"; ok: boolean; want: "front" | "side" }
   | { type: "baseline-ready" }
   /** The start reading was thrown away (the person moved, or wasn't in the start position); it is being taken again. */
-  | { type: "baseline-retry" };
+  | { type: "baseline-retry" }
+  /** The person came into the box in the starting position (ok) or left it (counting pauses). */
+  | { type: "placement"; ok: boolean }
+  /** A hold ended before its target (e.g. the lifted foot touched down): the timer starts again. */
+  | { type: "hold-broken"; seconds: number };
 
-export type TrackerStatus = "calibrating" | "not-visible" | "wrong-view" | "ready" | "active" | "holding";
+export type TrackerStatus = "placing" | "calibrating" | "not-visible" | "wrong-view" | "ready" | "active" | "holding";
 
 export interface TrackerSnapshot {
   status: TrackerStatus;
@@ -60,7 +65,9 @@ export interface TrackerSnapshot {
   values: Partial<Record<Side, number | null>>;
   /** Current progress toward target (0..1) of the most advanced side. */
   progress: number;
-  reps: { total: number; full: number; partial: number; left: number; right: number };
+  reps: { total: number; full: number; partial: number; left: number; right: number; fullLeft: number; fullRight: number };
+  /** The person is inside the box in the starting position (always true without the placement option). */
+  placed: boolean;
   holdSeconds: number;
   holdTarget: number;
   holdsCompleted: number;
@@ -101,6 +108,65 @@ export interface TrackerOptions {
   baselineMs?: number;
   /** Minimum mean landmark visibility to track. */
   minVisibility?: number;
+  /**
+   * Only count once the whole body is inside the on-screen box, in the exercise's starting
+   * position (standing, lying...), for a moment. Leaving the box pauses counting.
+   */
+  placement?: boolean;
+}
+
+/** The on-screen box the whole body must be inside, in camera-image coordinates (0..1). */
+export interface PlacementBox {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+/** Upright exercises use a tall box; floor exercises a wide, low one. */
+export function boxFor(position: Position): PlacementBox {
+  return position === "standing" || position === "seated"
+    ? { x0: 0.06, y0: 0.02, x1: 0.94, y1: 0.98 }
+    : { x0: 0.02, y0: 0.12, x1: 0.98, y1: 0.98 };
+}
+
+/** The body points that must be inside the box: head to feet (seated: head to knees). */
+const BOX_POINTS: Record<Position, number[]> = {
+  standing: [0, 11, 12, 23, 24, 25, 26, 27, 28],
+  seated: [0, 11, 12, 23, 24, 25, 26],
+  supine: [0, 11, 12, 23, 24, 25, 26, 27, 28],
+  prone: [0, 11, 12, 23, 24, 25, 26, 27, 28],
+  quadruped: [0, 11, 12, 23, 24, 25, 26, 27, 28],
+};
+
+/** How long the person must be in place before counting starts, and out of it before it pauses. */
+const PLACE_IN_MS = 1000;
+const PLACE_OUT_MS = 600;
+
+/** Every box point inside the box (`slack` widens it, so small wobbles at the edge don't pause counting). */
+export function inBox(f: PoseFrame, position: Position, slack = 0): boolean {
+  const b = boxFor(position);
+  return BOX_POINTS[position].every((i) => {
+    const p = f.image[i];
+    return !!p && p.x >= b.x0 - slack && p.x <= b.x1 + slack && p.y >= b.y0 - slack && p.y <= b.y1 + slack;
+  });
+}
+
+/** Once in place, the box may be overstepped by this much before counting pauses. */
+const BOX_SLACK = 0.05;
+
+/**
+ * In the exercise's starting position: upright (trunk within 50 degrees of vertical) for
+ * standing and seated exercises, lying or on all fours (trunk more than 50 degrees from vertical)
+ * for floor exercises. Stops walking to the mat from counting as reps.
+ */
+export function inStartPosition(f: PoseFrame, position: Position): boolean {
+  const sh = { x: ((f.image[11]?.x ?? 0) + (f.image[12]?.x ?? 0)) / 2, y: ((f.image[11]?.y ?? 0) + (f.image[12]?.y ?? 0)) / 2 };
+  const hp = { x: ((f.image[23]?.x ?? 0) + (f.image[24]?.x ?? 0)) / 2, y: ((f.image[23]?.y ?? 0) + (f.image[24]?.y ?? 0)) / 2 };
+  const dx = Math.abs(sh.x - hp.x) * (f.aspect || 1);
+  const dy = Math.abs(sh.y - hp.y);
+  const fromVertical = (Math.atan2(dx, dy) * 180) / Math.PI;
+  return position === "standing" || position === "seated" ? fromVertical < 50 : fromVertical > 50;
 }
 
 /** Side-on exercises need the body turned at least this far from facing the camera (degrees). */
@@ -148,6 +214,8 @@ class SideMachine {
   secondary = new Map<string, SecondaryAcc>();
   value: number | null = null;
   progress = 0;
+  /** Recent resting values of relative fault measures (see FaultRule.measure). */
+  restMeasures = new Map<string, number[]>();
   // hold
   holdStart: number | null = null;
   lastInZone = 0;
@@ -227,6 +295,9 @@ export class ExerciseTracker {
   private wrongView = false;
   private wrongViewSince: number | null = null;
   private rightViewSince: number | null = null;
+  private placed: boolean;
+  private placeSince: number | null = null;
+  private outSince: number | null = null;
 
   constructor(def: ExerciseDefinition, options: TrackerOptions = {}) {
     this.def = def;
@@ -245,6 +316,7 @@ export class ExerciseTracker {
       : null;
     this.holdRule = def.hold ? { ...def.hold, ...options.overrides?.hold } : null;
     this.lockedSide = options.side ?? null;
+    this.placed = !options.placement;
     this.baselineDone = !def.metric.baselineOf;
     if (def.laterality === "alternating") {
       this.machines = [new SideMachine("left"), new SideMachine("right")];
@@ -271,6 +343,12 @@ export class ExerciseTracker {
     this.lastT = f.t;
     this.frames++;
     this.ensureMachines(f);
+
+    // Placement gate: whole body in the box, in the starting position.
+    if (this.opts.placement && !this.stepPlacement(f, events)) {
+      this.status = "placing";
+      return events;
+    }
 
     // Visibility gate.
     const req = new Set<number>();
@@ -375,6 +453,45 @@ export class ExerciseTracker {
     return events;
   }
 
+  /** Returns whether the person is in place (counting allowed). */
+  private stepPlacement(f: PoseFrame, events: TrackerEvent[]): boolean {
+    const pos = this.def.position;
+    if (!this.placed) {
+      if (inBox(f, pos) && inStartPosition(f, pos)) {
+        this.placeSince ??= f.t;
+        if (f.t - this.placeSince >= PLACE_IN_MS) {
+          this.placed = true;
+          this.outSince = null;
+          events.push({ type: "placement", ok: true });
+        }
+      } else this.placeSince = null;
+      return this.placed;
+    }
+    if (inBox(f, pos, BOX_SLACK)) {
+      this.outSince = null;
+      return true;
+    }
+    this.outSince ??= f.t;
+    if (f.t - this.outSince < PLACE_OUT_MS) return true;
+    // Out of the box: pause, and drop the rep or hold that was under way.
+    this.placed = false;
+    this.placeSince = null;
+    for (const m of this.machines) {
+      m.phase = "rest";
+      m.resetRep();
+      if (m.holdStart !== null) {
+        if (!m.holdDoneThisSegment && m.holdAccMs >= 1000) {
+          this.closeHold(m, false);
+          events.push({ type: "hold-broken", seconds: Math.round(m.holdAccMs / 100) / 10 });
+        }
+        m.holdStart = null;
+        m.holdAccMs = 0;
+      }
+    }
+    events.push({ type: "placement", ok: false });
+    return false;
+  }
+
   private updateSecondary(m: SideMachine, f: PoseFrame, side: Side): void {
     const active = m.phase === "active" || m.holdStart !== null;
     if (!active || !this.def.secondary) return;
@@ -402,7 +519,24 @@ export class ExerciseTracker {
       const applies = rule.phase === "any" || moving;
       let hit = false;
       const seen = !rule.uses || hiddenLandmarks(f, rule.uses(side), 0.5).length === 0;
-      if (applies && seen) {
+      if (rule.measure && seen) {
+        let v: number | null = null;
+        try {
+          v = rule.measure(f, side);
+        } catch {
+          v = null;
+        }
+        if (v !== null && Number.isFinite(v)) {
+          const rest = m.restMeasures.get(rule.id) ?? [];
+          if (!moving) {
+            rest.push(v);
+            if (rest.length > 15) rest.shift();
+            m.restMeasures.set(rule.id, rest);
+          } else if (applies && rest.length >= 5) {
+            hit = v - median(rest) > (rule.rise ?? 0);
+          }
+        }
+      } else if (applies && seen) {
         try {
           hit = rule.test(f, side);
         } catch {
@@ -526,7 +660,10 @@ export class ExerciseTracker {
     }
 
     if (m.holdStart !== null && t - m.lastInZone > HOLD_DROPOUT_MS) {
-      if (!m.holdDoneThisSegment && m.holdAccMs >= 1000) this.closeHold(m, false);
+      if (!m.holdDoneThisSegment && m.holdAccMs >= 1000) {
+        this.closeHold(m, false);
+        events.push({ type: "hold-broken", seconds: Math.round(m.holdAccMs / 100) / 10 });
+      }
       m.holdStart = null;
       m.holdAccMs = 0;
     }
@@ -589,7 +726,10 @@ export class ExerciseTracker {
         partial: this.reps.length - full,
         left: this.reps.filter((r) => r.side === "left").length,
         right: this.reps.filter((r) => r.side === "right").length,
+        fullLeft: this.reps.filter((r) => r.full && r.side === "left").length,
+        fullRight: this.reps.filter((r) => r.full && r.side === "right").length,
       },
+      placed: this.placed,
       holdSeconds,
       holdTarget: this.holdRule?.targetSeconds ?? 0,
       holdsCompleted: this.holds.filter((h) => h.completed).length,

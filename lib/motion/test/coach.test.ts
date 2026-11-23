@@ -1,7 +1,8 @@
+import type { FaultRule } from "../src/types.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { VoiceCoach } from "../src/coach.ts";
-import { PARTIAL_CUE, type RepRecord } from "../src/tracker.ts";
+import { HOLD_CUE, PARTIAL_CUE, type RepRecord } from "../src/tracker.ts";
 
 const tip = (en: string) => ({ en, hi: en });
 
@@ -49,14 +50,16 @@ test("a tip that waited too long is dropped", () => {
   assert.equal(c.take(2000, false), null); // 2 s late: moment has passed
 });
 
-test("setup reminders repeat at most every 6 seconds", () => {
+test("setup reminders repeat at most every 10 seconds", () => {
   const c = new VoiceCoach();
   c.hear([{ type: "view", ok: false, want: "side" }], 0, () => 0);
   assert.match(c.take(0, false)!.text.en, /side-on/);
   c.hear([{ type: "view", ok: false, want: "side" }], 2000, () => 0);
   assert.equal(c.take(2000, false), null);
   c.hear([{ type: "view", ok: false, want: "side" }], 6500, () => 0);
-  assert.match(c.take(6500, false)!.text.en, /side-on/);
+  assert.equal(c.take(6500, false), null);
+  c.hear([{ type: "view", ok: false, want: "side" }], 10500, () => 0);
+  assert.match(c.take(10500, false)!.text.en, /side-on/);
 });
 
 test("a start reading that had to be taken again asks the person to hold still", () => {
@@ -65,13 +68,32 @@ test("a start reading that had to be taken again asks the person to hold still",
   assert.equal(c.take(0, false)?.text.en, "Hold still in the starting position.");
 });
 
-test("a partial rep is counted with a short nudge; a number is never announced twice", () => {
+test("a rep that isn't complete doesn't count: the coach says why and asks for it again", () => {
   const c = new VoiceCoach();
-  const rep = {} as RepRecord;
-  c.hear([{ type: "partial", rep, cue: PARTIAL_CUE }], 0, () => 1);
-  assert.equal(c.take(0, false)?.text.en, "1. A little further.");
-  c.hear([{ type: "rep", rep }], 1000, () => 1); // alternating: other side done, pair not complete
+  const rep = { faults: [] as string[] } as RepRecord;
+  c.hear([{ type: "partial", rep, cue: PARTIAL_CUE }], 0, () => 0);
+  assert.equal(c.take(0, false)?.text.en, "Not complete. Go a little further, and do that one again.");
+  c.hear([{ type: "partial", rep, cue: HOLD_CUE }], 3000, () => 0);
+  assert.equal(c.take(3000, false)?.text.en, "Not complete. Hold the top a little longer, and do that one again.");
+});
+
+test("a number is never announced twice (alternating sides)", () => {
+  const c = new VoiceCoach();
+  const rep = { faults: [] as string[] } as RepRecord;
+  c.hear([{ type: "rep", rep }], 0, () => 1);
+  assert.equal(c.take(0, false)?.text.en, "1");
+  c.hear([{ type: "rep", rep }], 1000, () => 1); // other side done, pair not complete
   assert.equal(c.take(1000, false), null);
   c.hear([{ type: "rep", rep }], 2000, () => 2);
   assert.equal(c.take(2000, false)?.text.en, "2");
+});
+
+test("nothing is spoken during a rep; one correction after a rep that had a problem", () => {
+  const c = new VoiceCoach();
+  const elbow: FaultRule = { id: "elbow-bent", message: { en: "Elbow is bending", hi: "" }, cue: { en: "Keep your elbow straight", hi: "कोहनी सीधी रखिए" }, severity: "minor", phase: "active", test: () => true };
+  c.hear([{ type: "fault", side: "left", fault: elbow }], 0, () => 0, [elbow]);
+  assert.equal(c.take(0, false), null);
+  c.hear([{ type: "rep", rep: { faults: ["elbow-bent"] } as RepRecord }], 1500, () => 3, [elbow]);
+  assert.equal(c.take(1500, false)?.text.en, "3. Keep your elbow straight");
+  assert.equal(VoiceCoach.soundFor({ type: "fault", side: "left", fault: elbow }), "form");
 });

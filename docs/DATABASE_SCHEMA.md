@@ -115,11 +115,14 @@ One exercise session. `status`: in-progress, completed, stopped, red-flag (stopp
 | pain_after | integer | |
 | started_at, ended_at | timestamptz | |
 | reviewed_by, reviewed_at, review_note | | the doctor's review (M5) |
+| comment | text | the patient's overall comment on the session and the app (M5c) |
 
 ### session_exercises (M4)
 The result of one exercise in a session: the dose asked for (copied from the plan), sets, full/partial reps, holds,
 best range, form score, how it felt, every rep (`reps` jsonb: set, side, times, range, faults, score), holds, fault counts,
 how much of the time the camera saw the patient, and whether a video was kept **on the patient's phone** (the video itself is never sent).
+M5c adds the patient's feedback: `feedback_tags` (text[]: unclear, not-counted, not-seen, hurt, too-easy, too-hard) and `feedback_note` (text).
+Only complete reps count toward `reps_full`; `reps_partial` are reps that weren't complete (announced to the patient as "do it again").
 
 ### motion_tracks (M4)
 The movement of one exercise as joint positions only (19 joints, 10 per second, millimetres; no picture), used to replay it
@@ -173,6 +176,7 @@ in order, recorded in the `drizzle.__drizzle_migrations` table), so nothing is t
 | 0000 | 21 Nov 2026 | M1 | `0000_m1_sign_in.sql` | Creates `clinics`, `users`, `login_sessions` |
 | 0001 | 21 Nov 2026 | M2 | `0001_m2_exercise_library.sql` | Creates `exercises`, `clinic_exercise_settings`. Safe to re-run: skips anything already there |
 | 0002 | 23 Nov 2026 | M3-M5b | `0002_m3_m5b_care_sessions_bookings.sql` | Creates plans, sessions and results, movement tracks, symptoms, notes, activity, visit types, hours, time off, appointments, waiting list. Safe to re-run |
+| 0003 | 23 Nov 2026 | M5c | `0003_m5c_feedback.sql` | Adds patient feedback: `session_exercises.feedback_tags`, `feedback_note`, `sessions.comment`. Safe to re-run (`ADD COLUMN IF NOT EXISTS`) |
 
 **Rule from M2 on:** write every migration so it can run on a database that already has its tables
 (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, constraints added inside `DO $$ … EXCEPTION WHEN duplicate_object`).

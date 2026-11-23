@@ -6,6 +6,7 @@ import {
   startSession,
   useGetToday,
   type CheckInFlag,
+  type FeedbackTag,
   type Me,
   type PlanItem,
 } from "@kynex/api-client-react";
@@ -17,8 +18,10 @@ import { ExerciseRun, type RunOutput } from "../../components/ExerciseRun.tsx";
 import { LangSwitch } from "../../components/LangSwitch.tsx";
 import { Button, ErrorText, FEELINGS, inputCls, Loading, PainScale } from "../../components/ui.tsx";
 import { must, ok } from "../../lib/api.ts";
+import { keyPoints } from "../../lib/keypoints.ts";
 import { doseText } from "../../lib/labels.ts";
 import { useLang } from "../../lib/lang.ts";
+import { unlockSounds } from "../../lib/sounds.ts";
 import { saveVideo } from "../../lib/videos.ts";
 import { canSpeak, speak, stopSpeaking } from "../../lib/voice.ts";
 
@@ -57,17 +60,49 @@ export function SessionPlayer({ me: _me }: { me: Me }) {
   // Today's exercises (or, on a rest day, the whole plan), minus any already done in an unfinished session.
   const due = today.plan.items.filter((i) => i.today);
   const done = new Set(today.inProgress?.doneItemIds ?? []);
-  const items = (due.length ? due : today.plan.items).filter((i) => !done.has(i.id));
-  return <Player items={items} resumeId={today.inProgress?.id ?? null} lang={lang} />;
+  const all = due.length ? due : today.plan.items;
+  const items = all.filter((i) => !done.has(i.id));
+  // After a resume, keep numbering the whole session ("Exercise 3 of 5"), not just what's left.
+  return <Player items={items} offset={all.length - items.length} total={all.length} resumeId={today.inProgress?.id ?? null} lang={lang} />;
 }
 
-function Player({ items, resumeId, lang }: { items: PlanItem[]; resumeId: string | null; lang: Lang }) {
+/** Quick feedback a patient can tap after an exercise (all optional). */
+const FEEDBACK: { key: FeedbackTag; en: string; hi: string }[] = [
+  { key: "unclear", en: "I didn't understand the exercise", hi: "व्यायाम समझ नहीं आया" },
+  { key: "not-counted", en: "The app didn't count properly", hi: "ऐप ने ठीक से नहीं गिना" },
+  { key: "not-seen", en: "The camera couldn't see me", hi: "कैमरा मुझे नहीं देख पाया" },
+  { key: "hurt", en: "It hurt", hi: "दर्द हुआ" },
+  { key: "too-easy", en: "Too easy", hi: "बहुत आसान" },
+  { key: "too-hard", en: "Too hard", hi: "बहुत कठिन" },
+];
+
+const CAMERA_KEY = "kynex-camera";
+function savedFacing(): "user" | "environment" {
+  try {
+    return localStorage.getItem(CAMERA_KEY) === "environment" ? "environment" : "user";
+  } catch {
+    return "user";
+  }
+}
+
+function Player({ items, offset, total, resumeId, lang }: { items: PlanItem[]; offset: number; total: number; resumeId: string | null; lang: Lang }) {
   const [, navigate] = useLocation();
   const qc = useQueryClient();
   const [sessionId, setSessionId] = useState<string | null>(resumeId);
   const [step, setStep] = useState<Step>(resumeId ? (items.length ? { kind: "intro", index: 0 } : { kind: "after" }) : { kind: "checkin" });
   const [voiceOn, setVoiceOn] = useState(true);
-  const [facing, setFacing] = useState<"user" | "environment">("user");
+  // The camera the patient chose last time (front or back) is remembered on this phone.
+  const [facing, setFacingState] = useState<"user" | "environment">(savedFacing);
+  const setFacing = (f: "user" | "environment") => {
+    setFacingState(f);
+    try {
+      localStorage.setItem(CAMERA_KEY, f);
+    } catch {
+      /* private mode: just this session */
+    }
+  };
+  const [tags, setTags] = useState<FeedbackTag[]>([]);
+  const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stoppedEarly, setStoppedEarly] = useState(false);
@@ -75,12 +110,12 @@ function Player({ items, resumeId, lang }: { items: PlanItem[]; resumeId: string
   const say = (t: { en: string; hi: string }) => voiceOn && speak(t, lang);
   const next = (index: number) => (index + 1 < items.length ? setStep({ kind: "intro", index: index + 1 }) : setStep({ kind: "after" }));
 
-  async function end(status: "completed" | "stopped", painAfter: number | null) {
+  async function end(status: "completed" | "stopped", painAfter: number | null, comment: string) {
     if (!sessionId) return;
     setBusy(true);
     setError(null);
     try {
-      await must(finishSession(sessionId, { painAfter, status }));
+      await must(finishSession(sessionId, { painAfter, status, comment: comment.trim() || null }));
       stopSpeaking();
       await qc.invalidateQueries();
       navigate(`/reports/${sessionId}`);
@@ -96,9 +131,20 @@ function Player({ items, resumeId, lang }: { items: PlanItem[]; resumeId: string
     setBusy(true);
     setError(null);
     try {
-      const saved = await must(saveSessionExercise(sessionId!, { ...out.result, itemId: item.id, exerciseSlug: item.exercise.slug, feeling: (feeling || null) as never }));
+      const saved = await must(
+        saveSessionExercise(sessionId!, {
+          ...out.result,
+          itemId: item.id,
+          exerciseSlug: item.exercise.slug,
+          feeling: (feeling || null) as never,
+          feedbackTags: tags,
+          feedbackNote: note.trim() || null,
+        }),
+      );
       // The video stays on this phone, filed under the saved result.
       if (out.video) await saveVideo({ id: saved.id, ...out.video, savedAt: Date.now() });
+      setTags([]);
+      setNote("");
       next(index);
     } catch (e) {
       setError((e as Error).message);
@@ -166,19 +212,47 @@ function Player({ items, resumeId, lang }: { items: PlanItem[]; resumeId: string
       return (
         <Frame lang={lang} sessionId={sessionId}>
           <p className="text-sm text-brand-100">
-            {lang === "en" ? `Exercise ${step.index + 1} of ${items.length}` : `व्यायाम ${step.index + 1} / ${items.length}`}
+            {lang === "en" ? `Exercise ${offset + step.index + 1} of ${total}` : `व्यायाम ${offset + step.index + 1} / ${total}`}
           </p>
           <h1 className="text-2xl font-semibold">{def.name[lang]}</h1>
           <p className="text-brand-50">
             {def.kind === "reps"
               ? lang === "en"
-                ? `${r.repsFull} full rep${r.repsFull === 1 ? "" : "s"}${r.repsPartial ? `, ${r.repsPartial} partial` : ""}.`
-                : `${r.repsFull} पूरे रेप${r.repsPartial ? `, ${r.repsPartial} आधे` : ""}।`
+                ? `${r.repsFull} complete rep${r.repsFull === 1 ? "" : "s"}${r.repsPartial ? ` (${r.repsPartial} not complete, not counted)` : ""}.`
+                : `${r.repsFull} पूरे रेप${r.repsPartial ? ` (${r.repsPartial} अधूरे, गिने नहीं गए)` : ""}।`
               : lang === "en"
                 ? `${r.holdsDone} hold${r.holdsDone === 1 ? "" : "s"} done.`
                 : `${r.holdsDone} होल्ड पूरे।`}
           </p>
-          <h2 className="text-lg font-semibold">{lang === "en" ? "How did it feel?" : "कैसा लगा?"}</h2>
+          <div className="flex flex-col gap-2 rounded-2xl bg-white/10 p-4">
+            <p className="font-semibold">{lang === "en" ? "Anything to tell us? (optional)" : "कुछ बताना चाहेंगे? (वैकल्पिक)"}</p>
+            <div className="flex flex-wrap gap-2">
+              {FEEDBACK.map((f) => {
+                const on = tags.includes(f.key);
+                return (
+                  <button
+                    key={f.key}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => setTags((t) => (on ? t.filter((x) => x !== f.key) : [...t, f.key]))}
+                    className={`rounded-full px-3 py-2 text-sm font-medium ${on ? "bg-white text-brand-900" : "bg-white/10"}`}
+                  >
+                    {f[lang]}
+                  </button>
+                );
+              })}
+            </div>
+            <textarea
+              className="rounded-xl bg-white p-3 text-base text-ink"
+              rows={2}
+              maxLength={1000}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder={lang === "en" ? "Write a note for your clinic (optional)" : "क्लिनिक के लिए नोट लिखिए (वैकल्पिक)"}
+              aria-label={lang === "en" ? "Note for your clinic" : "क्लिनिक के लिए नोट"}
+            />
+          </div>
+          <h2 className="text-lg font-semibold">{lang === "en" ? "How did it feel? (tap to continue)" : "कैसा लगा? (आगे बढ़ने के लिए टैप करें)"}</h2>
           <div className="grid grid-cols-2 gap-2">
             {FEELINGS.map((f) => (
               <button
@@ -203,28 +277,62 @@ function Player({ items, resumeId, lang }: { items: PlanItem[]; resumeId: string
       );
     }
     const x = explainExercise(def, lang);
+    const points = keyPoints(def, lang, item.holdSeconds ?? undefined);
     return (
       <Frame lang={lang} sessionId={sessionId} onStop={() => (setStoppedEarly(true), setStep({ kind: "after" }))}>
-        <p className="text-sm text-brand-100">{lang === "en" ? `Exercise ${step.index + 1} of ${items.length}` : `व्यायाम ${step.index + 1} / ${items.length}`}</p>
+        <p className="text-sm text-brand-100">{lang === "en" ? `Exercise ${offset + step.index + 1} of ${total}` : `व्यायाम ${offset + step.index + 1} / ${total}`}</p>
         <h1 className="text-2xl font-semibold">{def.name[lang]}</h1>
         <p className="rounded-2xl bg-white/10 p-3 font-medium">
           {doseText({ sets: item.sets, reps: item.reps ?? undefined, holdSeconds: item.holdSeconds ?? undefined, restSeconds: item.restSeconds }, lang)}
-          {def.laterality === "unilateral" ? (item.side === "both" ? (lang === "en" ? " · each side" : " · दोनों तरफ़") : ` · ${item.side}`) : ""}
+          {def.laterality === "unilateral" ? (item.side === "both" ? (lang === "en" ? " · left, then right" : " · पहले बायाँ, फिर दायाँ") : ` · ${item.side === "left" ? (lang === "en" ? "left side" : "बायाँ") : lang === "en" ? "right side" : "दायाँ"}`) : ""}
         </p>
         {item.note && <p className="rounded-2xl bg-accent-500/20 p-3 text-sm">{item.note}</p>}
-        <ol className="list-decimal space-y-2 pl-5 text-brand-50">
-          <li>{x.camera}</li>
-          <li>{x.inView}</li>
-          <li>{def.setup[lang]}</li>
-          {def.steps.map((s, i) => (
-            <li key={i}>{s[lang]}</li>
-          ))}
-        </ol>
+
+        {/* KEY POINTS: what decides whether a rep counts. Highlighted so it can't be missed. */}
+        <section className="rounded-2xl border-2 border-[#ffc23d] bg-[#ffc23d]/15 p-4" aria-labelledby="keypoints">
+          <h2 id="keypoints" className="text-sm font-extrabold uppercase tracking-wide text-[#ffc23d]">
+            {lang === "en" ? "Key points: read these" : "ज़रूरी बातें: इन्हें पढ़िए"}
+          </h2>
+          <ul className="mt-2 space-y-2 text-base font-semibold">
+            {points.map((p) => (
+              <li key={p} className="flex gap-2">
+                <span aria-hidden className="text-[#ffc23d]">★</span>
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* PHONE: where to put it. */}
+        <section className="rounded-2xl bg-sky-400/15 p-4" aria-labelledby="phone">
+          <h2 id="phone" className="text-sm font-extrabold uppercase tracking-wide text-sky-300">
+            {lang === "en" ? "Where to put the phone" : "फ़ोन कहाँ रखें"}
+          </h2>
+          <p className="mt-1">{x.camera}</p>
+          <p className="mt-1 text-brand-50">{x.inView}</p>
+        </section>
+
+        {/* STEPS: what to do. */}
+        <section aria-labelledby="steps">
+          <h2 id="steps" className="text-sm font-extrabold uppercase tracking-wide text-brand-100">
+            {lang === "en" ? "What to do" : "क्या करना है"}
+          </h2>
+          <ol className="mt-2 space-y-2">
+            {[def.setup[lang], ...def.steps.map((s) => s[lang])].map((s, i) => (
+              <li key={i} className="flex gap-3">
+                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-white text-sm font-bold text-brand-900">{i + 1}</span>
+                <span className="pt-0.5 text-brand-50">{s}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* SAFETY */}
         {def.precautions.length > 0 && (
-          <p className="text-sm text-accent-500">
-            {lang === "en" ? "Take care: " : "सावधानी: "}
-            {def.precautions.map((p) => p[lang]).join(" ")}
-          </p>
+          <section className="rounded-2xl bg-accent-500/20 p-4" aria-labelledby="safety">
+            <h2 id="safety" className="text-sm font-extrabold uppercase tracking-wide text-accent-500">{lang === "en" ? "Take care" : "सावधानी"}</h2>
+            <p className="mt-1 text-sm">{def.precautions.map((p) => p[lang]).join(" ")}</p>
+          </section>
         )}
         <div className="flex flex-wrap gap-2">
           {(["user", "environment"] as const).map((f) => (
@@ -240,7 +348,9 @@ function Player({ items, resumeId, lang }: { items: PlanItem[]; resumeId: string
         <button
           type="button"
           onClick={() => {
-            say(W("Starting the camera.", "कैमरा शुरू हो रहा है।"));
+            // Tapping here lets the phone play sounds later in the exercise.
+            unlockSounds();
+            say(W("Starting the camera. Get inside the box.", "कैमरा शुरू हो रहा है। बॉक्स के अंदर आइए।"));
             setStep({ kind: "run", index: step.index, mode: "camera" });
           }}
           className="rounded-2xl bg-accent-500 px-5 py-4 text-lg font-semibold"
@@ -275,7 +385,7 @@ function Player({ items, resumeId, lang }: { items: PlanItem[]; resumeId: string
   }
 
   /* ---------------------------------------------------------- after */
-  return <After lang={lang} busy={busy} error={error} onDone={(pain) => end(stoppedEarly ? "stopped" : "completed", pain)} />;
+  return <After lang={lang} busy={busy} error={error} onDone={(pain, comment) => end(stoppedEarly ? "stopped" : "completed", pain, comment)} />;
 }
 
 function CheckIn({ lang, onStart, busy, error }: { lang: Lang; onStart: (pain: number, flags: CheckInFlag[]) => void; busy: boolean; error: string | null }) {
@@ -311,6 +421,9 @@ function CheckIn({ lang, onStart, busy, error }: { lang: Lang; onStart: (pain: n
         ))}
       </div>
       <ErrorText>{error}</ErrorText>
+      {(pain === null || !all) && (
+        <p className="text-sm text-brand-100">{lang === "en" ? "Choose your pain score and answer every question to start." : "शुरू करने के लिए दर्द चुनिए और हर प्रश्न का उत्तर दीजिए।"}</p>
+      )}
       <button
         type="button"
         disabled={pain === null || !all || busy}
@@ -319,13 +432,13 @@ function CheckIn({ lang, onStart, busy, error }: { lang: Lang; onStart: (pain: n
       >
         {lang === "en" ? "Start today's session" : "आज का सेशन शुरू करें"}
       </button>
-      <p className="text-xs text-brand-100">{lang === "en" ? "These questions are drafts until QI Spine's physiotherapists approve them." : "ये प्रश्न QI Spine के फ़िज़ियोथेरेपिस्ट की मंज़ूरी तक प्रारंभिक हैं।"}</p>
     </Frame>
   );
 }
 
-function After({ lang, busy, error, onDone }: { lang: Lang; busy: boolean; error: string | null; onDone: (pain: number | null) => void }) {
+function After({ lang, busy, error, onDone }: { lang: Lang; busy: boolean; error: string | null; onDone: (pain: number | null, comment: string) => void }) {
   const [pain, setPain] = useState<number | null>(null);
+  const [comment, setComment] = useState("");
   return (
     <Frame lang={lang}>
       <h1 className="text-2xl font-semibold">{lang === "en" ? "Well done!" : "बहुत बढ़िया!"}</h1>
@@ -333,8 +446,20 @@ function After({ lang, busy, error, onDone }: { lang: Lang; busy: boolean; error
         <p className="mb-2 font-semibold">{lang === "en" ? "How much pain do you have now?" : "अब आपको कितना दर्द है?"}</p>
         <PainScale value={pain} onChange={setPain} lang={lang} />
       </div>
+      <div className="flex flex-col gap-2 rounded-2xl bg-white/10 p-4">
+        <p className="font-semibold">{lang === "en" ? "How was today's session and the app? (optional)" : "आज का सेशन और ऐप कैसा रहा? (वैकल्पिक)"}</p>
+        <textarea
+          className="rounded-xl bg-white p-3 text-base text-ink"
+          rows={3}
+          maxLength={2000}
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder={lang === "en" ? "Anything that was confusing, didn't work, or you liked" : "जो समझ नहीं आया, काम नहीं किया, या अच्छा लगा"}
+          aria-label={lang === "en" ? "Comment on the session" : "सेशन पर टिप्पणी"}
+        />
+      </div>
       <ErrorText>{error}</ErrorText>
-      <button type="button" disabled={pain === null || busy} onClick={() => onDone(pain)} className="rounded-2xl bg-accent-500 px-5 py-4 text-lg font-semibold disabled:opacity-40">
+      <button type="button" disabled={pain === null || busy} onClick={() => onDone(pain, comment)} className="rounded-2xl bg-accent-500 px-5 py-4 text-lg font-semibold disabled:opacity-40">
         {lang === "en" ? "Finish and see my report" : "पूरा करें और रिपोर्ट देखें"}
       </button>
     </Frame>

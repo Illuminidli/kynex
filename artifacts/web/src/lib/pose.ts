@@ -1,5 +1,5 @@
 import type { PoseLandmarker } from "@mediapipe/tasks-vision";
-import { PoseSmoother, SKELETON, type PoseFrame } from "@kynex/motion";
+import { PoseSmoother, SKELETON, type PlacementBox, type PoseFrame } from "@kynex/motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /* ------------------------------ Pose model ------------------------------ */
@@ -162,7 +162,7 @@ export function drawPose(
   canvas: HTMLCanvasElement,
   video: HTMLVideoElement,
   frame: PoseFrame | null,
-  o: { mirror: boolean; focus: number[]; state: keyof typeof COLOURS },
+  o: { mirror: boolean; focus: number[]; state: keyof typeof COLOURS; box?: { rect: PlacementBox; state: "wait" | "in" | "out" } },
 ) {
   const rect = canvas.getBoundingClientRect();
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -175,7 +175,6 @@ export function drawPose(
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
   ctx.clearRect(0, 0, w, h);
-  if (!frame) return;
   const vw = video.videoWidth || 16;
   const vh = video.videoHeight || 9;
   const scale = Math.min(w / vw, h / vh);
@@ -183,6 +182,23 @@ export function drawPose(
   const dh = vh * scale;
   const ox = (w - dw) / 2;
   const oy = (h - dh) / 2;
+  // The box the whole body must be inside: dashed white while waiting, green when in place, red when out.
+  if (o.box) {
+    const b = o.box.rect;
+    const x0 = ox + (o.mirror ? 1 - b.x1 : b.x0) * dw;
+    const y0 = oy + b.y0 * dh;
+    const bw = (b.x1 - b.x0) * dw;
+    const bh = (b.y1 - b.y0) * dh;
+    ctx.save();
+    ctx.lineWidth = Math.max(4, dw / 110);
+    ctx.strokeStyle = o.box.state === "in" ? "rgba(61,220,132,0.95)" : o.box.state === "out" ? "rgba(255,90,78,0.95)" : "rgba(255,255,255,0.8)";
+    if (o.box.state === "wait") ctx.setLineDash([ctx.lineWidth * 3, ctx.lineWidth * 2]);
+    ctx.beginPath();
+    ctx.roundRect(x0, y0, bw, bh, Math.max(12, dw / 30));
+    ctx.stroke();
+    ctx.restore();
+  }
+  if (!frame) return;
   const at = (i: number) => {
     const p = frame.image[i];
     if (!p || (p.visibility ?? 1) < 0.3) return null;

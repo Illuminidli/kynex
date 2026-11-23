@@ -10,6 +10,7 @@ const NAV: Record<Me["role"], { href: string; label: string }[]> = {
     { href: "/", label: "Today" },
     { href: "/reports", label: "My reports" },
     { href: "/visits", label: "Visits" },
+    { href: "/settings", label: "Settings" },
   ],
   clinician: [
     { href: "/", label: "Patients" },

@@ -14,6 +14,7 @@ const AREAS = [
   ["review", "Doctor reviews"],
   ["booking", "Bookings"],
   ["note", "Notes"],
+  ["feedback", "Patient feedback (incl. app problems)"],
 ] as const;
 
 /** Every patient interaction, newest first, with filters (the audit trail). */
