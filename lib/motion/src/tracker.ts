@@ -29,6 +29,9 @@ export interface RepRecord {
 
 export interface HoldRecord {
   side: Side | null;
+  /** When the hold started and ended (same clock as the frames, ms). */
+  startMs: number;
+  endMs: number;
   seconds: number;
   completed: boolean;
   best: number;
@@ -45,7 +48,9 @@ export type TrackerEvent =
   | { type: "visibility"; ok: boolean; missing: number[] }
   /** The person is turned the wrong way for this exercise (e.g. facing the camera for a side-on exercise). */
   | { type: "view"; ok: boolean; want: "front" | "side" }
-  | { type: "baseline-ready" };
+  | { type: "baseline-ready" }
+  /** The start reading was thrown away (the person moved, or wasn't in the start position); it is being taken again. */
+  | { type: "baseline-retry" };
 
 export type TrackerStatus = "calibrating" | "not-visible" | "wrong-view" | "ready" | "active" | "holding";
 
@@ -164,6 +169,16 @@ class SideMachine {
     this.faultsInRep.clear();
     this.secondary.clear();
   }
+}
+
+/**
+ * A start reading is steady when most samples sit close to the middle value: a few jittery
+ * frames are fine, a person still moving is not.
+ */
+function steadyStart(samples: number[], mid: number, unit: string): boolean {
+  const tolerance = unit === "deg" ? 8 : unit === "cm" ? 3 : Infinity;
+  const close = samples.filter((v) => Math.abs(v - mid) <= tolerance).length;
+  return close >= 0.8 * samples.length;
 }
 
 function median(xs: number[]): number {
@@ -313,10 +328,23 @@ export class ExerciseTracker {
         }
       }
       if (f.t - this.baselineStart >= this.opts.baselineMs) {
+        const taken = new Map<Side, number>();
+        let usable = true;
         for (const m of this.machines) {
           const arr = this.baselineSamples.get(m.side);
-          if (arr && arr.length) this.baseline.set(m.side, median(arr));
+          if (!arr || !arr.length) continue;
+          const mid = median(arr);
+          if (!steadyStart(arr, mid, this.def.metric.unit) || Math.abs(mid) > (this.def.metric.baselineLimit ?? Infinity)) usable = false;
+          taken.set(m.side, mid);
         }
+        if (!usable) {
+          // Moving, or not in the start position (e.g. still looking aside): take it again.
+          this.baselineStart = f.t;
+          this.baselineSamples.clear();
+          events.push({ type: "baseline-retry" });
+          return events;
+        }
+        for (const [s, v] of taken) this.baseline.set(s, v);
         this.baselineDone = true;
         events.push({ type: "baseline-ready" });
       }
@@ -510,6 +538,8 @@ export class ExerciseTracker {
     for (const [k, acc] of m.secondary) if (Number.isFinite(acc.value)) secondary[k] = acc.value;
     const rec: HoldRecord = {
       side: this.def.laterality === "bilateral" ? null : m.side,
+      startMs: m.holdStart ?? this.lastT,
+      endMs: this.lastT,
       seconds: Math.round(m.holdAccMs / 100) / 10,
       completed,
       best: m.holdBest,

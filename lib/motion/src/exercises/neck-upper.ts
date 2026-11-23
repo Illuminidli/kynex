@@ -32,12 +32,14 @@ export const neckRotation: ExerciseDefinition = {
     label: "Neck rotation",
     unit: "deg",
     baselineOf: earsYaw,
+    baselineLimit: 25, // must start facing the phone
     compute: (f, side, { baseline }) => {
       const d = wrap(earsYaw(f) - (baseline ?? 0));
       return side === "left" ? Math.max(0, d) : Math.max(0, -d);
     },
   },
-  reps: { rest: 0, target: 60, minRepMs: 700 },
+  // 50 degrees until the lab sets it (M6): 60 was too strict on a real phone test (best 51).
+  reps: { rest: 0, target: 50, minRepMs: 700 },
   faults: [
     {
       id: "shoulders-turning",
@@ -45,7 +47,8 @@ export const neckRotation: ExerciseDefinition = {
       cue: t("Keep your shoulders still, turn only your head", "कंधे स्थिर रखिए, केवल सिर घुमाइए"),
       severity: "minor",
       phase: "active",
-      test: (f) => Math.abs(shouldersYaw(f)) > 20,
+      // 30, not 20: a chair at a slight angle to the phone is not a fault.
+      test: (f) => Math.abs(shouldersYaw(f)) > 30,
     },
   ],
   dose: { sets: 2, reps: 8, restSeconds: 30 },
@@ -75,6 +78,7 @@ export const neckSideBend: ExerciseDefinition = {
     label: "Lateral flexion",
     unit: "deg",
     baselineOf: headTilt,
+    baselineLimit: 15, // must start with the head upright
     compute: (f, side, { baseline }) => {
       const d = headTilt(f) - (baseline ?? 0);
       return side === "left" ? Math.max(0, -d) : Math.max(0, d);

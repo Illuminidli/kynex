@@ -44,7 +44,7 @@ Plain-language version: the "Architecture & security" tab of the Kynex Google Sh
 
 - Video is analysed on the device; only numbers reach the server.
 - Strict security headers in production (CSP, HSTS, no framing, camera only for our own pages).
-- API rate limit (300 requests a minute per address), 100 kB request body limit.
+- API rate limit (300 requests a minute per address), 100 kB request body limit (4 MB for a finished exercise with its movement track).
 - Errors never send internal details to the browser.
 - Secrets only in Replit Secrets / environment variables, never in the repository.
 - GitHub Checks (type checks, tests, build, dependency audit) must pass before merging; Dependabot proposes security updates.
@@ -60,6 +60,15 @@ Plain-language version: the "Architecture & security" tab of the Kynex Google Sh
   CSP adds `'wasm-unsafe-eval'` so this WebAssembly can run; it does not allow JavaScript `eval`.
 - Voice (M2): the phone's built-in speech, spoken on the device; no text is sent anywhere. M4 swaps it for
   pre-recorded natural voice files.
+- Session video (M4): the camera video of each exercise is recorded and kept **only on the patient's phone**
+  (the browser's own storage, IndexedDB) and replayed there with the body outline. The server receives the counts,
+  rep-by-rep results and the movement as joint positions (no picture, no face); the doctor sees that as an animated
+  figure. Clearing the browser's site data deletes the phone's videos.
+- Who sees what (M3-M5b): patients see only their own plan, sessions, reports and visits; a doctor sees only their own
+  patients (anything else answers "not found"); the admin sees the whole clinic. Every plan change, session, symptom,
+  review, note and booking is written to an append-only `activity` log (who, what, when).
+- Bookings (M5b): all times are clinic time (India); the server checks working hours, leave, holidays, the 10-minute
+  gap between visits, double booking of doctor or patient, the 60-day limit and the patients' 12-hour cut-off.
 
 ## Avoiding lock-in
 

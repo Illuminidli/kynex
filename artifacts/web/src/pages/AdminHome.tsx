@@ -1,9 +1,9 @@
 import { getListUsersQueryKey, useListUsers, useResetUser, type AdminUser, type Me } from "@kynex/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Card, LibraryLink, Shell } from "../components/Shell.tsx";
+import { Card, Shell } from "../components/Shell.tsx";
 
-const ROLE_LABEL: Record<AdminUser["role"], string> = { patient: "Patient", clinician: "Clinician", admin: "Admin" };
+const ROLE_LABEL: Record<AdminUser["role"], string> = { patient: "Patient", clinician: "Doctor", admin: "Admin" };
 const when = (iso: string) => new Date(iso).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
 
 export function AdminHome({ me }: { me: Me }) {
@@ -14,7 +14,7 @@ export function AdminHome({ me }: { me: Me }) {
 
   async function resetAccount(user: AdminUser) {
     const ok = window.confirm(
-      `Reset ${user.displayName} to fresh?\n\nThis signs them out on every device, unlocks the account, and starts their journey again from scratch.`,
+      `Reset ${user.displayName} to fresh?\n\nThis signs them out on every device, unlocks the account, and starts their journey again from scratch. For a patient this also deletes their plan, sessions, reports, symptoms, notes and visits.`,
     );
     if (!ok) return;
     setNotice(undefined);
@@ -31,7 +31,6 @@ export function AdminHome({ me }: { me: Me }) {
 
   return (
     <Shell me={me} title="Test accounts">
-      <LibraryLink />
       <p className="-mt-2 text-sm text-ink-soft">
         Everyone who can sign in to {me.clinic.name}. All share the test password. <b>Reset to fresh</b> lets a tester go through the
         journey again from the start.

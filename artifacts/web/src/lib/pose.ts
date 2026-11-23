@@ -68,12 +68,15 @@ export function useCamera(onFrame: (frame: PoseFrame | null) => void) {
   const stream = useRef<MediaStream | null>(null);
   const raf = useRef<number | null>(null);
   const smoother = useRef(new PoseSmoother());
+  /** Each start gets a number; a start that has been overtaken (stopped, or started again) quietly gives up. */
+  const run = useRef(0);
 
   useEffect(() => {
     onFrameRef.current = onFrame;
   }, [onFrame]);
 
   const stop = useCallback(() => {
+    run.current++;
     if (raf.current !== null) cancelAnimationFrame(raf.current);
     raf.current = null;
     stream.current?.getTracks().forEach((track) => track.stop());
@@ -87,6 +90,7 @@ export function useCamera(onFrame: (frame: PoseFrame | null) => void) {
   const start = useCallback(
     async (facingMode: "user" | "environment") => {
       stop();
+      const id = run.current;
       setError(null);
       setStatus("loading");
       try {
@@ -100,12 +104,17 @@ export function useCamera(onFrame: (frame: PoseFrame | null) => void) {
             audio: false,
           }),
         ]);
+        if (id !== run.current || !videoRef.current) {
+          media.getTracks().forEach((t) => t.stop());
+          return;
+        }
         stream.current = media;
-        const video = videoRef.current!;
+        const video = videoRef.current;
         video.srcObject = media;
         video.muted = true;
         video.playsInline = true;
         await video.play();
+        if (id !== run.current) return;
         smoother.current.reset();
         setStatus("running");
         let lastVideoTime = -1;
@@ -119,6 +128,7 @@ export function useCamera(onFrame: (frame: PoseFrame | null) => void) {
         };
         raf.current = requestAnimationFrame(tick);
       } catch (e) {
+        if (id !== run.current) return; // overtaken by a newer start or a stop: not an error
         stop();
         setError(
           e instanceof DOMException && e.name === "NotAllowedError"

@@ -9,3 +9,6 @@ export * from "./clinics.ts";
 export * from "./login-sessions.ts";
 export * from "./users.ts";
 export * from "./exercises.ts";
+export * from "./care.ts";
+export * from "./sessions.ts";
+export * from "./bookings.ts";

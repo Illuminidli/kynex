@@ -1,8 +1,31 @@
 import { useSignOut, type Me } from "@kynex/api-client-react";
 import type { ReactNode } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
-const ROLE_LABEL: Record<Me["role"], string> = { patient: "Patient", clinician: "Clinician", admin: "Admin" };
+const ROLE_LABEL: Record<Me["role"], string> = { patient: "Patient", clinician: "Doctor", admin: "Admin" };
+
+/** The main sections for each role. */
+const NAV: Record<Me["role"], { href: string; label: string }[]> = {
+  patient: [
+    { href: "/", label: "Today" },
+    { href: "/reports", label: "My reports" },
+    { href: "/visits", label: "Visits" },
+  ],
+  clinician: [
+    { href: "/", label: "Patients" },
+    { href: "/calendar", label: "Calendar" },
+    { href: "/hours", label: "Hours & leave" },
+    { href: "/library", label: "Library" },
+  ],
+  admin: [
+    { href: "/", label: "Overview" },
+    { href: "/activity", label: "Activity" },
+    { href: "/calendar", label: "Calendar" },
+    { href: "/hours", label: "Hours & leave" },
+    { href: "/library", label: "Library" },
+    { href: "/accounts", label: "Accounts" },
+  ],
+};
 
 /** Frame shared by every signed-in page: logo, who is signed in, sign-out, optional back link. */
 export function Shell({
@@ -11,13 +34,18 @@ export function Shell({
   children,
   back,
   aside,
+  wide = false,
 }: {
   me: Me;
   title: string;
   children: ReactNode;
   back?: { href: string; label: string };
   aside?: ReactNode;
+  /** Use the full width (dashboards on a laptop). */
+  wide?: boolean;
 }) {
+  const [path] = useLocation();
+  const width = wide ? "max-w-6xl" : "max-w-3xl";
   const signOut = useSignOut({
     mutation: {
       // Reload from scratch so nothing about this person stays in the page's memory.
@@ -28,7 +56,7 @@ export function Shell({
   return (
     <div className="min-h-dvh">
       <header className="border-b border-line bg-white">
-        <div className="mx-auto flex max-w-3xl items-center gap-3 px-5 py-3">
+        <div className={`mx-auto flex ${width} items-center gap-3 px-5 py-3`}>
           <Link href="/" aria-label="Home">
             <img src="/icon.svg" alt="" className="size-9 rounded-xl" />
           </Link>
@@ -46,8 +74,23 @@ export function Shell({
             Sign out
           </button>
         </div>
+        <nav aria-label="Sections" className={`mx-auto flex ${width} gap-1 overflow-x-auto px-3 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}>
+          {NAV[me.role].map((n) => {
+            const here = n.href === "/" ? path === "/" : path.startsWith(n.href);
+            return (
+              <Link
+                key={n.href}
+                href={n.href}
+                aria-current={here ? "page" : undefined}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium ${here ? "bg-brand-50 text-brand-700" : "text-ink-soft hover:bg-canvas"}`}
+              >
+                {n.label}
+              </Link>
+            );
+          })}
+        </nav>
       </header>
-      <main className="mx-auto flex max-w-3xl flex-col gap-5 px-5 py-6">
+      <main className={`mx-auto flex ${width} flex-col gap-5 px-5 py-6`}>
         {back && (
           <Link href={back.href} className="-mb-3 self-start text-sm font-medium text-brand-700">
             ← {back.label}

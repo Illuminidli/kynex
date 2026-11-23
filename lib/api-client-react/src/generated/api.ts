@@ -266,6 +266,979 @@ export interface ExerciseVisibility {
   hidden: boolean;
 }
 
+export interface PersonRef {
+  id: string;
+  displayName: string;
+}
+
+/**
+ * A clinic day (India time), YYYY-MM-DD.
+ */
+export type Day = string;
+
+export type PlanSide = typeof PlanSide[keyof typeof PlanSide];
+
+
+export const PlanSide = {
+  both: 'both',
+  left: 'left',
+  right: 'right',
+} as const;
+
+export interface PlanItem {
+  id: string;
+  exercise: ExerciseSummary;
+  sets: number;
+  /** @nullable */
+  reps: number | null;
+  /** @nullable */
+  holdSeconds: number | null;
+  restSeconds: number;
+  /** 0 = Sunday ... 6 = Saturday. */
+  weekdays: number[];
+  timesPerDay: number;
+  side: PlanSide;
+  note: string;
+  /** Scheduled for today. */
+  today: boolean;
+}
+
+export interface Plan {
+  id: string;
+  startDate: Day;
+  /** @nullable */
+  endDate: string | null;
+  note: string;
+  updatedAt: string;
+  /** @nullable */
+  updatedByName: string | null;
+  items: PlanItem[];
+}
+
+export interface PlanResponse {
+  plan: Plan | null;
+}
+
+export interface PlanItemInput {
+  /** @pattern ^[a-z0-9-]{1,60}$ */
+  exerciseSlug: string;
+  /**
+     * @minimum 1
+     * @maximum 10
+     */
+  sets: number;
+  /**
+     * @minimum 1
+     * @maximum 50
+     * @nullable
+     */
+  reps: number | null;
+  /**
+     * @minimum 5
+     * @maximum 300
+     * @nullable
+     */
+  holdSeconds: number | null;
+  /**
+     * @minimum 0
+     * @maximum 300
+     */
+  restSeconds: number;
+  /**
+     * @minItems 1
+     * @maxItems 7
+     * @items.minimum 0
+     * @items.maximum 6
+     */
+  weekdays: number[];
+  /**
+     * @minimum 1
+     * @maximum 3
+     */
+  timesPerDay: number;
+  side: PlanSide;
+  /** @maxLength 300 */
+  note: string;
+}
+
+export interface PlanInput {
+  startDate: string;
+  /** @nullable */
+  endDate: string | null;
+  /** @maxLength 1000 */
+  note: string;
+  /**
+     * @minItems 1
+     * @maxItems 15
+     */
+  items: PlanItemInput[];
+}
+
+export interface NoteInput {
+  /**
+     * @minLength 1
+     * @maxLength 2000
+     */
+  text: string;
+}
+
+export interface Note {
+  id: string;
+  text: string;
+  createdAt: string;
+  /** @nullable */
+  authorName: string | null;
+}
+
+/**
+ * Red-flag questions at the check-in (draft until QI Spine approves them).
+ */
+export type CheckInFlag = typeof CheckInFlag[keyof typeof CheckInFlag];
+
+
+export const CheckInFlag = {
+  numbness: 'numbness',
+  bladder: 'bladder',
+  chest: 'chest',
+  fall: 'fall',
+  severe: 'severe',
+} as const;
+
+export interface SymptomInput {
+  /**
+     * @minimum 0
+     * @maximum 10
+     * @nullable
+     */
+  pain: number | null;
+  /** @maxLength 1000 */
+  text: string;
+  /** @nullable */
+  sessionId: string | null;
+}
+
+export type SymptomSource = typeof SymptomSource[keyof typeof SymptomSource];
+
+
+export const SymptomSource = {
+  'check-in': 'check-in',
+  session: 'session',
+  home: 'home',
+} as const;
+
+export interface Symptom {
+  id: string;
+  createdAt: string;
+  source: SymptomSource;
+  /** @nullable */
+  pain: number | null;
+  redFlags: string[];
+  text: string;
+  /** @nullable */
+  sessionId: string | null;
+  /** @nullable */
+  acknowledgedAt: string | null;
+  /** @nullable */
+  acknowledgedByName: string | null;
+}
+
+export type AttentionKind = typeof AttentionKind[keyof typeof AttentionKind];
+
+
+export const AttentionKind = {
+  'red-flag': 'red-flag',
+  symptom: 'symptom',
+  pain: 'pain',
+  painful: 'painful',
+  missed: 'missed',
+  form: 'form',
+  review: 'review',
+} as const;
+
+export interface Attention {
+  kind: AttentionKind;
+  text: string;
+}
+
+export type VisitMode = typeof VisitMode[keyof typeof VisitMode];
+
+
+export const VisitMode = {
+  clinic: 'clinic',
+  video: 'video',
+  home: 'home',
+} as const;
+
+export interface VisitType {
+  id: string;
+  code: string;
+  name: string;
+  nameHi: string;
+  minutes: number;
+  mode: VisitMode;
+}
+
+export type AppointmentStatus = typeof AppointmentStatus[keyof typeof AppointmentStatus];
+
+
+export const AppointmentStatus = {
+  booked: 'booked',
+  confirmed: 'confirmed',
+  arrived: 'arrived',
+  completed: 'completed',
+  'no-show': 'no-show',
+  cancelled: 'cancelled',
+} as const;
+
+export interface Appointment {
+  id: string;
+  patient: PersonRef;
+  clinician: PersonRef;
+  visitType: VisitType;
+  startsAt: string;
+  endsAt: string;
+  status: AppointmentStatus;
+  /** @nullable */
+  seriesId: string | null;
+  /** @nullable */
+  meetingLink: string | null;
+  note: string;
+  /** @nullable */
+  cancelReason: string | null;
+  /** @nullable */
+  createdByName: string | null;
+  /** The signed-in person may still move or cancel it. */
+  canChange: boolean;
+}
+
+export interface PatientRow {
+  id: string;
+  displayName: string;
+  email: string;
+  /** @nullable */
+  clinicianName: string | null;
+  hasPlan: boolean;
+  exercises: number;
+  /** @nullable */
+  lastSessionAt: string | null;
+  /**
+     * Percent of planned sessions done in the last 14 days.
+     * @nullable
+     */
+  adherence: number | null;
+  attention: Attention[];
+  nextAppointment: Appointment | null;
+}
+
+export interface PatientList {
+  patients: PatientRow[];
+}
+
+export interface DayAdherence {
+  day: Day;
+  planned: number;
+  done: number;
+}
+
+export interface PainPoint {
+  day: Day;
+  sessionId: string;
+  /** @nullable */
+  before: number | null;
+  /** @nullable */
+  after: number | null;
+}
+
+export type RomSeriesPointsItem = {
+  day: Day;
+  sessionId: string;
+  best: number;
+};
+
+export interface RomSeries {
+  slug: string;
+  name: Text;
+  unit: string;
+  /** @nullable */
+  goal: number | null;
+  points: RomSeriesPointsItem[];
+}
+
+export type SessionStatus = typeof SessionStatus[keyof typeof SessionStatus];
+
+
+export const SessionStatus = {
+  'in-progress': 'in-progress',
+  completed: 'completed',
+  stopped: 'stopped',
+  'red-flag': 'red-flag',
+} as const;
+
+export interface SessionRow {
+  id: string;
+  day: Day;
+  startedAt: string;
+  status: SessionStatus;
+  exercises: number;
+  repsFull: number;
+  repsPartial: number;
+  holds: number;
+  /** @nullable */
+  quality: number | null;
+  /** @nullable */
+  painBefore: number | null;
+  /** @nullable */
+  painAfter: number | null;
+  /** Reps or holds with a form problem. */
+  problems: number;
+  reviewed: boolean;
+}
+
+export interface SessionRowList {
+  sessions: SessionRow[];
+}
+
+export type PatientOverviewPatient = {
+  id: string;
+  displayName: string;
+  email: string;
+};
+
+export type ActivityItemArea = typeof ActivityItemArea[keyof typeof ActivityItemArea];
+
+
+export const ActivityItemArea = {
+  plan: 'plan',
+  session: 'session',
+  symptom: 'symptom',
+  booking: 'booking',
+  review: 'review',
+  note: 'note',
+  account: 'account',
+} as const;
+
+export interface ActivityItem {
+  id: string;
+  /** e.g. session.completed, booking.cancelled. */
+  kind: string;
+  area: ActivityItemArea;
+  summary: string;
+  createdAt: string;
+  /** @nullable */
+  actorName: string | null;
+  actorRole: Role | null;
+  patient: PersonRef | null;
+  /** @nullable */
+  sessionId: string | null;
+  /** @nullable */
+  appointmentId: string | null;
+}
+
+export interface PatientOverview {
+  patient: PatientOverviewPatient;
+  /** @nullable */
+  clinicianName: string | null;
+  plan: Plan | null;
+  /** Last 28 days. */
+  adherence: DayAdherence[];
+  /** @nullable */
+  adherencePercent: number | null;
+  pain: PainPoint[];
+  rom: RomSeries[];
+  sessions: SessionRow[];
+  symptoms: Symptom[];
+  notes: Note[];
+  attention: Attention[];
+  /** Upcoming visits. */
+  appointments: Appointment[];
+  activity: ActivityItem[];
+}
+
+export type TodayInProgress = {
+  id: string;
+  doneItemIds: string[];
+} | null;
+
+export type TimeOfDay = typeof TimeOfDay[keyof typeof TimeOfDay];
+
+
+export const TimeOfDay = {
+  any: 'any',
+  morning: 'morning',
+  afternoon: 'afternoon',
+} as const;
+
+export type WaitlistEntryStatus = typeof WaitlistEntryStatus[keyof typeof WaitlistEntryStatus];
+
+
+export const WaitlistEntryStatus = {
+  waiting: 'waiting',
+  offered: 'offered',
+  booked: 'booked',
+  removed: 'removed',
+} as const;
+
+export interface WaitlistEntry {
+  id: string;
+  patient: PersonRef;
+  visitType: VisitType;
+  fromDate: Day;
+  toDate: Day;
+  timeOfDay: TimeOfDay;
+  status: WaitlistEntryStatus;
+  /** @nullable */
+  offerStartsAt: string | null;
+  /** @nullable */
+  offerExpiresAt: string | null;
+  createdAt: string;
+}
+
+export interface Today {
+  day: Day;
+  hasPlan: boolean;
+  plan: Plan | null;
+  /** Sessions planned today (0 = rest day). */
+  timesPerDay: number;
+  sessionsDoneToday: number;
+  inProgress: TodayInProgress;
+  nextAppointment: Appointment | null;
+  /** Slots offered from the waiting list. */
+  offers: WaitlistEntry[];
+  lastSession: SessionRow | null;
+}
+
+export interface StartSessionRequest {
+  /**
+     * @minimum 0
+     * @maximum 10
+     */
+  pain: number;
+  /** @maxItems 5 */
+  redFlags: CheckInFlag[];
+}
+
+export interface SessionStarted {
+  id: string;
+  status: SessionStatus;
+  /** A red-flag answer stopped the session; tell the patient to contact the clinic. */
+  stopped: boolean;
+}
+
+/**
+ * @nullable
+ */
+export type Side = typeof Side[keyof typeof Side] | null;
+
+
+export const Side = {
+  left: 'left',
+  right: 'right',
+} as const;
+
+export interface SavedRep {
+  /**
+     * @minimum 1
+     * @maximum 20
+     */
+  set: number;
+  side: Side | null;
+  /** Milliseconds from the start of the movement track. */
+  startMs: number;
+  endMs: number;
+  peak: number;
+  progress: number;
+  full: boolean;
+  heldMs: number;
+  /**
+     * @maxItems 10
+     * @items.maxLength 60
+     */
+  faults: string[];
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  quality: number;
+}
+
+export interface SavedHold {
+  /**
+     * @minimum 1
+     * @maximum 20
+     */
+  set: number;
+  side: Side | null;
+  startMs: number;
+  endMs: number;
+  seconds: number;
+  completed: boolean;
+  best: number;
+  /**
+     * @maxItems 10
+     * @items.maxLength 60
+     */
+  faults: string[];
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  quality: number;
+}
+
+/**
+ * Joint positions only (no picture). data is base64 of little-endian int16 millimetres, frame by frame, x y z per joint.
+ */
+export interface MotionTrack {
+  /**
+     * @minimum 1
+     * @maximum 30
+     */
+  fps: number;
+  /**
+     * @minItems 1
+     * @maxItems 33
+     * @items.minimum 0
+     * @items.maximum 32
+     */
+  joints: number[];
+  /**
+     * @minimum 1
+     * @maximum 20000
+     */
+  frames: number;
+  /** @maxLength 3000000 */
+  data: string;
+}
+
+export type Feeling = typeof Feeling[keyof typeof Feeling];
+
+
+export const Feeling = {
+  easy: 'easy',
+  ok: 'ok',
+  hard: 'hard',
+  painful: 'painful',
+} as const;
+
+export type SessionExerciseInputMode = typeof SessionExerciseInputMode[keyof typeof SessionExerciseInputMode];
+
+
+export const SessionExerciseInputMode = {
+  camera: 'camera',
+  manual: 'manual',
+} as const;
+
+export type SessionExerciseInputStatus = typeof SessionExerciseInputStatus[keyof typeof SessionExerciseInputStatus];
+
+
+export const SessionExerciseInputStatus = {
+  done: 'done',
+  skipped: 'skipped',
+  stopped: 'stopped',
+} as const;
+
+export type SessionExerciseInputFaultCounts = {[key: string]: number};
+
+export interface SessionExerciseInput {
+  /** @nullable */
+  itemId: string | null;
+  /** @pattern ^[a-z0-9-]{1,60}$ */
+  exerciseSlug: string;
+  mode: SessionExerciseInputMode;
+  status: SessionExerciseInputStatus;
+  /**
+     * @minimum 0
+     * @maximum 20
+     */
+  setsDone: number;
+  /**
+     * @minimum 0
+     * @maximum 1000
+     */
+  repsFull: number;
+  /**
+     * @minimum 0
+     * @maximum 1000
+     */
+  repsPartial: number;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  holdsDone: number;
+  /** @nullable */
+  best: number | null;
+  /**
+     * @minimum 0
+     * @maximum 100
+     * @nullable
+     */
+  quality: number | null;
+  feeling: Feeling | null;
+  /** @maxItems 500 */
+  reps: SavedRep[];
+  /** @maxItems 100 */
+  holds: SavedHold[];
+  faultCounts: SessionExerciseInputFaultCounts;
+  /**
+     * @minimum 0
+     * @maximum 1
+     * @nullable
+     */
+  visibleRatio: number | null;
+  videoOnPhone: boolean;
+  /**
+     * @minimum 0
+     * @maximum 7200
+     */
+  durationSeconds: number;
+  track: MotionTrack | null;
+}
+
+export interface SavedExercise {
+  id: string;
+}
+
+export type FinishSessionRequestStatus = typeof FinishSessionRequestStatus[keyof typeof FinishSessionRequestStatus];
+
+
+export const FinishSessionRequestStatus = {
+  completed: 'completed',
+  stopped: 'stopped',
+} as const;
+
+export interface FinishSessionRequest {
+  /**
+     * @minimum 0
+     * @maximum 10
+     * @nullable
+     */
+  painAfter: number | null;
+  status: FinishSessionRequestStatus;
+}
+
+export interface ReviewRequest {
+  /** @maxLength 2000 */
+  note: string;
+}
+
+export interface ExerciseTarget {
+  sets: number;
+  /** @nullable */
+  reps: number | null;
+  /** @nullable */
+  holdSeconds: number | null;
+  side: PlanSide;
+  /**
+     * Camera value at the start position.
+     * @nullable
+     */
+  rest: number | null;
+  /**
+     * Camera value for the full target range.
+     * @nullable
+     */
+  goal: number | null;
+  unit: string;
+}
+
+export type FaultSummarySeverity = typeof FaultSummarySeverity[keyof typeof FaultSummarySeverity];
+
+
+export const FaultSummarySeverity = {
+  minor: 'minor',
+  major: 'major',
+} as const;
+
+export interface FaultSummary {
+  id: string;
+  message: Text;
+  severity: FaultSummarySeverity;
+  count: number;
+}
+
+export type ReportExerciseMode = typeof ReportExerciseMode[keyof typeof ReportExerciseMode];
+
+
+export const ReportExerciseMode = {
+  camera: 'camera',
+  manual: 'manual',
+} as const;
+
+export type ReportExerciseStatus = typeof ReportExerciseStatus[keyof typeof ReportExerciseStatus];
+
+
+export const ReportExerciseStatus = {
+  done: 'done',
+  skipped: 'skipped',
+  stopped: 'stopped',
+} as const;
+
+export interface ReportExercise {
+  id: string;
+  exercise: ExerciseSummary;
+  mode: ReportExerciseMode;
+  status: ReportExerciseStatus;
+  target: ExerciseTarget;
+  setsDone: number;
+  repsFull: number;
+  repsPartial: number;
+  holdsDone: number;
+  /** @nullable */
+  best: number | null;
+  /**
+     * Best in the patient's previous session with this exercise.
+     * @nullable
+     */
+  previousBest: number | null;
+  /** @nullable */
+  quality: number | null;
+  feeling: Feeling | null;
+  reps: SavedRep[];
+  holds: SavedHold[];
+  faults: FaultSummary[];
+  /** @nullable */
+  visibleRatio: number | null;
+  videoOnPhone: boolean;
+  hasTrack: boolean;
+  durationSeconds: number;
+}
+
+export type SessionReportCheckIn = {
+  pain: number;
+  redFlags: string[];
+} | null;
+
+export type SessionReportReview = {
+  at: string;
+  /** @nullable */
+  byName: string | null;
+  note: string;
+} | null;
+
+export type SessionReportTotals = {
+  repsFull: number;
+  repsPartial: number;
+  holds: number;
+  /** @nullable */
+  quality: number | null;
+  problems: number;
+};
+
+export interface SessionReport {
+  id: string;
+  patient: PersonRef;
+  day: Day;
+  startedAt: string;
+  /** @nullable */
+  endedAt: string | null;
+  status: SessionStatus;
+  checkIn: SessionReportCheckIn;
+  /** @nullable */
+  painAfter: number | null;
+  review: SessionReportReview;
+  exercises: ReportExercise[];
+  totals: SessionReportTotals;
+}
+
+export interface VisitTypeList {
+  visitTypes: VisitType[];
+}
+
+export interface ClinicianList {
+  clinicians: PersonRef[];
+}
+
+export type SlotsSlotsItem = {
+  startsAt: string;
+  endsAt: string;
+};
+
+export interface Slots {
+  date: Day;
+  slots: SlotsSlotsItem[];
+  /**
+     * Why nothing can be booked that day (holiday, leave, not a working day, too far ahead).
+     * @nullable
+     */
+  closed: string | null;
+}
+
+export interface AppointmentList {
+  appointments: Appointment[];
+}
+
+export type BookRequestRepeat = {
+  /**
+     * @minItems 1
+     * @maxItems 6
+     * @items.minimum 0
+     * @items.maximum 6
+     */
+  weekdays: number[];
+  /**
+     * @minimum 1
+     * @maximum 12
+     */
+  weeks: number;
+};
+
+export interface BookRequest {
+  /** Staff booking for a patient. Patients book for themselves. */
+  patientId?: string;
+  visitTypeId: string;
+  startsAt: string;
+  /** @maxLength 500 */
+  note?: string;
+  /**
+     * @maxLength 300
+     * @nullable
+     */
+  meetingLink?: string | null;
+  repeat?: BookRequestRepeat;
+  preview?: boolean;
+}
+
+export type BookResultPlannedItem = {
+  startsAt: string;
+  ok: boolean;
+  /** @nullable */
+  reason: string | null;
+};
+
+export interface BookResult {
+  booked: Appointment[];
+  /** Every date asked for, and whether it can be (or was) booked. */
+  planned: BookResultPlannedItem[];
+  /** @nullable */
+  seriesId: string | null;
+}
+
+export interface MoveRequest {
+  startsAt: string;
+}
+
+export type AppointmentStatusRequestStatus = typeof AppointmentStatusRequestStatus[keyof typeof AppointmentStatusRequestStatus];
+
+
+export const AppointmentStatusRequestStatus = {
+  confirmed: 'confirmed',
+  arrived: 'arrived',
+  completed: 'completed',
+  'no-show': 'no-show',
+  cancelled: 'cancelled',
+} as const;
+
+export interface AppointmentStatusRequest {
+  status: AppointmentStatusRequestStatus;
+  /** @maxLength 300 */
+  reason?: string;
+}
+
+export type WeeklyHoursHoursItem = {
+  /**
+     * @minimum 0
+     * @maximum 6
+     */
+  weekday: number;
+  /**
+     * Minutes from midnight, India time.
+     * @minimum 0
+     * @maximum 1440
+     */
+  startMinute: number;
+  /**
+     * @minimum 0
+     * @maximum 1440
+     */
+  endMinute: number;
+};
+
+export interface WeeklyHours {
+  clinicianId: string;
+  /** @maxItems 21 */
+  hours: WeeklyHoursHoursItem[];
+}
+
+export interface TimeOff {
+  id: string;
+  /**
+     * Null = the whole clinic is closed.
+     * @nullable
+     */
+  clinicianId: string | null;
+  /** @nullable */
+  clinicianName: string | null;
+  startDate: Day;
+  endDate: Day;
+  reason: string;
+}
+
+export interface TimeOffList {
+  timeOff: TimeOff[];
+}
+
+export interface TimeOffInput {
+  /** @nullable */
+  clinicianId: string | null;
+  startDate: string;
+  endDate: string;
+  /** @maxLength 200 */
+  reason: string;
+}
+
+export interface WaitlistList {
+  entries: WaitlistEntry[];
+}
+
+export interface WaitlistInput {
+  patientId?: string;
+  visitTypeId: string;
+  fromDate: string;
+  toDate: string;
+  timeOfDay: TimeOfDay;
+}
+
+export interface ActivityList {
+  items: ActivityItem[];
+}
+
+export type OverviewCounts = {
+  patients: number;
+  clinicians: number;
+  sessionsToday: number;
+  sessionsWeek: number;
+  /**
+     * Percent of planned sessions done in the last 7 days
+     * @nullable
+     */
+  adherence7: number | null;
+  openAlerts: number;
+  openSymptoms: number;
+  appointmentsToday: number;
+  noShows30: number;
+  cancellations30: number;
+  waiting: number;
+};
+
+export interface Overview {
+  day: Day;
+  counts: OverviewCounts;
+  patients: PatientRow[];
+  today: Appointment[];
+  recent: ActivityItem[];
+}
+
+/**
+ * Not found (or not yours to see).
+ */
+export type NotFoundResponse = Error;
+
+/**
+ * Clashes with something already there (e.g. the time is no longer free).
+ */
+export type ConflictResponse = Error;
+
 /**
  * The request was not in the expected shape.
  */
@@ -285,6 +1258,45 @@ export type NotAllowedResponse = Error;
  * No exercise with that name.
  */
 export type NoSuchExerciseResponse = Error;
+
+export type GetSlotsParams = {
+  visitTypeId: string;
+  date: string;
+  /** Staff booking for a patient. */
+  patientId?: string;
+  /** When moving a visit, its own time counts as free. */
+  ignoreAppointmentId?: string;
+};
+
+export type ListAppointmentsParams = {
+  from: string;
+  to: string;
+  patientId?: string;
+};
+
+export type GetAvailabilityParams = {
+  clinicianId?: string;
+};
+
+export type ListActivityParams = {
+  patientId?: string;
+  /** plan, session, symptom, booking, review or note. */
+  area?: ListActivityArea;
+  from?: string;
+  to?: string;
+};
+
+export type ListActivityArea = typeof ListActivityArea[keyof typeof ListActivityArea];
+
+
+export const ListActivityArea = {
+  plan: 'plan',
+  session: 'session',
+  symptom: 'symptom',
+  booking: 'booking',
+  review: 'review',
+  note: 'note',
+} as const;
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -1408,3 +2420,4198 @@ export const useSetExerciseVisibility = <TError = InvalidResponse | SignedOutRes
       > => {
       return useMutation(getSetExerciseVisibilityMutationOptions(options), queryClient);
     }
+
+export type listPatientsResponse200 = {
+  data: PatientList
+  status: 200
+}
+
+export type listPatientsResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type listPatientsResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type listPatientsResponseSuccess = (listPatientsResponse200) & {
+  headers: Headers;
+};
+export type listPatientsResponseError = (listPatientsResponse401 | listPatientsResponse403) & {
+  headers: Headers;
+};
+
+export type listPatientsResponse = (listPatientsResponseSuccess | listPatientsResponseError)
+
+export const getListPatientsUrl = () => {
+
+
+
+
+  return `/api/patients`
+}
+
+/**
+ * @summary The doctor's patients (admin - every patient), with who needs attention first.
+ */
+export const listPatients = async ( options?: RequestInit): Promise<listPatientsResponse> => {
+
+  const res = await fetch(getListPatientsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listPatientsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listPatientsResponse
+}
+
+
+
+
+
+export const getListPatientsQueryKey = () => {
+    return [
+    `/api/patients`
+    ] as const;
+    }
+
+
+export const getListPatientsQueryOptions = <TData = Awaited<ReturnType<typeof listPatients>>, TError = SignedOutResponse | NotAllowedResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPatients>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListPatientsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPatients>>> = ({ signal }) => listPatients({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listPatients>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListPatientsQueryResult = NonNullable<Awaited<ReturnType<typeof listPatients>>>
+export type ListPatientsQueryError = SignedOutResponse | NotAllowedResponse
+
+
+/** @summary The doctor's patients (admin - every patient), with who needs attention first. */
+export function useListPatients<TData = Awaited<ReturnType<typeof listPatients>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPatients>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listPatients>>,
+          TError,
+          Awaited<ReturnType<typeof listPatients>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The doctor's patients (admin - every patient), with who needs attention first. */
+export function useListPatients<TData = Awaited<ReturnType<typeof listPatients>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPatients>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listPatients>>,
+          TError,
+          Awaited<ReturnType<typeof listPatients>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The doctor's patients (admin - every patient), with who needs attention first. */
+export function useListPatients<TData = Awaited<ReturnType<typeof listPatients>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPatients>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The doctor's patients (admin - every patient), with who needs attention first. */
+export function useListPatients<TData = Awaited<ReturnType<typeof listPatients>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listPatients>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListPatientsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type getPatientResponse200 = {
+  data: PatientOverview
+  status: 200
+}
+
+export type getPatientResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type getPatientResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type getPatientResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type getPatientResponseSuccess = (getPatientResponse200) & {
+  headers: Headers;
+};
+export type getPatientResponseError = (getPatientResponse401 | getPatientResponse403 | getPatientResponse404) & {
+  headers: Headers;
+};
+
+export type getPatientResponse = (getPatientResponseSuccess | getPatientResponseError)
+
+export const getGetPatientUrl = (patientId: string,) => {
+
+
+
+
+  return `/api/patients/${patientId}`
+}
+
+/**
+ * @summary Everything about one patient for the doctor - plan, adherence, pain, range of motion, sessions, symptoms, notes, visits.
+ */
+export const getPatient = async (patientId: string, options?: RequestInit): Promise<getPatientResponse> => {
+
+  const res = await fetch(getGetPatientUrl(patientId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getPatientResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getPatientResponse
+}
+
+
+
+
+
+export const getGetPatientQueryKey = (patientId: string,) => {
+    return [
+    `/api/patients/${patientId}`
+    ] as const;
+    }
+
+
+export const getGetPatientQueryOptions = <TData = Awaited<ReturnType<typeof getPatient>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(patientId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPatient>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPatientQueryKey(patientId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPatient>>> = ({ signal }) => getPatient(patientId, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: patientId !== null && patientId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPatient>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPatientQueryResult = NonNullable<Awaited<ReturnType<typeof getPatient>>>
+export type GetPatientQueryError = SignedOutResponse | NotAllowedResponse | NotFoundResponse
+
+
+/** @summary Everything about one patient for the doctor - plan, adherence, pain, range of motion, sessions, symptoms, notes, visits. */
+export function useGetPatient<TData = Awaited<ReturnType<typeof getPatient>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ patientId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPatient>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPatient>>,
+          TError,
+          Awaited<ReturnType<typeof getPatient>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Everything about one patient for the doctor - plan, adherence, pain, range of motion, sessions, symptoms, notes, visits. */
+export function useGetPatient<TData = Awaited<ReturnType<typeof getPatient>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ patientId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPatient>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPatient>>,
+          TError,
+          Awaited<ReturnType<typeof getPatient>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Everything about one patient for the doctor - plan, adherence, pain, range of motion, sessions, symptoms, notes, visits. */
+export function useGetPatient<TData = Awaited<ReturnType<typeof getPatient>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ patientId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPatient>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Everything about one patient for the doctor - plan, adherence, pain, range of motion, sessions, symptoms, notes, visits. */
+export function useGetPatient<TData = Awaited<ReturnType<typeof getPatient>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ patientId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPatient>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPatientQueryOptions(patientId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type getPlanResponse200 = {
+  data: PlanResponse
+  status: 200
+}
+
+export type getPlanResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type getPlanResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type getPlanResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type getPlanResponseSuccess = (getPlanResponse200) & {
+  headers: Headers;
+};
+export type getPlanResponseError = (getPlanResponse401 | getPlanResponse403 | getPlanResponse404) & {
+  headers: Headers;
+};
+
+export type getPlanResponse = (getPlanResponseSuccess | getPlanResponseError)
+
+export const getGetPlanUrl = (patientId: string,) => {
+
+
+
+
+  return `/api/patients/${patientId}/plan`
+}
+
+/**
+ * @summary A patient's exercise plan (null if none yet).
+ */
+export const getPlan = async (patientId: string, options?: RequestInit): Promise<getPlanResponse> => {
+
+  const res = await fetch(getGetPlanUrl(patientId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getPlanResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getPlanResponse
+}
+
+
+
+
+
+export const getGetPlanQueryKey = (patientId: string,) => {
+    return [
+    `/api/patients/${patientId}/plan`
+    ] as const;
+    }
+
+
+export const getGetPlanQueryOptions = <TData = Awaited<ReturnType<typeof getPlan>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(patientId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlan>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPlanQueryKey(patientId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlan>>> = ({ signal }) => getPlan(patientId, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: patientId !== null && patientId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlan>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPlanQueryResult = NonNullable<Awaited<ReturnType<typeof getPlan>>>
+export type GetPlanQueryError = SignedOutResponse | NotAllowedResponse | NotFoundResponse
+
+
+/** @summary A patient's exercise plan (null if none yet). */
+export function useGetPlan<TData = Awaited<ReturnType<typeof getPlan>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ patientId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlan>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPlan>>,
+          TError,
+          Awaited<ReturnType<typeof getPlan>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary A patient's exercise plan (null if none yet). */
+export function useGetPlan<TData = Awaited<ReturnType<typeof getPlan>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ patientId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlan>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPlan>>,
+          TError,
+          Awaited<ReturnType<typeof getPlan>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary A patient's exercise plan (null if none yet). */
+export function useGetPlan<TData = Awaited<ReturnType<typeof getPlan>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ patientId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlan>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary A patient's exercise plan (null if none yet). */
+export function useGetPlan<TData = Awaited<ReturnType<typeof getPlan>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ patientId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlan>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPlanQueryOptions(patientId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type savePlanResponse200 = {
+  data: PlanResponse
+  status: 200
+}
+
+export type savePlanResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type savePlanResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type savePlanResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type savePlanResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type savePlanResponseSuccess = (savePlanResponse200) & {
+  headers: Headers;
+};
+export type savePlanResponseError = (savePlanResponse400 | savePlanResponse401 | savePlanResponse403 | savePlanResponse404) & {
+  headers: Headers;
+};
+
+export type savePlanResponse = (savePlanResponseSuccess | savePlanResponseError)
+
+export const getSavePlanUrl = (patientId: string,) => {
+
+
+
+
+  return `/api/patients/${patientId}/plan`
+}
+
+/**
+ * @summary Create or replace a patient's plan. Recorded in the activity log with who and when.
+ */
+export const savePlan = async (patientId: string,
+    planInput: PlanInput, options?: RequestInit): Promise<savePlanResponse> => {
+
+  const res = await fetch(getSavePlanUrl(patientId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(planInput)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: savePlanResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as savePlanResponse
+}
+
+
+
+
+
+export const getSavePlanMutationKey = () => ['savePlan'] as const;
+
+export const getSavePlanMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof savePlan>>, TError,SavePlanMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof savePlan>>, TError,SavePlanMutationVariables, TContext> => {
+
+const mutationKey = getSavePlanMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof savePlan>>, SavePlanMutationVariables> = (props) => {
+          const {patientId,data} = props ?? {};
+
+          return  savePlan(patientId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SavePlanMutationResult = NonNullable<Awaited<ReturnType<typeof savePlan>>>
+    export type SavePlanMutationBody = PlanInput
+    export type SavePlanMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse
+    export type SavePlanMutationVariables = {patientId: string;data: PlanInput}
+
+    /** @summary Create or replace a patient's plan. Recorded in the activity log with who and when. */
+export const useSavePlan = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof savePlan>>, TError,SavePlanMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof savePlan>>,
+        TError,
+        SavePlanMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSavePlanMutationOptions(options), queryClient);
+    }
+
+export type addNoteResponse200 = {
+  data: Note
+  status: 200
+}
+
+export type addNoteResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type addNoteResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type addNoteResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type addNoteResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type addNoteResponseSuccess = (addNoteResponse200) & {
+  headers: Headers;
+};
+export type addNoteResponseError = (addNoteResponse400 | addNoteResponse401 | addNoteResponse403 | addNoteResponse404) & {
+  headers: Headers;
+};
+
+export type addNoteResponse = (addNoteResponseSuccess | addNoteResponseError)
+
+export const getAddNoteUrl = (patientId: string,) => {
+
+
+
+
+  return `/api/patients/${patientId}/notes`
+}
+
+/**
+ * @summary Add a doctor's note about a patient.
+ */
+export const addNote = async (patientId: string,
+    noteInput: NoteInput, options?: RequestInit): Promise<addNoteResponse> => {
+
+  const res = await fetch(getAddNoteUrl(patientId),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(noteInput)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: addNoteResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as addNoteResponse
+}
+
+
+
+
+
+export const getAddNoteMutationKey = () => ['addNote'] as const;
+
+export const getAddNoteMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addNote>>, TError,AddNoteMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof addNote>>, TError,AddNoteMutationVariables, TContext> => {
+
+const mutationKey = getAddNoteMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addNote>>, AddNoteMutationVariables> = (props) => {
+          const {patientId,data} = props ?? {};
+
+          return  addNote(patientId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddNoteMutationResult = NonNullable<Awaited<ReturnType<typeof addNote>>>
+    export type AddNoteMutationBody = NoteInput
+    export type AddNoteMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse
+    export type AddNoteMutationVariables = {patientId: string;data: NoteInput}
+
+    /** @summary Add a doctor's note about a patient. */
+export const useAddNote = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addNote>>, TError,AddNoteMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addNote>>,
+        TError,
+        AddNoteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddNoteMutationOptions(options), queryClient);
+    }
+
+export type reportSymptomResponse200 = {
+  data: Symptom
+  status: 200
+}
+
+export type reportSymptomResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type reportSymptomResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type reportSymptomResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type reportSymptomResponseSuccess = (reportSymptomResponse200) & {
+  headers: Headers;
+};
+export type reportSymptomResponseError = (reportSymptomResponse400 | reportSymptomResponse401 | reportSymptomResponse403) & {
+  headers: Headers;
+};
+
+export type reportSymptomResponse = (reportSymptomResponseSuccess | reportSymptomResponseError)
+
+export const getReportSymptomUrl = () => {
+
+
+
+
+  return `/api/symptoms`
+}
+
+/**
+ * @summary The patient reports a symptom (from home or during a session).
+ */
+export const reportSymptom = async (symptomInput: SymptomInput, options?: RequestInit): Promise<reportSymptomResponse> => {
+
+  const res = await fetch(getReportSymptomUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(symptomInput)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: reportSymptomResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as reportSymptomResponse
+}
+
+
+
+
+
+export const getReportSymptomMutationKey = () => ['reportSymptom'] as const;
+
+export const getReportSymptomMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reportSymptom>>, TError,ReportSymptomMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof reportSymptom>>, TError,ReportSymptomMutationVariables, TContext> => {
+
+const mutationKey = getReportSymptomMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reportSymptom>>, ReportSymptomMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  reportSymptom(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReportSymptomMutationResult = NonNullable<Awaited<ReturnType<typeof reportSymptom>>>
+    export type ReportSymptomMutationBody = SymptomInput
+    export type ReportSymptomMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse
+    export type ReportSymptomMutationVariables = {data: SymptomInput}
+
+    /** @summary The patient reports a symptom (from home or during a session). */
+export const useReportSymptom = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reportSymptom>>, TError,ReportSymptomMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof reportSymptom>>,
+        TError,
+        ReportSymptomMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReportSymptomMutationOptions(options), queryClient);
+    }
+
+export type acknowledgeSymptomResponse200 = {
+  data: Symptom
+  status: 200
+}
+
+export type acknowledgeSymptomResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type acknowledgeSymptomResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type acknowledgeSymptomResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type acknowledgeSymptomResponseSuccess = (acknowledgeSymptomResponse200) & {
+  headers: Headers;
+};
+export type acknowledgeSymptomResponseError = (acknowledgeSymptomResponse401 | acknowledgeSymptomResponse403 | acknowledgeSymptomResponse404) & {
+  headers: Headers;
+};
+
+export type acknowledgeSymptomResponse = (acknowledgeSymptomResponseSuccess | acknowledgeSymptomResponseError)
+
+export const getAcknowledgeSymptomUrl = (symptomId: string,) => {
+
+
+
+
+  return `/api/symptoms/${symptomId}/acknowledge`
+}
+
+/**
+ * @summary The doctor marks a symptom report as seen.
+ */
+export const acknowledgeSymptom = async (symptomId: string, options?: RequestInit): Promise<acknowledgeSymptomResponse> => {
+
+  const res = await fetch(getAcknowledgeSymptomUrl(symptomId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: acknowledgeSymptomResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as acknowledgeSymptomResponse
+}
+
+
+
+
+
+export const getAcknowledgeSymptomMutationKey = () => ['acknowledgeSymptom'] as const;
+
+export const getAcknowledgeSymptomMutationOptions = <TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acknowledgeSymptom>>, TError,AcknowledgeSymptomMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof acknowledgeSymptom>>, TError,AcknowledgeSymptomMutationVariables, TContext> => {
+
+const mutationKey = getAcknowledgeSymptomMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof acknowledgeSymptom>>, AcknowledgeSymptomMutationVariables> = (props) => {
+          const {symptomId} = props ?? {};
+
+          return  acknowledgeSymptom(symptomId,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AcknowledgeSymptomMutationResult = NonNullable<Awaited<ReturnType<typeof acknowledgeSymptom>>>
+
+    export type AcknowledgeSymptomMutationError = SignedOutResponse | NotAllowedResponse | NotFoundResponse
+    export type AcknowledgeSymptomMutationVariables = {symptomId: string}
+
+    /** @summary The doctor marks a symptom report as seen. */
+export const useAcknowledgeSymptom = <TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acknowledgeSymptom>>, TError,AcknowledgeSymptomMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof acknowledgeSymptom>>,
+        TError,
+        AcknowledgeSymptomMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAcknowledgeSymptomMutationOptions(options), queryClient);
+    }
+
+export type getTodayResponse200 = {
+  data: Today
+  status: 200
+}
+
+export type getTodayResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type getTodayResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type getTodayResponseSuccess = (getTodayResponse200) & {
+  headers: Headers;
+};
+export type getTodayResponseError = (getTodayResponse401 | getTodayResponse403) & {
+  headers: Headers;
+};
+
+export type getTodayResponse = (getTodayResponseSuccess | getTodayResponseError)
+
+export const getGetTodayUrl = () => {
+
+
+
+
+  return `/api/me/today`
+}
+
+/**
+ * @summary The patient's day - today's exercises, sessions done, a session to resume, next visit, slot offers.
+ */
+export const getToday = async ( options?: RequestInit): Promise<getTodayResponse> => {
+
+  const res = await fetch(getGetTodayUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getTodayResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getTodayResponse
+}
+
+
+
+
+
+export const getGetTodayQueryKey = () => {
+    return [
+    `/api/me/today`
+    ] as const;
+    }
+
+
+export const getGetTodayQueryOptions = <TData = Awaited<ReturnType<typeof getToday>>, TError = SignedOutResponse | NotAllowedResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getToday>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTodayQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getToday>>> = ({ signal }) => getToday({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getToday>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTodayQueryResult = NonNullable<Awaited<ReturnType<typeof getToday>>>
+export type GetTodayQueryError = SignedOutResponse | NotAllowedResponse
+
+
+/** @summary The patient's day - today's exercises, sessions done, a session to resume, next visit, slot offers. */
+export function useGetToday<TData = Awaited<ReturnType<typeof getToday>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getToday>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getToday>>,
+          TError,
+          Awaited<ReturnType<typeof getToday>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The patient's day - today's exercises, sessions done, a session to resume, next visit, slot offers. */
+export function useGetToday<TData = Awaited<ReturnType<typeof getToday>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getToday>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getToday>>,
+          TError,
+          Awaited<ReturnType<typeof getToday>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The patient's day - today's exercises, sessions done, a session to resume, next visit, slot offers. */
+export function useGetToday<TData = Awaited<ReturnType<typeof getToday>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getToday>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The patient's day - today's exercises, sessions done, a session to resume, next visit, slot offers. */
+export function useGetToday<TData = Awaited<ReturnType<typeof getToday>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getToday>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTodayQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type listMySessionsResponse200 = {
+  data: SessionRowList
+  status: 200
+}
+
+export type listMySessionsResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type listMySessionsResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type listMySessionsResponseSuccess = (listMySessionsResponse200) & {
+  headers: Headers;
+};
+export type listMySessionsResponseError = (listMySessionsResponse401 | listMySessionsResponse403) & {
+  headers: Headers;
+};
+
+export type listMySessionsResponse = (listMySessionsResponseSuccess | listMySessionsResponseError)
+
+export const getListMySessionsUrl = () => {
+
+
+
+
+  return `/api/me/sessions`
+}
+
+/**
+ * @summary The patient's own session reports, newest first.
+ */
+export const listMySessions = async ( options?: RequestInit): Promise<listMySessionsResponse> => {
+
+  const res = await fetch(getListMySessionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listMySessionsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listMySessionsResponse
+}
+
+
+
+
+
+export const getListMySessionsQueryKey = () => {
+    return [
+    `/api/me/sessions`
+    ] as const;
+    }
+
+
+export const getListMySessionsQueryOptions = <TData = Awaited<ReturnType<typeof listMySessions>>, TError = SignedOutResponse | NotAllowedResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMySessions>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListMySessionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listMySessions>>> = ({ signal }) => listMySessions({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listMySessions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListMySessionsQueryResult = NonNullable<Awaited<ReturnType<typeof listMySessions>>>
+export type ListMySessionsQueryError = SignedOutResponse | NotAllowedResponse
+
+
+/** @summary The patient's own session reports, newest first. */
+export function useListMySessions<TData = Awaited<ReturnType<typeof listMySessions>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMySessions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listMySessions>>,
+          TError,
+          Awaited<ReturnType<typeof listMySessions>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The patient's own session reports, newest first. */
+export function useListMySessions<TData = Awaited<ReturnType<typeof listMySessions>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMySessions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listMySessions>>,
+          TError,
+          Awaited<ReturnType<typeof listMySessions>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The patient's own session reports, newest first. */
+export function useListMySessions<TData = Awaited<ReturnType<typeof listMySessions>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMySessions>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The patient's own session reports, newest first. */
+export function useListMySessions<TData = Awaited<ReturnType<typeof listMySessions>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listMySessions>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListMySessionsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type startSessionResponse200 = {
+  data: SessionStarted
+  status: 200
+}
+
+export type startSessionResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type startSessionResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type startSessionResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type startSessionResponse409 = {
+  data: ConflictResponse
+  status: 409
+}
+
+export type startSessionResponseSuccess = (startSessionResponse200) & {
+  headers: Headers;
+};
+export type startSessionResponseError = (startSessionResponse400 | startSessionResponse401 | startSessionResponse403 | startSessionResponse409) & {
+  headers: Headers;
+};
+
+export type startSessionResponse = (startSessionResponseSuccess | startSessionResponseError)
+
+export const getStartSessionUrl = () => {
+
+
+
+
+  return `/api/sessions`
+}
+
+/**
+ * @summary Start a session with the pain check-in. A red-flag answer stops it straight away.
+ */
+export const startSession = async (startSessionRequest: StartSessionRequest, options?: RequestInit): Promise<startSessionResponse> => {
+
+  const res = await fetch(getStartSessionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(startSessionRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: startSessionResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as startSessionResponse
+}
+
+
+
+
+
+export const getStartSessionMutationKey = () => ['startSession'] as const;
+
+export const getStartSessionMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | ConflictResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startSession>>, TError,StartSessionMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof startSession>>, TError,StartSessionMutationVariables, TContext> => {
+
+const mutationKey = getStartSessionMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof startSession>>, StartSessionMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  startSession(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StartSessionMutationResult = NonNullable<Awaited<ReturnType<typeof startSession>>>
+    export type StartSessionMutationBody = StartSessionRequest
+    export type StartSessionMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse | ConflictResponse
+    export type StartSessionMutationVariables = {data: StartSessionRequest}
+
+    /** @summary Start a session with the pain check-in. A red-flag answer stops it straight away. */
+export const useStartSession = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | ConflictResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startSession>>, TError,StartSessionMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof startSession>>,
+        TError,
+        StartSessionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getStartSessionMutationOptions(options), queryClient);
+    }
+
+export type getSessionResponse200 = {
+  data: SessionReport
+  status: 200
+}
+
+export type getSessionResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type getSessionResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type getSessionResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type getSessionResponseSuccess = (getSessionResponse200) & {
+  headers: Headers;
+};
+export type getSessionResponseError = (getSessionResponse401 | getSessionResponse403 | getSessionResponse404) & {
+  headers: Headers;
+};
+
+export type getSessionResponse = (getSessionResponseSuccess | getSessionResponseError)
+
+export const getGetSessionUrl = (sessionId: string,) => {
+
+
+
+
+  return `/api/sessions/${sessionId}`
+}
+
+/**
+ * @summary A full session report (the patient's own; the doctor's patients; admin any).
+ */
+export const getSession = async (sessionId: string, options?: RequestInit): Promise<getSessionResponse> => {
+
+  const res = await fetch(getGetSessionUrl(sessionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getSessionResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getSessionResponse
+}
+
+
+
+
+
+export const getGetSessionQueryKey = (sessionId: string,) => {
+    return [
+    `/api/sessions/${sessionId}`
+    ] as const;
+    }
+
+
+export const getGetSessionQueryOptions = <TData = Awaited<ReturnType<typeof getSession>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSession>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSessionQueryKey(sessionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSession>>> = ({ signal }) => getSession(sessionId, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: sessionId !== null && sessionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSession>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSessionQueryResult = NonNullable<Awaited<ReturnType<typeof getSession>>>
+export type GetSessionQueryError = SignedOutResponse | NotAllowedResponse | NotFoundResponse
+
+
+/** @summary A full session report (the patient's own; the doctor's patients; admin any). */
+export function useGetSession<TData = Awaited<ReturnType<typeof getSession>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ sessionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSession>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSession>>,
+          TError,
+          Awaited<ReturnType<typeof getSession>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary A full session report (the patient's own; the doctor's patients; admin any). */
+export function useGetSession<TData = Awaited<ReturnType<typeof getSession>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSession>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSession>>,
+          TError,
+          Awaited<ReturnType<typeof getSession>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary A full session report (the patient's own; the doctor's patients; admin any). */
+export function useGetSession<TData = Awaited<ReturnType<typeof getSession>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSession>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary A full session report (the patient's own; the doctor's patients; admin any). */
+export function useGetSession<TData = Awaited<ReturnType<typeof getSession>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSession>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSessionQueryOptions(sessionId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type saveSessionExerciseResponse200 = {
+  data: SavedExercise
+  status: 200
+}
+
+export type saveSessionExerciseResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type saveSessionExerciseResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type saveSessionExerciseResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type saveSessionExerciseResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type saveSessionExerciseResponse409 = {
+  data: ConflictResponse
+  status: 409
+}
+
+export type saveSessionExerciseResponseSuccess = (saveSessionExerciseResponse200) & {
+  headers: Headers;
+};
+export type saveSessionExerciseResponseError = (saveSessionExerciseResponse400 | saveSessionExerciseResponse401 | saveSessionExerciseResponse403 | saveSessionExerciseResponse404 | saveSessionExerciseResponse409) & {
+  headers: Headers;
+};
+
+export type saveSessionExerciseResponse = (saveSessionExerciseResponseSuccess | saveSessionExerciseResponseError)
+
+export const getSaveSessionExerciseUrl = (sessionId: string,) => {
+
+
+
+
+  return `/api/sessions/${sessionId}/exercises`
+}
+
+/**
+ * @summary Save one finished exercise - results rep by rep and the movement as joint positions (never the video).
+ */
+export const saveSessionExercise = async (sessionId: string,
+    sessionExerciseInput: SessionExerciseInput, options?: RequestInit): Promise<saveSessionExerciseResponse> => {
+
+  const res = await fetch(getSaveSessionExerciseUrl(sessionId),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(sessionExerciseInput)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: saveSessionExerciseResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as saveSessionExerciseResponse
+}
+
+
+
+
+
+export const getSaveSessionExerciseMutationKey = () => ['saveSessionExercise'] as const;
+
+export const getSaveSessionExerciseMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveSessionExercise>>, TError,SaveSessionExerciseMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof saveSessionExercise>>, TError,SaveSessionExerciseMutationVariables, TContext> => {
+
+const mutationKey = getSaveSessionExerciseMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveSessionExercise>>, SaveSessionExerciseMutationVariables> = (props) => {
+          const {sessionId,data} = props ?? {};
+
+          return  saveSessionExercise(sessionId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveSessionExerciseMutationResult = NonNullable<Awaited<ReturnType<typeof saveSessionExercise>>>
+    export type SaveSessionExerciseMutationBody = SessionExerciseInput
+    export type SaveSessionExerciseMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse
+    export type SaveSessionExerciseMutationVariables = {sessionId: string;data: SessionExerciseInput}
+
+    /** @summary Save one finished exercise - results rep by rep and the movement as joint positions (never the video). */
+export const useSaveSessionExercise = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveSessionExercise>>, TError,SaveSessionExerciseMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof saveSessionExercise>>,
+        TError,
+        SaveSessionExerciseMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSaveSessionExerciseMutationOptions(options), queryClient);
+    }
+
+export type finishSessionResponse200 = {
+  data: SessionReport
+  status: 200
+}
+
+export type finishSessionResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type finishSessionResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type finishSessionResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type finishSessionResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type finishSessionResponseSuccess = (finishSessionResponse200) & {
+  headers: Headers;
+};
+export type finishSessionResponseError = (finishSessionResponse400 | finishSessionResponse401 | finishSessionResponse403 | finishSessionResponse404) & {
+  headers: Headers;
+};
+
+export type finishSessionResponse = (finishSessionResponseSuccess | finishSessionResponseError)
+
+export const getFinishSessionUrl = (sessionId: string,) => {
+
+
+
+
+  return `/api/sessions/${sessionId}/finish`
+}
+
+/**
+ * @summary End the session with the pain score after it.
+ */
+export const finishSession = async (sessionId: string,
+    finishSessionRequest: FinishSessionRequest, options?: RequestInit): Promise<finishSessionResponse> => {
+
+  const res = await fetch(getFinishSessionUrl(sessionId),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(finishSessionRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: finishSessionResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as finishSessionResponse
+}
+
+
+
+
+
+export const getFinishSessionMutationKey = () => ['finishSession'] as const;
+
+export const getFinishSessionMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof finishSession>>, TError,FinishSessionMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof finishSession>>, TError,FinishSessionMutationVariables, TContext> => {
+
+const mutationKey = getFinishSessionMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof finishSession>>, FinishSessionMutationVariables> = (props) => {
+          const {sessionId,data} = props ?? {};
+
+          return  finishSession(sessionId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type FinishSessionMutationResult = NonNullable<Awaited<ReturnType<typeof finishSession>>>
+    export type FinishSessionMutationBody = FinishSessionRequest
+    export type FinishSessionMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse
+    export type FinishSessionMutationVariables = {sessionId: string;data: FinishSessionRequest}
+
+    /** @summary End the session with the pain score after it. */
+export const useFinishSession = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof finishSession>>, TError,FinishSessionMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof finishSession>>,
+        TError,
+        FinishSessionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getFinishSessionMutationOptions(options), queryClient);
+    }
+
+export type reviewSessionResponse200 = {
+  data: SessionReport
+  status: 200
+}
+
+export type reviewSessionResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type reviewSessionResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type reviewSessionResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type reviewSessionResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type reviewSessionResponseSuccess = (reviewSessionResponse200) & {
+  headers: Headers;
+};
+export type reviewSessionResponseError = (reviewSessionResponse400 | reviewSessionResponse401 | reviewSessionResponse403 | reviewSessionResponse404) & {
+  headers: Headers;
+};
+
+export type reviewSessionResponse = (reviewSessionResponseSuccess | reviewSessionResponseError)
+
+export const getReviewSessionUrl = (sessionId: string,) => {
+
+
+
+
+  return `/api/sessions/${sessionId}/review`
+}
+
+/**
+ * @summary The doctor marks a session as reviewed, with an optional note.
+ */
+export const reviewSession = async (sessionId: string,
+    reviewRequest: ReviewRequest, options?: RequestInit): Promise<reviewSessionResponse> => {
+
+  const res = await fetch(getReviewSessionUrl(sessionId),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(reviewRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: reviewSessionResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as reviewSessionResponse
+}
+
+
+
+
+
+export const getReviewSessionMutationKey = () => ['reviewSession'] as const;
+
+export const getReviewSessionMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewSession>>, TError,ReviewSessionMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof reviewSession>>, TError,ReviewSessionMutationVariables, TContext> => {
+
+const mutationKey = getReviewSessionMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reviewSession>>, ReviewSessionMutationVariables> = (props) => {
+          const {sessionId,data} = props ?? {};
+
+          return  reviewSession(sessionId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReviewSessionMutationResult = NonNullable<Awaited<ReturnType<typeof reviewSession>>>
+    export type ReviewSessionMutationBody = ReviewRequest
+    export type ReviewSessionMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse
+    export type ReviewSessionMutationVariables = {sessionId: string;data: ReviewRequest}
+
+    /** @summary The doctor marks a session as reviewed, with an optional note. */
+export const useReviewSession = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewSession>>, TError,ReviewSessionMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof reviewSession>>,
+        TError,
+        ReviewSessionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReviewSessionMutationOptions(options), queryClient);
+    }
+
+export type getMotionTrackResponse200 = {
+  data: MotionTrack
+  status: 200
+}
+
+export type getMotionTrackResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type getMotionTrackResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type getMotionTrackResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type getMotionTrackResponseSuccess = (getMotionTrackResponse200) & {
+  headers: Headers;
+};
+export type getMotionTrackResponseError = (getMotionTrackResponse401 | getMotionTrackResponse403 | getMotionTrackResponse404) & {
+  headers: Headers;
+};
+
+export type getMotionTrackResponse = (getMotionTrackResponseSuccess | getMotionTrackResponseError)
+
+export const getGetMotionTrackUrl = (resultId: string,) => {
+
+
+
+
+  return `/api/session-exercises/${resultId}/track`
+}
+
+/**
+ * @summary The movement of one exercise as joint positions, to replay as an animated figure.
+ */
+export const getMotionTrack = async (resultId: string, options?: RequestInit): Promise<getMotionTrackResponse> => {
+
+  const res = await fetch(getGetMotionTrackUrl(resultId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getMotionTrackResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getMotionTrackResponse
+}
+
+
+
+
+
+export const getGetMotionTrackQueryKey = (resultId: string,) => {
+    return [
+    `/api/session-exercises/${resultId}/track`
+    ] as const;
+    }
+
+
+export const getGetMotionTrackQueryOptions = <TData = Awaited<ReturnType<typeof getMotionTrack>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(resultId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMotionTrack>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMotionTrackQueryKey(resultId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMotionTrack>>> = ({ signal }) => getMotionTrack(resultId, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: resultId !== null && resultId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMotionTrack>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMotionTrackQueryResult = NonNullable<Awaited<ReturnType<typeof getMotionTrack>>>
+export type GetMotionTrackQueryError = SignedOutResponse | NotAllowedResponse | NotFoundResponse
+
+
+/** @summary The movement of one exercise as joint positions, to replay as an animated figure. */
+export function useGetMotionTrack<TData = Awaited<ReturnType<typeof getMotionTrack>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ resultId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMotionTrack>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMotionTrack>>,
+          TError,
+          Awaited<ReturnType<typeof getMotionTrack>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The movement of one exercise as joint positions, to replay as an animated figure. */
+export function useGetMotionTrack<TData = Awaited<ReturnType<typeof getMotionTrack>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ resultId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMotionTrack>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMotionTrack>>,
+          TError,
+          Awaited<ReturnType<typeof getMotionTrack>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The movement of one exercise as joint positions, to replay as an animated figure. */
+export function useGetMotionTrack<TData = Awaited<ReturnType<typeof getMotionTrack>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ resultId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMotionTrack>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The movement of one exercise as joint positions, to replay as an animated figure. */
+export function useGetMotionTrack<TData = Awaited<ReturnType<typeof getMotionTrack>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ resultId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMotionTrack>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMotionTrackQueryOptions(resultId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type listVisitTypesResponse200 = {
+  data: VisitTypeList
+  status: 200
+}
+
+export type listVisitTypesResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type listVisitTypesResponseSuccess = (listVisitTypesResponse200) & {
+  headers: Headers;
+};
+export type listVisitTypesResponseError = (listVisitTypesResponse401) & {
+  headers: Headers;
+};
+
+export type listVisitTypesResponse = (listVisitTypesResponseSuccess | listVisitTypesResponseError)
+
+export const getListVisitTypesUrl = () => {
+
+
+
+
+  return `/api/visit-types`
+}
+
+/**
+ * @summary Kinds of visit the clinic offers.
+ */
+export const listVisitTypes = async ( options?: RequestInit): Promise<listVisitTypesResponse> => {
+
+  const res = await fetch(getListVisitTypesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listVisitTypesResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listVisitTypesResponse
+}
+
+
+
+
+
+export const getListVisitTypesQueryKey = () => {
+    return [
+    `/api/visit-types`
+    ] as const;
+    }
+
+
+export const getListVisitTypesQueryOptions = <TData = Awaited<ReturnType<typeof listVisitTypes>>, TError = SignedOutResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVisitTypes>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListVisitTypesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listVisitTypes>>> = ({ signal }) => listVisitTypes({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listVisitTypes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListVisitTypesQueryResult = NonNullable<Awaited<ReturnType<typeof listVisitTypes>>>
+export type ListVisitTypesQueryError = SignedOutResponse
+
+
+/** @summary Kinds of visit the clinic offers. */
+export function useListVisitTypes<TData = Awaited<ReturnType<typeof listVisitTypes>>, TError = SignedOutResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVisitTypes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listVisitTypes>>,
+          TError,
+          Awaited<ReturnType<typeof listVisitTypes>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Kinds of visit the clinic offers. */
+export function useListVisitTypes<TData = Awaited<ReturnType<typeof listVisitTypes>>, TError = SignedOutResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVisitTypes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listVisitTypes>>,
+          TError,
+          Awaited<ReturnType<typeof listVisitTypes>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Kinds of visit the clinic offers. */
+export function useListVisitTypes<TData = Awaited<ReturnType<typeof listVisitTypes>>, TError = SignedOutResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVisitTypes>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Kinds of visit the clinic offers. */
+export function useListVisitTypes<TData = Awaited<ReturnType<typeof listVisitTypes>>, TError = SignedOutResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVisitTypes>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListVisitTypesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type listCliniciansResponse200 = {
+  data: ClinicianList
+  status: 200
+}
+
+export type listCliniciansResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type listCliniciansResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type listCliniciansResponseSuccess = (listCliniciansResponse200) & {
+  headers: Headers;
+};
+export type listCliniciansResponseError = (listCliniciansResponse401 | listCliniciansResponse403) & {
+  headers: Headers;
+};
+
+export type listCliniciansResponse = (listCliniciansResponseSuccess | listCliniciansResponseError)
+
+export const getListCliniciansUrl = () => {
+
+
+
+
+  return `/api/clinicians`
+}
+
+/**
+ * @summary The clinic's doctors (staff only).
+ */
+export const listClinicians = async ( options?: RequestInit): Promise<listCliniciansResponse> => {
+
+  const res = await fetch(getListCliniciansUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listCliniciansResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listCliniciansResponse
+}
+
+
+
+
+
+export const getListCliniciansQueryKey = () => {
+    return [
+    `/api/clinicians`
+    ] as const;
+    }
+
+
+export const getListCliniciansQueryOptions = <TData = Awaited<ReturnType<typeof listClinicians>>, TError = SignedOutResponse | NotAllowedResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listClinicians>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListCliniciansQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listClinicians>>> = ({ signal }) => listClinicians({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listClinicians>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListCliniciansQueryResult = NonNullable<Awaited<ReturnType<typeof listClinicians>>>
+export type ListCliniciansQueryError = SignedOutResponse | NotAllowedResponse
+
+
+/** @summary The clinic's doctors (staff only). */
+export function useListClinicians<TData = Awaited<ReturnType<typeof listClinicians>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listClinicians>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listClinicians>>,
+          TError,
+          Awaited<ReturnType<typeof listClinicians>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The clinic's doctors (staff only). */
+export function useListClinicians<TData = Awaited<ReturnType<typeof listClinicians>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listClinicians>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listClinicians>>,
+          TError,
+          Awaited<ReturnType<typeof listClinicians>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The clinic's doctors (staff only). */
+export function useListClinicians<TData = Awaited<ReturnType<typeof listClinicians>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listClinicians>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The clinic's doctors (staff only). */
+export function useListClinicians<TData = Awaited<ReturnType<typeof listClinicians>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listClinicians>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListCliniciansQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type getSlotsResponse200 = {
+  data: Slots
+  status: 200
+}
+
+export type getSlotsResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type getSlotsResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type getSlotsResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type getSlotsResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type getSlotsResponseSuccess = (getSlotsResponse200) & {
+  headers: Headers;
+};
+export type getSlotsResponseError = (getSlotsResponse400 | getSlotsResponse401 | getSlotsResponse403 | getSlotsResponse404) & {
+  headers: Headers;
+};
+
+export type getSlotsResponse = (getSlotsResponseSuccess | getSlotsResponseError)
+
+export const getGetSlotsUrl = (params: GetSlotsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/bookings/slots?${stringifiedParams}` : `/api/bookings/slots`
+}
+
+/**
+ * @summary Free start times on one day for a visit type with the patient's doctor.
+ */
+export const getSlots = async (params: GetSlotsParams, options?: RequestInit): Promise<getSlotsResponse> => {
+
+  const res = await fetch(getGetSlotsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getSlotsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getSlotsResponse
+}
+
+
+
+
+
+export const getGetSlotsQueryKey = (params?: GetSlotsParams,) => {
+    return [
+    `/api/bookings/slots`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetSlotsQueryOptions = <TData = Awaited<ReturnType<typeof getSlots>>, TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse>(params: GetSlotsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSlots>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSlotsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSlots>>> = ({ signal }) => getSlots(params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSlots>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSlotsQueryResult = NonNullable<Awaited<ReturnType<typeof getSlots>>>
+export type GetSlotsQueryError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse
+
+
+/** @summary Free start times on one day for a visit type with the patient's doctor. */
+export function useGetSlots<TData = Awaited<ReturnType<typeof getSlots>>, TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ params: GetSlotsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSlots>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSlots>>,
+          TError,
+          Awaited<ReturnType<typeof getSlots>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Free start times on one day for a visit type with the patient's doctor. */
+export function useGetSlots<TData = Awaited<ReturnType<typeof getSlots>>, TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ params: GetSlotsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSlots>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSlots>>,
+          TError,
+          Awaited<ReturnType<typeof getSlots>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Free start times on one day for a visit type with the patient's doctor. */
+export function useGetSlots<TData = Awaited<ReturnType<typeof getSlots>>, TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ params: GetSlotsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSlots>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Free start times on one day for a visit type with the patient's doctor. */
+export function useGetSlots<TData = Awaited<ReturnType<typeof getSlots>>, TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ params: GetSlotsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSlots>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSlotsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type listAppointmentsResponse200 = {
+  data: AppointmentList
+  status: 200
+}
+
+export type listAppointmentsResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type listAppointmentsResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type listAppointmentsResponseSuccess = (listAppointmentsResponse200) & {
+  headers: Headers;
+};
+export type listAppointmentsResponseError = (listAppointmentsResponse400 | listAppointmentsResponse401) & {
+  headers: Headers;
+};
+
+export type listAppointmentsResponse = (listAppointmentsResponseSuccess | listAppointmentsResponseError)
+
+export const getListAppointmentsUrl = (params: ListAppointmentsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/appointments?${stringifiedParams}` : `/api/appointments`
+}
+
+/**
+ * @summary Visits between two dates (patients see their own, doctors theirs, admin all).
+ */
+export const listAppointments = async (params: ListAppointmentsParams, options?: RequestInit): Promise<listAppointmentsResponse> => {
+
+  const res = await fetch(getListAppointmentsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listAppointmentsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listAppointmentsResponse
+}
+
+
+
+
+
+export const getListAppointmentsQueryKey = (params?: ListAppointmentsParams,) => {
+    return [
+    `/api/appointments`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListAppointmentsQueryOptions = <TData = Awaited<ReturnType<typeof listAppointments>>, TError = InvalidResponse | SignedOutResponse>(params: ListAppointmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAppointments>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAppointmentsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAppointments>>> = ({ signal }) => listAppointments(params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAppointments>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListAppointmentsQueryResult = NonNullable<Awaited<ReturnType<typeof listAppointments>>>
+export type ListAppointmentsQueryError = InvalidResponse | SignedOutResponse
+
+
+/** @summary Visits between two dates (patients see their own, doctors theirs, admin all). */
+export function useListAppointments<TData = Awaited<ReturnType<typeof listAppointments>>, TError = InvalidResponse | SignedOutResponse>(
+ params: ListAppointmentsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAppointments>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listAppointments>>,
+          TError,
+          Awaited<ReturnType<typeof listAppointments>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Visits between two dates (patients see their own, doctors theirs, admin all). */
+export function useListAppointments<TData = Awaited<ReturnType<typeof listAppointments>>, TError = InvalidResponse | SignedOutResponse>(
+ params: ListAppointmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAppointments>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listAppointments>>,
+          TError,
+          Awaited<ReturnType<typeof listAppointments>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Visits between two dates (patients see their own, doctors theirs, admin all). */
+export function useListAppointments<TData = Awaited<ReturnType<typeof listAppointments>>, TError = InvalidResponse | SignedOutResponse>(
+ params: ListAppointmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAppointments>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Visits between two dates (patients see their own, doctors theirs, admin all). */
+export function useListAppointments<TData = Awaited<ReturnType<typeof listAppointments>>, TError = InvalidResponse | SignedOutResponse>(
+ params: ListAppointmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAppointments>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListAppointmentsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type bookAppointmentResponse200 = {
+  data: BookResult
+  status: 200
+}
+
+export type bookAppointmentResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type bookAppointmentResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type bookAppointmentResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type bookAppointmentResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type bookAppointmentResponse409 = {
+  data: ConflictResponse
+  status: 409
+}
+
+export type bookAppointmentResponseSuccess = (bookAppointmentResponse200) & {
+  headers: Headers;
+};
+export type bookAppointmentResponseError = (bookAppointmentResponse400 | bookAppointmentResponse401 | bookAppointmentResponse403 | bookAppointmentResponse404 | bookAppointmentResponse409) & {
+  headers: Headers;
+};
+
+export type bookAppointmentResponse = (bookAppointmentResponseSuccess | bookAppointmentResponseError)
+
+export const getBookAppointmentUrl = () => {
+
+
+
+
+  return `/api/appointments`
+}
+
+/**
+ * @summary Book a visit, once or repeating. With preview true nothing is saved - each date is checked and the clashes shown.
+ */
+export const bookAppointment = async (bookRequest: BookRequest, options?: RequestInit): Promise<bookAppointmentResponse> => {
+
+  const res = await fetch(getBookAppointmentUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(bookRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: bookAppointmentResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as bookAppointmentResponse
+}
+
+
+
+
+
+export const getBookAppointmentMutationKey = () => ['bookAppointment'] as const;
+
+export const getBookAppointmentMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bookAppointment>>, TError,BookAppointmentMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof bookAppointment>>, TError,BookAppointmentMutationVariables, TContext> => {
+
+const mutationKey = getBookAppointmentMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof bookAppointment>>, BookAppointmentMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  bookAppointment(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BookAppointmentMutationResult = NonNullable<Awaited<ReturnType<typeof bookAppointment>>>
+    export type BookAppointmentMutationBody = BookRequest
+    export type BookAppointmentMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse
+    export type BookAppointmentMutationVariables = {data: BookRequest}
+
+    /** @summary Book a visit, once or repeating. With preview true nothing is saved - each date is checked and the clashes shown. */
+export const useBookAppointment = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bookAppointment>>, TError,BookAppointmentMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof bookAppointment>>,
+        TError,
+        BookAppointmentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getBookAppointmentMutationOptions(options), queryClient);
+    }
+
+export type moveAppointmentResponse200 = {
+  data: Appointment
+  status: 200
+}
+
+export type moveAppointmentResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type moveAppointmentResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type moveAppointmentResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type moveAppointmentResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type moveAppointmentResponse409 = {
+  data: ConflictResponse
+  status: 409
+}
+
+export type moveAppointmentResponseSuccess = (moveAppointmentResponse200) & {
+  headers: Headers;
+};
+export type moveAppointmentResponseError = (moveAppointmentResponse400 | moveAppointmentResponse401 | moveAppointmentResponse403 | moveAppointmentResponse404 | moveAppointmentResponse409) & {
+  headers: Headers;
+};
+
+export type moveAppointmentResponse = (moveAppointmentResponseSuccess | moveAppointmentResponseError)
+
+export const getMoveAppointmentUrl = (appointmentId: string,) => {
+
+
+
+
+  return `/api/appointments/${appointmentId}`
+}
+
+/**
+ * @summary Move a visit to another time.
+ */
+export const moveAppointment = async (appointmentId: string,
+    moveRequest: MoveRequest, options?: RequestInit): Promise<moveAppointmentResponse> => {
+
+  const res = await fetch(getMoveAppointmentUrl(appointmentId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(moveRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: moveAppointmentResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as moveAppointmentResponse
+}
+
+
+
+
+
+export const getMoveAppointmentMutationKey = () => ['moveAppointment'] as const;
+
+export const getMoveAppointmentMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof moveAppointment>>, TError,MoveAppointmentMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof moveAppointment>>, TError,MoveAppointmentMutationVariables, TContext> => {
+
+const mutationKey = getMoveAppointmentMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof moveAppointment>>, MoveAppointmentMutationVariables> = (props) => {
+          const {appointmentId,data} = props ?? {};
+
+          return  moveAppointment(appointmentId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MoveAppointmentMutationResult = NonNullable<Awaited<ReturnType<typeof moveAppointment>>>
+    export type MoveAppointmentMutationBody = MoveRequest
+    export type MoveAppointmentMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse
+    export type MoveAppointmentMutationVariables = {appointmentId: string;data: MoveRequest}
+
+    /** @summary Move a visit to another time. */
+export const useMoveAppointment = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof moveAppointment>>, TError,MoveAppointmentMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof moveAppointment>>,
+        TError,
+        MoveAppointmentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getMoveAppointmentMutationOptions(options), queryClient);
+    }
+
+export type setAppointmentStatusResponse200 = {
+  data: Appointment
+  status: 200
+}
+
+export type setAppointmentStatusResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type setAppointmentStatusResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type setAppointmentStatusResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type setAppointmentStatusResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type setAppointmentStatusResponse409 = {
+  data: ConflictResponse
+  status: 409
+}
+
+export type setAppointmentStatusResponseSuccess = (setAppointmentStatusResponse200) & {
+  headers: Headers;
+};
+export type setAppointmentStatusResponseError = (setAppointmentStatusResponse400 | setAppointmentStatusResponse401 | setAppointmentStatusResponse403 | setAppointmentStatusResponse404 | setAppointmentStatusResponse409) & {
+  headers: Headers;
+};
+
+export type setAppointmentStatusResponse = (setAppointmentStatusResponseSuccess | setAppointmentStatusResponseError)
+
+export const getSetAppointmentStatusUrl = (appointmentId: string,) => {
+
+
+
+
+  return `/api/appointments/${appointmentId}/status`
+}
+
+/**
+ * @summary Confirm, mark arrived, completed or no-show, or cancel (with a reason).
+ */
+export const setAppointmentStatus = async (appointmentId: string,
+    appointmentStatusRequest: AppointmentStatusRequest, options?: RequestInit): Promise<setAppointmentStatusResponse> => {
+
+  const res = await fetch(getSetAppointmentStatusUrl(appointmentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(appointmentStatusRequest)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: setAppointmentStatusResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as setAppointmentStatusResponse
+}
+
+
+
+
+
+export const getSetAppointmentStatusMutationKey = () => ['setAppointmentStatus'] as const;
+
+export const getSetAppointmentStatusMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setAppointmentStatus>>, TError,SetAppointmentStatusMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof setAppointmentStatus>>, TError,SetAppointmentStatusMutationVariables, TContext> => {
+
+const mutationKey = getSetAppointmentStatusMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setAppointmentStatus>>, SetAppointmentStatusMutationVariables> = (props) => {
+          const {appointmentId,data} = props ?? {};
+
+          return  setAppointmentStatus(appointmentId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetAppointmentStatusMutationResult = NonNullable<Awaited<ReturnType<typeof setAppointmentStatus>>>
+    export type SetAppointmentStatusMutationBody = AppointmentStatusRequest
+    export type SetAppointmentStatusMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse
+    export type SetAppointmentStatusMutationVariables = {appointmentId: string;data: AppointmentStatusRequest}
+
+    /** @summary Confirm, mark arrived, completed or no-show, or cancel (with a reason). */
+export const useSetAppointmentStatus = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setAppointmentStatus>>, TError,SetAppointmentStatusMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof setAppointmentStatus>>,
+        TError,
+        SetAppointmentStatusMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSetAppointmentStatusMutationOptions(options), queryClient);
+    }
+
+export type getAvailabilityResponse200 = {
+  data: WeeklyHours
+  status: 200
+}
+
+export type getAvailabilityResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type getAvailabilityResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type getAvailabilityResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type getAvailabilityResponseSuccess = (getAvailabilityResponse200) & {
+  headers: Headers;
+};
+export type getAvailabilityResponseError = (getAvailabilityResponse401 | getAvailabilityResponse403 | getAvailabilityResponse404) & {
+  headers: Headers;
+};
+
+export type getAvailabilityResponse = (getAvailabilityResponseSuccess | getAvailabilityResponseError)
+
+export const getGetAvailabilityUrl = (params?: GetAvailabilityParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/availability?${stringifiedParams}` : `/api/availability`
+}
+
+/**
+ * @summary A doctor's weekly working hours (doctors - their own; admin - any).
+ */
+export const getAvailability = async (params?: GetAvailabilityParams, options?: RequestInit): Promise<getAvailabilityResponse> => {
+
+  const res = await fetch(getGetAvailabilityUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getAvailabilityResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getAvailabilityResponse
+}
+
+
+
+
+
+export const getGetAvailabilityQueryKey = (params?: GetAvailabilityParams,) => {
+    return [
+    `/api/availability`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetAvailabilityQueryOptions = <TData = Awaited<ReturnType<typeof getAvailability>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(params?: GetAvailabilityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailability>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAvailabilityQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAvailability>>> = ({ signal }) => getAvailability(params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAvailability>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAvailabilityQueryResult = NonNullable<Awaited<ReturnType<typeof getAvailability>>>
+export type GetAvailabilityQueryError = SignedOutResponse | NotAllowedResponse | NotFoundResponse
+
+
+/** @summary A doctor's weekly working hours (doctors - their own; admin - any). */
+export function useGetAvailability<TData = Awaited<ReturnType<typeof getAvailability>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ params: undefined |  GetAvailabilityParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailability>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAvailability>>,
+          TError,
+          Awaited<ReturnType<typeof getAvailability>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary A doctor's weekly working hours (doctors - their own; admin - any). */
+export function useGetAvailability<TData = Awaited<ReturnType<typeof getAvailability>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ params?: GetAvailabilityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailability>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAvailability>>,
+          TError,
+          Awaited<ReturnType<typeof getAvailability>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary A doctor's weekly working hours (doctors - their own; admin - any). */
+export function useGetAvailability<TData = Awaited<ReturnType<typeof getAvailability>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ params?: GetAvailabilityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailability>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary A doctor's weekly working hours (doctors - their own; admin - any). */
+export function useGetAvailability<TData = Awaited<ReturnType<typeof getAvailability>>, TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse>(
+ params?: GetAvailabilityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAvailability>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAvailabilityQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type setAvailabilityResponse200 = {
+  data: WeeklyHours
+  status: 200
+}
+
+export type setAvailabilityResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type setAvailabilityResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type setAvailabilityResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type setAvailabilityResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type setAvailabilityResponseSuccess = (setAvailabilityResponse200) & {
+  headers: Headers;
+};
+export type setAvailabilityResponseError = (setAvailabilityResponse400 | setAvailabilityResponse401 | setAvailabilityResponse403 | setAvailabilityResponse404) & {
+  headers: Headers;
+};
+
+export type setAvailabilityResponse = (setAvailabilityResponseSuccess | setAvailabilityResponseError)
+
+export const getSetAvailabilityUrl = () => {
+
+
+
+
+  return `/api/availability`
+}
+
+/**
+ * @summary Replace a doctor's weekly working hours.
+ */
+export const setAvailability = async (weeklyHours: WeeklyHours, options?: RequestInit): Promise<setAvailabilityResponse> => {
+
+  const res = await fetch(getSetAvailabilityUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(weeklyHours)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: setAvailabilityResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as setAvailabilityResponse
+}
+
+
+
+
+
+export const getSetAvailabilityMutationKey = () => ['setAvailability'] as const;
+
+export const getSetAvailabilityMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setAvailability>>, TError,SetAvailabilityMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof setAvailability>>, TError,SetAvailabilityMutationVariables, TContext> => {
+
+const mutationKey = getSetAvailabilityMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setAvailability>>, SetAvailabilityMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  setAvailability(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetAvailabilityMutationResult = NonNullable<Awaited<ReturnType<typeof setAvailability>>>
+    export type SetAvailabilityMutationBody = WeeklyHours
+    export type SetAvailabilityMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse
+    export type SetAvailabilityMutationVariables = {data: WeeklyHours}
+
+    /** @summary Replace a doctor's weekly working hours. */
+export const useSetAvailability = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setAvailability>>, TError,SetAvailabilityMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof setAvailability>>,
+        TError,
+        SetAvailabilityMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSetAvailabilityMutationOptions(options), queryClient);
+    }
+
+export type listTimeOffResponse200 = {
+  data: TimeOffList
+  status: 200
+}
+
+export type listTimeOffResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type listTimeOffResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type listTimeOffResponseSuccess = (listTimeOffResponse200) & {
+  headers: Headers;
+};
+export type listTimeOffResponseError = (listTimeOffResponse401 | listTimeOffResponse403) & {
+  headers: Headers;
+};
+
+export type listTimeOffResponse = (listTimeOffResponseSuccess | listTimeOffResponseError)
+
+export const getListTimeOffUrl = () => {
+
+
+
+
+  return `/api/time-off`
+}
+
+/**
+ * @summary Leave days and clinic holidays from today on.
+ */
+export const listTimeOff = async ( options?: RequestInit): Promise<listTimeOffResponse> => {
+
+  const res = await fetch(getListTimeOffUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listTimeOffResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listTimeOffResponse
+}
+
+
+
+
+
+export const getListTimeOffQueryKey = () => {
+    return [
+    `/api/time-off`
+    ] as const;
+    }
+
+
+export const getListTimeOffQueryOptions = <TData = Awaited<ReturnType<typeof listTimeOff>>, TError = SignedOutResponse | NotAllowedResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTimeOff>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListTimeOffQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listTimeOff>>> = ({ signal }) => listTimeOff({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listTimeOff>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListTimeOffQueryResult = NonNullable<Awaited<ReturnType<typeof listTimeOff>>>
+export type ListTimeOffQueryError = SignedOutResponse | NotAllowedResponse
+
+
+/** @summary Leave days and clinic holidays from today on. */
+export function useListTimeOff<TData = Awaited<ReturnType<typeof listTimeOff>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTimeOff>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listTimeOff>>,
+          TError,
+          Awaited<ReturnType<typeof listTimeOff>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Leave days and clinic holidays from today on. */
+export function useListTimeOff<TData = Awaited<ReturnType<typeof listTimeOff>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTimeOff>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listTimeOff>>,
+          TError,
+          Awaited<ReturnType<typeof listTimeOff>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Leave days and clinic holidays from today on. */
+export function useListTimeOff<TData = Awaited<ReturnType<typeof listTimeOff>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTimeOff>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Leave days and clinic holidays from today on. */
+export function useListTimeOff<TData = Awaited<ReturnType<typeof listTimeOff>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTimeOff>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListTimeOffQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type addTimeOffResponse200 = {
+  data: TimeOff
+  status: 200
+}
+
+export type addTimeOffResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type addTimeOffResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type addTimeOffResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type addTimeOffResponseSuccess = (addTimeOffResponse200) & {
+  headers: Headers;
+};
+export type addTimeOffResponseError = (addTimeOffResponse400 | addTimeOffResponse401 | addTimeOffResponse403) & {
+  headers: Headers;
+};
+
+export type addTimeOffResponse = (addTimeOffResponseSuccess | addTimeOffResponseError)
+
+export const getAddTimeOffUrl = () => {
+
+
+
+
+  return `/api/time-off`
+}
+
+/**
+ * @summary Add leave for a doctor, or a clinic holiday (admin, no doctor).
+ */
+export const addTimeOff = async (timeOffInput: TimeOffInput, options?: RequestInit): Promise<addTimeOffResponse> => {
+
+  const res = await fetch(getAddTimeOffUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(timeOffInput)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: addTimeOffResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as addTimeOffResponse
+}
+
+
+
+
+
+export const getAddTimeOffMutationKey = () => ['addTimeOff'] as const;
+
+export const getAddTimeOffMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addTimeOff>>, TError,AddTimeOffMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof addTimeOff>>, TError,AddTimeOffMutationVariables, TContext> => {
+
+const mutationKey = getAddTimeOffMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addTimeOff>>, AddTimeOffMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  addTimeOff(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddTimeOffMutationResult = NonNullable<Awaited<ReturnType<typeof addTimeOff>>>
+    export type AddTimeOffMutationBody = TimeOffInput
+    export type AddTimeOffMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse
+    export type AddTimeOffMutationVariables = {data: TimeOffInput}
+
+    /** @summary Add leave for a doctor, or a clinic holiday (admin, no doctor). */
+export const useAddTimeOff = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addTimeOff>>, TError,AddTimeOffMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addTimeOff>>,
+        TError,
+        AddTimeOffMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddTimeOffMutationOptions(options), queryClient);
+    }
+
+export type deleteTimeOffResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteTimeOffResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type deleteTimeOffResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type deleteTimeOffResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type deleteTimeOffResponseSuccess = (deleteTimeOffResponse204) & {
+  headers: Headers;
+};
+export type deleteTimeOffResponseError = (deleteTimeOffResponse401 | deleteTimeOffResponse403 | deleteTimeOffResponse404) & {
+  headers: Headers;
+};
+
+export type deleteTimeOffResponse = (deleteTimeOffResponseSuccess | deleteTimeOffResponseError)
+
+export const getDeleteTimeOffUrl = (timeOffId: string,) => {
+
+
+
+
+  return `/api/time-off/${timeOffId}`
+}
+
+/**
+ * @summary Remove a leave day or holiday.
+ */
+export const deleteTimeOff = async (timeOffId: string, options?: RequestInit): Promise<deleteTimeOffResponse> => {
+
+  const res = await fetch(getDeleteTimeOffUrl(timeOffId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: deleteTimeOffResponse['data'] = body ? JSON.parse(body) : undefined
+  return { data, status: res.status, headers: res.headers } as deleteTimeOffResponse
+}
+
+
+
+
+
+export const getDeleteTimeOffMutationKey = () => ['deleteTimeOff'] as const;
+
+export const getDeleteTimeOffMutationOptions = <TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTimeOff>>, TError,DeleteTimeOffMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTimeOff>>, TError,DeleteTimeOffMutationVariables, TContext> => {
+
+const mutationKey = getDeleteTimeOffMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTimeOff>>, DeleteTimeOffMutationVariables> = (props) => {
+          const {timeOffId} = props ?? {};
+
+          return  deleteTimeOff(timeOffId,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteTimeOffMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTimeOff>>>
+
+    export type DeleteTimeOffMutationError = SignedOutResponse | NotAllowedResponse | NotFoundResponse
+    export type DeleteTimeOffMutationVariables = {timeOffId: string}
+
+    /** @summary Remove a leave day or holiday. */
+export const useDeleteTimeOff = <TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTimeOff>>, TError,DeleteTimeOffMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteTimeOff>>,
+        TError,
+        DeleteTimeOffMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteTimeOffMutationOptions(options), queryClient);
+    }
+
+export type listWaitlistResponse200 = {
+  data: WaitlistList
+  status: 200
+}
+
+export type listWaitlistResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type listWaitlistResponseSuccess = (listWaitlistResponse200) & {
+  headers: Headers;
+};
+export type listWaitlistResponseError = (listWaitlistResponse401) & {
+  headers: Headers;
+};
+
+export type listWaitlistResponse = (listWaitlistResponseSuccess | listWaitlistResponseError)
+
+export const getListWaitlistUrl = () => {
+
+
+
+
+  return `/api/waitlist`
+}
+
+/**
+ * @summary Waiting list (patients - their own; staff - everyone).
+ */
+export const listWaitlist = async ( options?: RequestInit): Promise<listWaitlistResponse> => {
+
+  const res = await fetch(getListWaitlistUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listWaitlistResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listWaitlistResponse
+}
+
+
+
+
+
+export const getListWaitlistQueryKey = () => {
+    return [
+    `/api/waitlist`
+    ] as const;
+    }
+
+
+export const getListWaitlistQueryOptions = <TData = Awaited<ReturnType<typeof listWaitlist>>, TError = SignedOutResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWaitlist>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListWaitlistQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listWaitlist>>> = ({ signal }) => listWaitlist({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listWaitlist>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListWaitlistQueryResult = NonNullable<Awaited<ReturnType<typeof listWaitlist>>>
+export type ListWaitlistQueryError = SignedOutResponse
+
+
+/** @summary Waiting list (patients - their own; staff - everyone). */
+export function useListWaitlist<TData = Awaited<ReturnType<typeof listWaitlist>>, TError = SignedOutResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWaitlist>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listWaitlist>>,
+          TError,
+          Awaited<ReturnType<typeof listWaitlist>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Waiting list (patients - their own; staff - everyone). */
+export function useListWaitlist<TData = Awaited<ReturnType<typeof listWaitlist>>, TError = SignedOutResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWaitlist>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listWaitlist>>,
+          TError,
+          Awaited<ReturnType<typeof listWaitlist>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Waiting list (patients - their own; staff - everyone). */
+export function useListWaitlist<TData = Awaited<ReturnType<typeof listWaitlist>>, TError = SignedOutResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWaitlist>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Waiting list (patients - their own; staff - everyone). */
+export function useListWaitlist<TData = Awaited<ReturnType<typeof listWaitlist>>, TError = SignedOutResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWaitlist>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListWaitlistQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type joinWaitlistResponse200 = {
+  data: WaitlistEntry
+  status: 200
+}
+
+export type joinWaitlistResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type joinWaitlistResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type joinWaitlistResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type joinWaitlistResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type joinWaitlistResponseSuccess = (joinWaitlistResponse200) & {
+  headers: Headers;
+};
+export type joinWaitlistResponseError = (joinWaitlistResponse400 | joinWaitlistResponse401 | joinWaitlistResponse403 | joinWaitlistResponse404) & {
+  headers: Headers;
+};
+
+export type joinWaitlistResponse = (joinWaitlistResponseSuccess | joinWaitlistResponseError)
+
+export const getJoinWaitlistUrl = () => {
+
+
+
+
+  return `/api/waitlist`
+}
+
+/**
+ * @summary Wait for a slot between two dates. If one frees up the patient is offered it in the app.
+ */
+export const joinWaitlist = async (waitlistInput: WaitlistInput, options?: RequestInit): Promise<joinWaitlistResponse> => {
+
+  const res = await fetch(getJoinWaitlistUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }, options?.headers),
+    body: JSON.stringify(waitlistInput)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: joinWaitlistResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as joinWaitlistResponse
+}
+
+
+
+
+
+export const getJoinWaitlistMutationKey = () => ['joinWaitlist'] as const;
+
+export const getJoinWaitlistMutationOptions = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof joinWaitlist>>, TError,JoinWaitlistMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof joinWaitlist>>, TError,JoinWaitlistMutationVariables, TContext> => {
+
+const mutationKey = getJoinWaitlistMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof joinWaitlist>>, JoinWaitlistMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  joinWaitlist(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type JoinWaitlistMutationResult = NonNullable<Awaited<ReturnType<typeof joinWaitlist>>>
+    export type JoinWaitlistMutationBody = WaitlistInput
+    export type JoinWaitlistMutationError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse
+    export type JoinWaitlistMutationVariables = {data: WaitlistInput}
+
+    /** @summary Wait for a slot between two dates. If one frees up the patient is offered it in the app. */
+export const useJoinWaitlist = <TError = InvalidResponse | SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof joinWaitlist>>, TError,JoinWaitlistMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof joinWaitlist>>,
+        TError,
+        JoinWaitlistMutationVariables,
+        TContext
+      > => {
+      return useMutation(getJoinWaitlistMutationOptions(options), queryClient);
+    }
+
+export type leaveWaitlistResponse204 = {
+  data: void
+  status: 204
+}
+
+export type leaveWaitlistResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type leaveWaitlistResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type leaveWaitlistResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type leaveWaitlistResponseSuccess = (leaveWaitlistResponse204) & {
+  headers: Headers;
+};
+export type leaveWaitlistResponseError = (leaveWaitlistResponse401 | leaveWaitlistResponse403 | leaveWaitlistResponse404) & {
+  headers: Headers;
+};
+
+export type leaveWaitlistResponse = (leaveWaitlistResponseSuccess | leaveWaitlistResponseError)
+
+export const getLeaveWaitlistUrl = (entryId: string,) => {
+
+
+
+
+  return `/api/waitlist/${entryId}`
+}
+
+/**
+ * @summary Take an entry off the waiting list.
+ */
+export const leaveWaitlist = async (entryId: string, options?: RequestInit): Promise<leaveWaitlistResponse> => {
+
+  const res = await fetch(getLeaveWaitlistUrl(entryId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: leaveWaitlistResponse['data'] = body ? JSON.parse(body) : undefined
+  return { data, status: res.status, headers: res.headers } as leaveWaitlistResponse
+}
+
+
+
+
+
+export const getLeaveWaitlistMutationKey = () => ['leaveWaitlist'] as const;
+
+export const getLeaveWaitlistMutationOptions = <TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof leaveWaitlist>>, TError,LeaveWaitlistMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof leaveWaitlist>>, TError,LeaveWaitlistMutationVariables, TContext> => {
+
+const mutationKey = getLeaveWaitlistMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof leaveWaitlist>>, LeaveWaitlistMutationVariables> = (props) => {
+          const {entryId} = props ?? {};
+
+          return  leaveWaitlist(entryId,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LeaveWaitlistMutationResult = NonNullable<Awaited<ReturnType<typeof leaveWaitlist>>>
+
+    export type LeaveWaitlistMutationError = SignedOutResponse | NotAllowedResponse | NotFoundResponse
+    export type LeaveWaitlistMutationVariables = {entryId: string}
+
+    /** @summary Take an entry off the waiting list. */
+export const useLeaveWaitlist = <TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof leaveWaitlist>>, TError,LeaveWaitlistMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof leaveWaitlist>>,
+        TError,
+        LeaveWaitlistMutationVariables,
+        TContext
+      > => {
+      return useMutation(getLeaveWaitlistMutationOptions(options), queryClient);
+    }
+
+export type acceptOfferResponse200 = {
+  data: Appointment
+  status: 200
+}
+
+export type acceptOfferResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type acceptOfferResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type acceptOfferResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type acceptOfferResponse409 = {
+  data: ConflictResponse
+  status: 409
+}
+
+export type acceptOfferResponseSuccess = (acceptOfferResponse200) & {
+  headers: Headers;
+};
+export type acceptOfferResponseError = (acceptOfferResponse401 | acceptOfferResponse403 | acceptOfferResponse404 | acceptOfferResponse409) & {
+  headers: Headers;
+};
+
+export type acceptOfferResponse = (acceptOfferResponseSuccess | acceptOfferResponseError)
+
+export const getAcceptOfferUrl = (entryId: string,) => {
+
+
+
+
+  return `/api/waitlist/${entryId}/accept`
+}
+
+/**
+ * @summary Take the slot offered from the waiting list.
+ */
+export const acceptOffer = async (entryId: string, options?: RequestInit): Promise<acceptOfferResponse> => {
+
+  const res = await fetch(getAcceptOfferUrl(entryId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: acceptOfferResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as acceptOfferResponse
+}
+
+
+
+
+
+export const getAcceptOfferMutationKey = () => ['acceptOffer'] as const;
+
+export const getAcceptOfferMutationOptions = <TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptOffer>>, TError,AcceptOfferMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof acceptOffer>>, TError,AcceptOfferMutationVariables, TContext> => {
+
+const mutationKey = getAcceptOfferMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof acceptOffer>>, AcceptOfferMutationVariables> = (props) => {
+          const {entryId} = props ?? {};
+
+          return  acceptOffer(entryId,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AcceptOfferMutationResult = NonNullable<Awaited<ReturnType<typeof acceptOffer>>>
+
+    export type AcceptOfferMutationError = SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse
+    export type AcceptOfferMutationVariables = {entryId: string}
+
+    /** @summary Take the slot offered from the waiting list. */
+export const useAcceptOffer = <TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse | ConflictResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptOffer>>, TError,AcceptOfferMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof acceptOffer>>,
+        TError,
+        AcceptOfferMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAcceptOfferMutationOptions(options), queryClient);
+    }
+
+export type declineOfferResponse200 = {
+  data: WaitlistEntry
+  status: 200
+}
+
+export type declineOfferResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type declineOfferResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type declineOfferResponse404 = {
+  data: NotFoundResponse
+  status: 404
+}
+
+export type declineOfferResponseSuccess = (declineOfferResponse200) & {
+  headers: Headers;
+};
+export type declineOfferResponseError = (declineOfferResponse401 | declineOfferResponse403 | declineOfferResponse404) & {
+  headers: Headers;
+};
+
+export type declineOfferResponse = (declineOfferResponseSuccess | declineOfferResponseError)
+
+export const getDeclineOfferUrl = (entryId: string,) => {
+
+
+
+
+  return `/api/waitlist/${entryId}/decline`
+}
+
+/**
+ * @summary Say no to an offered slot; it goes to the next person waiting.
+ */
+export const declineOffer = async (entryId: string, options?: RequestInit): Promise<declineOfferResponse> => {
+
+  const res = await fetch(getDeclineOfferUrl(entryId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: declineOfferResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as declineOfferResponse
+}
+
+
+
+
+
+export const getDeclineOfferMutationKey = () => ['declineOffer'] as const;
+
+export const getDeclineOfferMutationOptions = <TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof declineOffer>>, TError,DeclineOfferMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof declineOffer>>, TError,DeclineOfferMutationVariables, TContext> => {
+
+const mutationKey = getDeclineOfferMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof declineOffer>>, DeclineOfferMutationVariables> = (props) => {
+          const {entryId} = props ?? {};
+
+          return  declineOffer(entryId,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeclineOfferMutationResult = NonNullable<Awaited<ReturnType<typeof declineOffer>>>
+
+    export type DeclineOfferMutationError = SignedOutResponse | NotAllowedResponse | NotFoundResponse
+    export type DeclineOfferMutationVariables = {entryId: string}
+
+    /** @summary Say no to an offered slot; it goes to the next person waiting. */
+export const useDeclineOffer = <TError = SignedOutResponse | NotAllowedResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof declineOffer>>, TError,DeclineOfferMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof declineOffer>>,
+        TError,
+        DeclineOfferMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeclineOfferMutationOptions(options), queryClient);
+    }
+
+export type getOverviewResponse200 = {
+  data: Overview
+  status: 200
+}
+
+export type getOverviewResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type getOverviewResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type getOverviewResponseSuccess = (getOverviewResponse200) & {
+  headers: Headers;
+};
+export type getOverviewResponseError = (getOverviewResponse401 | getOverviewResponse403) & {
+  headers: Headers;
+};
+
+export type getOverviewResponse = (getOverviewResponseSuccess | getOverviewResponseError)
+
+export const getGetOverviewUrl = () => {
+
+
+
+
+  return `/api/admin/overview`
+}
+
+/**
+ * @summary The admin's view of the whole clinic - today's numbers, every patient, today's visits.
+ */
+export const getOverview = async ( options?: RequestInit): Promise<getOverviewResponse> => {
+
+  const res = await fetch(getGetOverviewUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getOverviewResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getOverviewResponse
+}
+
+
+
+
+
+export const getGetOverviewQueryKey = () => {
+    return [
+    `/api/admin/overview`
+    ] as const;
+    }
+
+
+export const getGetOverviewQueryOptions = <TData = Awaited<ReturnType<typeof getOverview>>, TError = SignedOutResponse | NotAllowedResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOverview>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetOverviewQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getOverview>>> = ({ signal }) => getOverview({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getOverview>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetOverviewQueryResult = NonNullable<Awaited<ReturnType<typeof getOverview>>>
+export type GetOverviewQueryError = SignedOutResponse | NotAllowedResponse
+
+
+/** @summary The admin's view of the whole clinic - today's numbers, every patient, today's visits. */
+export function useGetOverview<TData = Awaited<ReturnType<typeof getOverview>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOverview>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getOverview>>,
+          TError,
+          Awaited<ReturnType<typeof getOverview>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The admin's view of the whole clinic - today's numbers, every patient, today's visits. */
+export function useGetOverview<TData = Awaited<ReturnType<typeof getOverview>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOverview>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getOverview>>,
+          TError,
+          Awaited<ReturnType<typeof getOverview>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The admin's view of the whole clinic - today's numbers, every patient, today's visits. */
+export function useGetOverview<TData = Awaited<ReturnType<typeof getOverview>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOverview>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary The admin's view of the whole clinic - today's numbers, every patient, today's visits. */
+export function useGetOverview<TData = Awaited<ReturnType<typeof getOverview>>, TError = SignedOutResponse | NotAllowedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOverview>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetOverviewQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type listActivityResponse200 = {
+  data: ActivityList
+  status: 200
+}
+
+export type listActivityResponse400 = {
+  data: InvalidResponse
+  status: 400
+}
+
+export type listActivityResponse401 = {
+  data: SignedOutResponse
+  status: 401
+}
+
+export type listActivityResponse403 = {
+  data: NotAllowedResponse
+  status: 403
+}
+
+export type listActivityResponseSuccess = (listActivityResponse200) & {
+  headers: Headers;
+};
+export type listActivityResponseError = (listActivityResponse400 | listActivityResponse401 | listActivityResponse403) & {
+  headers: Headers;
+};
+
+export type listActivityResponse = (listActivityResponseSuccess | listActivityResponseError)
+
+export const getListActivityUrl = (params?: ListActivityParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/activity?${stringifiedParams}` : `/api/activity`
+}
+
+/**
+ * @summary Activity feed, newest first (admin - everything; doctors - one of their patients).
+ */
+export const listActivity = async (params?: ListActivityParams, options?: RequestInit): Promise<listActivityResponse> => {
+
+  const res = await fetch(getListActivityUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listActivityResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listActivityResponse
+}
+
+
+
+
+
+export const getListActivityQueryKey = (params?: ListActivityParams,) => {
+    return [
+    `/api/activity`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListActivityQueryOptions = <TData = Awaited<ReturnType<typeof listActivity>>, TError = InvalidResponse | SignedOutResponse | NotAllowedResponse>(params?: ListActivityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listActivity>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListActivityQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listActivity>>> = ({ signal }) => listActivity(params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listActivity>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListActivityQueryResult = NonNullable<Awaited<ReturnType<typeof listActivity>>>
+export type ListActivityQueryError = InvalidResponse | SignedOutResponse | NotAllowedResponse
+
+
+/** @summary Activity feed, newest first (admin - everything; doctors - one of their patients). */
+export function useListActivity<TData = Awaited<ReturnType<typeof listActivity>>, TError = InvalidResponse | SignedOutResponse | NotAllowedResponse>(
+ params: undefined |  ListActivityParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listActivity>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listActivity>>,
+          TError,
+          Awaited<ReturnType<typeof listActivity>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Activity feed, newest first (admin - everything; doctors - one of their patients). */
+export function useListActivity<TData = Awaited<ReturnType<typeof listActivity>>, TError = InvalidResponse | SignedOutResponse | NotAllowedResponse>(
+ params?: ListActivityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listActivity>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listActivity>>,
+          TError,
+          Awaited<ReturnType<typeof listActivity>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Activity feed, newest first (admin - everything; doctors - one of their patients). */
+export function useListActivity<TData = Awaited<ReturnType<typeof listActivity>>, TError = InvalidResponse | SignedOutResponse | NotAllowedResponse>(
+ params?: ListActivityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listActivity>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Activity feed, newest first (admin - everything; doctors - one of their patients). */
+export function useListActivity<TData = Awaited<ReturnType<typeof listActivity>>, TError = InvalidResponse | SignedOutResponse | NotAllowedResponse>(
+ params?: ListActivityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listActivity>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListActivityQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}

@@ -91,6 +91,42 @@ test("neck rotation captures a baseline then counts each side", () => {
   assert.equal(r, 2);
 });
 
+test("neck rotation: a start reading taken while the head is turned is thrown away", () => {
+  // Phone test 22 Nov 2026: the patient was still looking aside when tracking began, the
+  // "straight ahead" reading was taken at ~35 degrees, and one side could never count.
+  const frames = run(1600 + 1600 + 8000, (t) => {
+    if (t < 1600) return { headYaw: 35 }; // looking aside
+    if (t < 3200) return { headYaw: 0 }; // now looking straight at the phone
+    const tt = t - 3200;
+    const dir = Math.floor(tt / 2000) % 2 === 0 ? 1 : -1;
+    return { headYaw: dir * wave(tt % 2000, 0, 55, 2000) };
+  });
+  const { result, events } = feed("neck-rotation", frames);
+  assert.ok(events.some((e) => e.type === "baseline-retry"), "asks the person to hold still facing forward");
+  assert.equal(result.reps.filter((r) => r.side === "left" && r.full).length, 2);
+  assert.equal(result.reps.filter((r) => r.side === "right" && r.full).length, 2);
+});
+
+test("a start reading taken while moving is thrown away", () => {
+  const frames = run(1600 + 1600 + 4000, (t) => {
+    if (t < 1600) return { headYaw: wave(t, -15, 15, 800) }; // fidgeting
+    if (t < 3200) return { headYaw: 0 };
+    const tt = t - 3200;
+    const dir = Math.floor(tt / 2000) % 2 === 0 ? 1 : -1;
+    return { headYaw: dir * wave(tt % 2000, 0, 55, 2000) };
+  });
+  const { result, events } = feed("neck-rotation", frames);
+  assert.ok(events.some((e) => e.type === "baseline-retry"));
+  assert.equal(result.reps.filter((r) => r.full).length, 2);
+});
+
+test("neck rotation: shoulders that stay still are not flagged", () => {
+  const frames = run(1600 + 4000, (t) => ({ headYaw: t < 1600 ? 0 : wave(t - 1600, 0, 55, 2000), turn: 22 }));
+  const { result } = feed("neck-rotation", frames);
+  assert.ok(result.reps.length > 0);
+  assert.ok(result.reps.every((r) => !r.faults.includes("shoulders-turning")), "a slightly angled seat is not a fault");
+});
+
 test("tracking pauses when required landmarks are not visible", () => {
   const frames = run(2000, (t) => ({ abdL: wave(t, 20, 160, 2000) })).map((f) => ({
     ...f,
