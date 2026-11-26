@@ -1,0 +1,5 @@
+kynex-male.glb and kynex-male-hair.glb are made from "Universal Base Characters" (Standard)
+by Quaternius - https://quaternius.com/packs/universalbasecharacters.html
+License: CC0 1.0 Universal (public domain) - https://creativecommons.org/publicdomain/zero/1.0/
+Changes: textures resized to 1024 px WebP and packed as GLB (gltf-transform). The T-shirt and
+shorts are painted at run time in artifacts/web/src/components/demo/avatar.ts.

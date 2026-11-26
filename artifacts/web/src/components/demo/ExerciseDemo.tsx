@@ -1,6 +1,6 @@
 import { getDemo, type LocalisedText } from "@kynex/motion";
 import { useEffect, useRef, useState } from "react";
-import type { DemoController } from "./mannequin.ts";
+import type { DemoController } from "./avatar.ts";
 
 type Lang = "en" | "hi";
 
@@ -9,8 +9,8 @@ const cx = (...c: (string | false | undefined)[]) => c.filter(Boolean).join(" ")
 
 /**
  * Looping 3D demonstration of an exercise, seen from where the phone camera should be.
- * A stand-in until the instructor videos (M7) and the human 3D avatar are ready.
- * three.js loads only when a demo is on screen, so other pages don't download it.
+ * A stand-in until the instructor videos (M7) and the final avatar are ready.
+ * three.js and the 3D body (~0.9 MB) load only when a demo is on screen.
  */
 export function ExerciseDemo({
   exerciseId,
@@ -30,6 +30,7 @@ export function ExerciseDemo({
   const [slow, setSlow] = useState(false);
   const [viewIdx, setViewIdx] = useState(0);
   const [failed, setFailed] = useState(false);
+  const [ready, setReady] = useState(false);
   const [visible, setVisible] = useState(false);
   const clip = getDemo(exerciseId);
 
@@ -56,10 +57,15 @@ export function ExerciseDemo({
     if (!host || !clip || !visible) return;
     let cancelled = false;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    import("./mannequin.ts")
-      .then(({ createDemo }) => {
-        if (cancelled) return;
-        ctl.current = createDemo(host, clip, { onCue: setCue, reducedMotion: reduced });
+    import("./avatar.ts")
+      .then(({ createDemo }) => createDemo(host, clip, { onCue: setCue, reducedMotion: reduced }))
+      .then((c) => {
+        if (cancelled) {
+          c.dispose();
+          return;
+        }
+        ctl.current = c;
+        setReady(true);
         ctl.current.setPlaying(!reduced && playingRef.current);
         ctl.current.setSpeed(slowRef.current ? 0.5 : 1);
         ctl.current.setOrbit(VIEWS[viewRef.current]!);
@@ -70,6 +76,7 @@ export function ExerciseDemo({
       cancelled = true;
       ctl.current?.dispose();
       ctl.current = null;
+      setReady(false);
     };
   }, [clip, visible]);
 
@@ -88,6 +95,9 @@ export function ExerciseDemo({
     <section aria-label={tx("How to do it", "कैसे करें")} className={cx("flex flex-col overflow-hidden rounded-3xl", dark ? "bg-brand-800/70" : "bg-white shadow-soft", className)}>
       <div className={cx("relative aspect-[4/3] w-full sm:aspect-video", dark ? "bg-gradient-to-b from-brand-700/60 to-brand-900/80" : "bg-gradient-to-b from-brand-50 via-white to-accent-50")}>
         <div ref={hostRef} className="absolute inset-0" aria-hidden="true" />
+        {!ready && !failed && (
+          <div className={cx("absolute inset-0 grid place-items-center text-sm", dark ? "text-white/70" : "text-ink-soft")}>{tx("Loading the demo…", "डेमो लोड हो रहा है…")}</div>
+        )}
         {failed && (
           <div className={cx("absolute inset-0 grid place-items-center p-6 text-center text-sm", dark ? "text-white/80" : "text-ink-soft")}>
             {tx("The 3D demo could not start on this device. Follow the steps below.", "इस डिवाइस पर 3D डेमो नहीं चल सका। नीचे दिए चरण देखें।")}
