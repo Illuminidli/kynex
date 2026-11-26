@@ -14,6 +14,7 @@ import { explainExercise, getExercise } from "@kynex/motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { ExerciseDemo } from "../../components/demo/ExerciseDemo.tsx";
 import { ExerciseRun, type RunOutput } from "../../components/ExerciseRun.tsx";
 import { LangSwitch } from "../../components/LangSwitch.tsx";
 import { Button, ErrorText, FEELINGS, inputCls, Loading, PainScale } from "../../components/ui.tsx";
@@ -287,6 +288,9 @@ function Player({ items, offset, total, resumeId, lang }: { items: PlanItem[]; o
           {def.laterality === "unilateral" ? (item.side === "both" ? (lang === "en" ? " · left, then right" : " · पहले बायाँ, फिर दायाँ") : ` · ${item.side === "left" ? (lang === "en" ? "left side" : "बायाँ") : lang === "en" ? "right side" : "दायाँ"}`) : ""}
         </p>
         {item.note && <p className="rounded-2xl bg-accent-500/20 p-3 text-sm">{item.note}</p>}
+
+        {/* HOW TO DO IT: animated demo until the instructor videos are ready. */}
+        <ExerciseDemo exerciseId={def.id} lang={lang} dark />
 
         {/* KEY POINTS: what decides whether a rep counts. Highlighted so it can't be missed. */}
         <section className="rounded-2xl border-2 border-[#ffc23d] bg-[#ffc23d]/15 p-4" aria-labelledby="keypoints">

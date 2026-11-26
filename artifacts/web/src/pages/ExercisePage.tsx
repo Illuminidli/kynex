@@ -6,6 +6,7 @@ import {
   type ExerciseDetail,
   type Me,
 } from "@kynex/api-client-react";
+import { ExerciseDemo } from "../components/demo/ExerciseDemo.tsx";
 import { explainExercise, getExercise } from "@kynex/motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
@@ -58,6 +59,7 @@ export function ExercisePage({ me, slug }: { me: Me; slug: string }) {
         <span aria-hidden>●</span> {t("tryIt", lang)}
       </Link>
 
+      <ExerciseDemo exerciseId={e.slug} lang={lang} />
       <VideoSlot status={e.videoStatus} lang={lang} />
 
       <Card title={t("setup", lang)}>
@@ -98,13 +100,10 @@ function VideoSlot({ status, lang }: { status: ExerciseDetail["videoStatus"]; la
     approved: { en: "Approved", hi: "मंज़ूर" },
   }[status][lang];
   return (
-    <section aria-label={t("video", lang)} className="grid aspect-video place-items-center rounded-3xl border-2 border-dashed border-brand-200 bg-brand-50 text-center">
-      <div>
-        <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">{t("video", lang)}</p>
-        <p className="mt-1 text-lg font-semibold text-brand-800">{t("videoComing", lang)}</p>
-        <p className="mt-1 text-sm text-ink-soft">{statusText}</p>
-      </div>
-    </section>
+    <p className="rounded-2xl border border-dashed border-brand-200 bg-brand-50 px-4 py-3 text-sm">
+      <b className="text-brand-800">{t("video", lang)}:</b> {t("videoComing", lang)} · <span className="text-ink-soft">{statusText}</span>
+      <span className="block text-ink-soft">{lang === "en" ? "Until then, patients see the animated demo above." : "तब तक मरीज़ ऊपर का एनिमेटेड डेमो देखते हैं।"}</span>
+    </p>
   );
 }
 
