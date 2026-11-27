@@ -13,7 +13,7 @@
     "@kynex/api-client-react": "workspace:*",
     "@kynex/motion": "workspace:*",
     "@mediapipe/tasks-vision": "^1.2.3",
-    "@tanstack/react-query": "^5.90.0",
+    "@tanstack/react-query": "^5.108.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "wouter": "^3.13.0"
