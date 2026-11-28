@@ -1,8 +1,11 @@
 import type { PlanItem, SessionExerciseInput } from "@kynex/api-client-react";
-import { boxFor, ExerciseTracker, HOLD_CUE, VoiceCoach, type ExerciseDefinition, type PoseFrame, type SessionResult, type Side, type TrackerSnapshot } from "@kynex/motion";
+import { boxFor, ExerciseTracker, type FaultRule, HOLD_CUE, VoiceCoach, type ExerciseDefinition, type PoseFrame, type SessionResult, type Side, type TrackerSnapshot } from "@kynex/motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { keyPoints } from "../lib/keypoints.ts";
 import { drawPose, useCamera } from "../lib/pose.ts";
+import { PICTURE_EVERY_MS, PICTURE_WIDTH, pushRecent, type ReplayFrame } from "../lib/replay.ts";
+import { ExerciseDemo } from "./demo/ExerciseDemo.tsx";
+import { FormFix } from "./FormFix.tsx";
 import { playSound } from "../lib/sounds.ts";
 import { TrackRecorder } from "../lib/track.ts";
 import { CameraRecorder } from "../lib/videos.ts";
@@ -76,6 +79,12 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
   const lastSeen = useRef(performance.now());
   const startedAt = useRef(Date.now());
   const finished = useRef(false);
+  // Form fix: the last two seconds of frames, which mistakes were shown in which set, and the pause.
+  const recent = useRef<ReplayFrame[]>([]);
+  const lastPicture = useRef(-Infinity);
+  const faultShown = useRef(new Map<string, number>());
+  const formFixOn = useRef(false);
+  const [formFix, setFormFix] = useState<{ rule: FaultRule; joints: number[]; frames: ReplayFrame[]; full: boolean } | null>(null);
   const tipShownAt = useRef(new Map<string, number>());
   const everPlacedRef = useRef(false);
   const globalSet = (r: number, s: number) => r * item.sets + s;
@@ -232,8 +241,21 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
         lastSeen.current = now;
         track.current.add(frame);
         recorder.current.mark(frame.image);
+        // Keep a small picture of the camera every ~100 ms for the form-fix replay (the last 2 s only).
+        const entry: ReplayFrame = { pose: frame, pic: null };
+        pushRecent(recent.current, entry);
+        if (video.videoWidth && now - lastPicture.current >= PICTURE_EVERY_MS) {
+          lastPicture.current = now;
+          const height = Math.round(PICTURE_WIDTH / (frame.aspect || 16 / 9));
+          createImageBitmap(video, { resizeWidth: PICTURE_WIDTH, resizeHeight: height })
+            .then((b) => {
+              entry.pic = b;
+            })
+            .catch(() => {});
+        }
         const tr = tracker.current;
-        if (tr && live.current.phase === "live") {
+        // While a form fix is on screen the set is paused: frames are kept, but nothing is counted.
+        if (tr && live.current.phase === "live" && !formFixOn.current) {
           const events = tr.update(frame);
           const inSet = () => countOf(def, tr.snapshot()) - setStart.current;
           coach.current.hear(events, now, inSet, def.faults);
@@ -242,6 +264,20 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
             // Each meaning has its own sound; words only come after the rep (see VoiceCoach).
             const sound = VoiceCoach.soundFor(e);
             if (sound) playSound(sound);
+            if (e.type === "fault") {
+              // Highlight a wrong rep before the next one: full replay the first time in a set,
+              // then a quick replay again only if it comes back after 8 s.
+              const key = `${live.current.set}:${e.fault.id}`;
+              const last = faultShown.current.get(key);
+              if (!formFixOn.current && (last === undefined || now - last > 8000) && recent.current.length >= 3) {
+                faultShown.current.set(key, now);
+                const sides: Side[] = e.side ? [e.side] : ["left", "right"];
+                const joints = [...new Set(sides.flatMap((s) => e.fault.uses?.(s) ?? []))];
+                formFixOn.current = true;
+                setFormFix({ rule: e.fault, joints: joints.length ? joints : focus, frames: recent.current.slice(), full: last === undefined });
+                if (live.current.voiceOn) speak(e.fault.cue, live.current.lang);
+              }
+            }
             if (e.type === "placement") everPlacedRef.current ||= e.ok;
             if (e.type === "placement" && e.ok) setEverPlaced(true);
             // On screen: the same one line the voice says after a rep, never tips during it.
@@ -360,7 +396,25 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
 
   return (
     <main className="fixed inset-0 z-20 flex flex-col bg-black text-white">
-      <div className="relative flex-1 overflow-hidden">
+      {formFix && (
+        <FormFix
+          frames={formFix.frames}
+          joints={formFix.joints}
+          cue={formFix.rule.cue[lang]}
+          repLabel={lang === "en" ? `Set ${set} of ${item.sets}` : `सेट ${set} / ${item.sets}`}
+          mirror={facing === "user"}
+          full={formFix.full}
+          exerciseId={def.id}
+          lang={lang}
+          onDone={() => {
+            formFixOn.current = false;
+            setFormFix(null);
+          }}
+        />
+      )}
+      <div className="relative flex min-h-0 flex-1 flex-col">
+      {/* Split view: you on top (tracking and count), the reference demo below, in step with the reps. */}
+      <div className="relative min-h-0 flex-[1.15] overflow-hidden">
         <video ref={camera.videoRef} className={`absolute inset-0 size-full object-contain ${facing === "user" ? "-scale-x-100" : ""}`} playsInline muted aria-label="Camera preview" />
         <canvas ref={canvas} className="pointer-events-none absolute inset-0 size-full" aria-hidden />
         <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 bg-gradient-to-b from-black/70 to-transparent p-4">
@@ -438,6 +492,10 @@ function CameraRun({ def, item, facing, lang, voiceOn, setVoiceOn, onFinish }: P
             </div>
           </div>
         )}
+      </div>
+      <div className="relative min-h-0 flex-1 overflow-hidden bg-[#f0f6fa] text-ink">
+        <ExerciseDemo exerciseId={def.id} lang={lang} />
+      </div>
       </div>
       <div className="flex items-center justify-between gap-3 bg-brand-900 p-4">
         <button type="button" onClick={() => setVoiceOn(!voiceOn)} className="rounded-xl bg-white/10 px-4 py-3 text-sm font-medium">
