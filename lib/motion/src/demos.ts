@@ -1,7 +1,7 @@
 /**
  * Demonstration clips: key poses for an animated 3D figure that shows each exercise
  * before the patient tries it. Renderer-independent (plain joint angles), so the web
- * three.js mannequin today and a rigged character or a native renderer later all read
+ * three.js avatar today (a rigged CC0 human) and a native renderer later all read
  * the same data.
  *
  * Angles are degrees in anatomical terms, positive in the usual clinical direction:
@@ -224,7 +224,7 @@ export const DEMOS: Record<string, DemoClip> = {
     seconds: 6,
     base: { ...SUPINE, lHipFlex: 50, rHipFlex: 50, lKnee: 100, rKnee: 100, lAnkle: 0, rAnkle: 0 },
     prop: "mat",
-    keys: out({ bodyPitch: -62, lHipFlex: 22, rHipFlex: 22, lKnee: 72, rKnee: 72, lAnkle: -18, rAnkle: -18, neckFlex: 25 }, t("Squeeze your buttocks and lift your hips", "नितंब कसकर कूल्हे उठाइए"), 0.22),
+    keys: out({ bodyPitch: -62, lHipFlex: 4, rHipFlex: 4, lKnee: 92, rKnee: 92, lAnkle: -6, rAnkle: -6, neckFlex: 20 }, t("Squeeze your buttocks and lift your hips", "नितंब कसकर कूल्हे उठाइए"), 0.22),
     highlight: ["trunk", "lLeg", "rLeg"],
   },
   "straight-leg-raise": {

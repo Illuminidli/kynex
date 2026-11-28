@@ -600,7 +600,9 @@ export class ExerciseTracker {
         if (dur >= r.minRepMs && m.peakP >= r.partial) {
           const reachedFull = m.peakP >= r.full;
           const heldEnough = m.heldMs >= r.holdMs;
-          const full = reachedFull && heldEnough;
+          // A rep with any form fault is not counted: it is announced as "not complete" and done again.
+          const faulty = m.faultsInRep.size > 0;
+          const full = reachedFull && heldEnough && !faulty;
           const secondary: Record<string, number> = {};
           for (const [k, acc] of m.secondary) if (Number.isFinite(acc.value)) secondary[k] = acc.value;
           const rep: RepRecord = {
@@ -619,7 +621,7 @@ export class ExerciseTracker {
           this.reps.push(rep);
           if (this.isBetter(m.peakV, m.best)) m.best = m.peakV;
           if (full) events.push({ type: "rep", rep });
-          else events.push({ type: "partial", rep, cue: reachedFull ? HOLD_CUE : PARTIAL_CUE });
+          else events.push({ type: "partial", rep, cue: reachedFull && !faulty ? HOLD_CUE : PARTIAL_CUE });
         }
         m.resetRep();
       }

@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Kynex: Product overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@500;600&family=Noto+Sans+Tamil:wght@500;600&family=Noto+Sans+Telugu:wght@500;600&family=Noto+Sans+Kannada:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/*
+  Kynex product overview, v2. A4 pages.
+  Story used in every mockup: Priya Sharma (56) is in week 3 of a 6-week plan for lower-back pain, with her physiotherapist Dr. Anjali Rao.
+  Plan: Glute bridge 2 × 10, Cat–cow 2 × 8, Bird dog 2 × 8, alternating (about 12 minutes). Her next visit is Thursday at 10:30.
+  App UI is drawn at real phone size (390 × 844) and scaled with zoom. Colours are the app's own tokens.
+*/
+:root {
+  --navy: #0e3147; --navy-2: #123f5a; --teal: #2f789f; --teal-d: #1d6189;
+  --b50: #f0f6fa; --b100: #dcebf4; --b200: #b9d6e8;
+  --orange: #f2812e; --o50: #fff3e8; --o-ink: #b4570f;
+  --canvas: #f6f8fa; --line: #e5eaf0; --ink: #16222f; --ink-2: #475569; --ink-3: #8a97a8;
+  --good: #2f9e73; --good-s: #e5f5ee; --good-ink: #1d7a55; --bad: #cf4b45; --bad-s: #fbe9e8; --bad-ink: #a3322d;
+  --display: "Outfit", "Segoe UI", sans-serif; --body: "Source Sans 3", "Segoe UI", sans-serif;
+  --ui: "Inter", "Segoe UI", sans-serif;
+}
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+html, body { margin: 0; background: #d5dbe0; }
+body { font: 10.5pt/1.5 var(--body); color: var(--ink); }
+@media screen { body { padding: 8mm 0; } .page { margin: 0 auto 8mm; } }
+
+/* ================= Document ================= */
+.page { width: 210mm; height: 297mm; padding: 17mm 18mm 15mm; background: #fff; position: relative; overflow: hidden; page-break-after: always; display: flex; flex-direction: column; gap: 6mm; }
+.page:last-child { page-break-after: auto; }
+h1, h2, h3, h4 { font-family: var(--display); margin: 0; color: var(--navy); text-wrap: balance; line-height: 1.15; }
+h2 { font-size: 23pt; font-weight: 600; letter-spacing: -0.01em; }
+h3 { font-size: 12.5pt; font-weight: 600; }
+h4 { font-size: 10.5pt; font-weight: 600; }
+p { margin: 0; }
+.eyebrow { font: 600 8pt var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--teal); }
+.lede { font-size: 11.5pt; color: var(--ink-2); max-width: 155mm; }
+.head { display: flex; flex-direction: column; gap: 2.5mm; }
+.foot { position: absolute; left: 18mm; right: 18mm; bottom: 8mm; display: flex; justify-content: space-between; font-size: 7.5pt; color: var(--ink-3); border-top: 1px solid var(--line); padding-top: 2.5mm; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; }
+.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm; }
+.card { background: var(--canvas); border-radius: 12px; padding: 4.5mm 5mm; display: flex; flex-direction: column; gap: 1.5mm; }
+.card p { color: var(--ink-2); font-size: 9.5pt; }
+.tag { display: inline-flex; align-items: center; gap: 5px; font: 600 7.5pt var(--body); padding: 2px 9px 2px 7px; border-radius: 99px; white-space: nowrap; }
+.tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.tag.built { background: var(--good-s); color: var(--good-ink); }
+.tag.planned { background: var(--o50); color: var(--o-ink); }
+ul.clean { margin: 0; padding: 0; list-style: none; display: grid; gap: 2.2mm; }
+ul.clean li { padding-left: 15px; position: relative; color: var(--ink-2); font-size: 9.5pt; }
+ul.clean li::before { content: ""; position: absolute; left: 0; top: .6em; width: 6px; height: 6px; border-radius: 2px; background: var(--teal); }
+ul.clean li b { color: var(--ink); font-weight: 600; }
+.callout { background: var(--navy); color: #fff; border-radius: 14px; padding: 6mm 7mm; }
+.callout h3 { color: #fff; }
+.callout p { color: #c6d9e6; font-size: 10.5pt; }
+.mark { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(140deg, #3d8fba, var(--teal-d)); display: inline-grid; place-items: center; flex: none; }
+.mark svg { width: 58%; height: 58%; }
+
+/* Mockup rows and captions */
+.shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; align-items: start; }
+.shot { display: flex; flex-direction: column; gap: 3.5mm; align-items: center; }
+.capt { display: flex; flex-direction: column; gap: 1.2mm; width: 100%; }
+.capt .t { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.capt p { font-size: 8.8pt; color: var(--ink-2); line-height: 1.45; }
+.ph { zoom: 0.5; }
+.ph-lg { zoom: 0.56; }
+
+/* ================= Device ================= */
+.device { width: 412px; height: 866px; border-radius: 62px; background: #0c1822; padding: 11px; position: relative; box-shadow: 0 40px 80px -40px rgba(14,49,71,.55), 0 0 0 2px #24384a inset; }
+.device::before { content: ""; position: absolute; top: 24px; left: 50%; transform: translateX(-50%); width: 118px; height: 34px; border-radius: 20px; background: #05090d; z-index: 20; }
+.scr { width: 390px; height: 844px; border-radius: 51px; overflow: hidden; position: relative; background: var(--canvas); display: flex; flex-direction: column; font: 400 16px/1.4 var(--ui); color: var(--ink); letter-spacing: -0.01em; }
+.status { height: 58px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 8px 32px 0 38px; font: 600 16px var(--ui); color: var(--ink); }
+.status .ic { display: flex; gap: 6px; align-items: center; }
+.dark .status { color: #fff; }
+.body { flex: 1; min-height: 0; padding: 6px 20px 16px; display: flex; flex-direction: column; gap: 14px; }
+
+/* UI type */
+.u-cap { font: 500 13px var(--ui); color: var(--ink-3); }
+.u-title { font: 700 28px/1.15 var(--ui); color: var(--ink); letter-spacing: -0.025em; }
+.u-h { font: 600 18px/1.25 var(--ui); color: var(--ink); letter-spacing: -0.015em; }
+.u-b { font: 600 16px var(--ui); color: var(--ink); }
+.u-s { font: 400 14px/1.4 var(--ui); color: var(--ink-2); }
+.u-xs { font: 500 12px var(--ui); color: var(--ink-3); }
+.ucard { background: #fff; border-radius: 22px; padding: 16px; box-shadow: 0 1px 2px rgba(16,34,51,.04), 0 6px 18px -10px rgba(16,34,51,.14); }
+.row { display: flex; align-items: center; gap: 12px; }
+.row .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sep { height: 1px; background: var(--line); margin: 0 -16px; }
+.btn { height: 56px; border-radius: 16px; background: var(--navy); color: #fff; font: 600 17px var(--ui); display: flex; align-items: center; justify-content: center; gap: 10px; flex: none; }
+.btn.light { background: #fff; color: var(--navy); }
+.btn.ghost { background: transparent; color: var(--teal-d); box-shadow: inset 0 0 0 1.5px var(--b200); }
+.pill { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 99px; font: 600 13px var(--ui); background: var(--b50); color: var(--teal-d); white-space: nowrap; }
+.pill.good { background: var(--good-s); color: var(--good-ink); }
+.pill.warn { background: var(--o50); color: var(--o-ink); }
+.pill.bad { background: var(--bad-s); color: var(--bad-ink); }
+.ico { width: 22px; height: 22px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tile { width: 52px; height: 52px; border-radius: 15px; background: var(--b50); display: grid; place-items: center; flex: none; }
+.tile svg { width: 44px; height: 44px; }
+.avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--b100); color: var(--teal-d); display: grid; place-items: center; font: 600 15px var(--ui); flex: none; }
+.chev { width: 18px; height: 18px; color: var(--ink-3); }
+.tabbar { flex: none; height: 92px; background: rgba(255,255,255,.96); border-top: 1px solid var(--line); display: flex; justify-content: space-around; padding: 10px 6px 0; }
+.tabbar span { display: flex; flex-direction: column; align-items: center; gap: 4px; font: 500 11.5px var(--ui); color: var(--ink-3); width: 76px; }
+.tabbar span.on { color: var(--navy); font-weight: 600; }
+.tabbar span.on .ico { color: var(--teal); }
+.seg { display: flex; background: #e9eef3; border-radius: 13px; padding: 4px; }
+.seg span { flex: 1; text-align: center; height: 36px; display: grid; place-items: center; border-radius: 10px; font: 600 14px var(--ui); color: var(--ink-2); }
+.seg span.on { background: #fff; color: var(--navy); box-shadow: 0 1px 3px rgba(16,34,51,.12); }
+.bar { height: 8px; border-radius: 8px; background: var(--b100); overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 8px; background: var(--teal); }
+.dev { font-family: "Noto Sans Devanagari", var(--ui); }
+
+/* Camera screen */
+.cam { background: #0f1c26; color: #fff; }
+.cam .scene { position: absolute; inset: 0; background: radial-gradient(130% 70% at 50% 35%, #3a5262 0%, #1d2e3b 55%, #0f1c26 100%); }
+.cam .scene::after { content: ""; position: absolute; left: 0; right: 0; top: 58%; bottom: 0; background: linear-gradient(#2a3d4a, #182733); }
+.cam .top { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 6px 20px; }
+.round { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.14); display: grid; place-items: center; color: #fff; backdrop-filter: blur(8px); }
+.cam .title { text-align: center; }
+.cam .title b { font: 600 17px var(--ui); display: block; }
+.cam .title span { font: 500 13px var(--ui); color: #b8cad6; }
+.cam .hud { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 20px 0; }
+.status-chip { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 99px; background: rgba(47,158,115,.92); font: 600 14px var(--ui); }
+.status-chip i { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+.counter { text-align: right; line-height: 1; }
+.counter b { font: 700 64px var(--ui); letter-spacing: -0.04em; }
+.counter b small { font-size: 26px; color: #b8cad6; font-weight: 600; letter-spacing: 0; }
+.counter span { display: block; font: 500 13px var(--ui); color: #b8cad6; margin-top: 6px; }
+.figure { position: absolute; left: 0; right: 0; top: 318px; height: 300px; z-index: 1; }
+.sheet { position: absolute; left: 12px; right: 12px; bottom: 14px; z-index: 3; background: rgba(12,24,34,.82); backdrop-filter: blur(14px); border-radius: 34px; padding: 18px 18px 18px; display: flex; flex-direction: column; gap: 14px; }
+.tip { display: flex; gap: 12px; align-items: flex-start; }
+.tip .dot { width: 34px; height: 34px; border-radius: 50%; background: var(--orange); display: grid; place-items: center; flex: none; }
+.tip b { font: 600 16px var(--ui); display: block; }
+.tip span { font: 400 13.5px var(--ui); color: #b8cad6; }
+.range { display: flex; flex-direction: column; gap: 6px; }
+.range .track { height: 10px; border-radius: 10px; background: rgba(255,255,255,.16); position: relative; }
+.range .track i { position: absolute; left: 0; top: 0; bottom: 0; width: 78%; border-radius: 10px; background: linear-gradient(90deg, #2f9e73, #44c08e); }
+.range .track em { position: absolute; left: 90%; top: -5px; bottom: -5px; width: 2px; background: #fff; border-radius: 2px; }
+.range .lbl { display: flex; justify-content: space-between; font: 500 12px var(--ui); color: #b8cad6; }
+.ctrls { display: flex; gap: 10px; }
+.ctrls .c { flex: 1; height: 52px; border-radius: 16px; background: rgba(255,255,255,.12); display: flex; align-items: center; justify-content: center; gap: 8px; font: 600 15px var(--ui); }
+
+/* Chat */
+.msg { max-width: 82%; padding: 12px 15px; border-radius: 20px; font: 400 15px/1.4 var(--ui); }
+.msg.in { background: #fff; align-self: flex-start; border-bottom-left-radius: 6px; box-shadow: 0 1px 2px rgba(16,34,51,.05); }
+.msg.out { background: var(--teal); color: #fff; align-self: flex-end; border-bottom-right-radius: 6px; }
+.msg-t { font: 500 11.5px var(--ui); color: var(--ink-3); align-self: center; }
+
+/* ================= Desktop ================= */
+.desk { zoom: 0.514; width: 1280px; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 30px 60px -30px rgba(14,49,71,.5), 0 0 0 1px var(--line); font: 400 15px/1.4 var(--ui); color: var(--ink); letter-spacing: -0.01em; }
+.desk .chrome { height: 40px; background: #eef2f5; display: flex; align-items: center; gap: 8px; padding: 0 18px; border-bottom: 1px solid var(--line); }
+.desk .chrome i { width: 12px; height: 12px; border-radius: 50%; background: #d3dbe2; }
+.desk .chrome span { margin-left: 18px; height: 24px; width: 420px; border-radius: 8px; background: #fff; font: 500 12px var(--ui); color: var(--ink-3); display: flex; align-items: center; padding: 0 12px; }
+.dapp { display: grid; grid-template-columns: 232px 1fr; height: 720px; }
+.dside { background: var(--navy); color: #b9cfdd; padding: 22px 16px; display: flex; flex-direction: column; gap: 4px; }
+.dside .brand { display: flex; align-items: center; gap: 10px; color: #fff; font: 600 20px var(--display); padding: 0 8px 22px; }
+.dside .nav { display: flex; align-items: center; gap: 12px; height: 42px; padding: 0 12px; border-radius: 10px; font: 500 15px var(--ui); }
+.dside .nav.on { background: rgba(255,255,255,.1); color: #fff; font-weight: 600; }
+.dside .nav em { margin-left: auto; font-style: normal; background: var(--orange); color: #fff; font: 600 12px var(--ui); padding: 1px 8px; border-radius: 99px; }
+.dside .me { margin-top: auto; display: flex; gap: 10px; align-items: center; padding: 12px 8px 0; border-top: 1px solid rgba(255,255,255,.1); }
+.dside .me .avatar { width: 36px; height: 36px; font-size: 13px; background: #24506b; color: #fff; }
+.dside .me b { color: #fff; font: 600 14px var(--ui); display: block; }
+.dside .me span { font-size: 12px; }
+.dmain { background: var(--canvas); padding: 26px 30px; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.dtop { display: flex; justify-content: space-between; align-items: flex-end; }
+.dtop h5 { margin: 0; font: 700 26px var(--ui); letter-spacing: -0.025em; color: var(--ink); }
+.dtop .sub { font: 500 14px var(--ui); color: var(--ink-3); margin-top: 4px; }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.kpi { background: #fff; border-radius: 16px; padding: 16px 18px; box-shadow: 0 1px 2px rgba(16,34,51,.04); display: flex; flex-direction: column; gap: 6px; }
+.kpi small { font: 500 13px var(--ui); color: var(--ink-3); }
+.kpi b { font: 700 28px var(--ui); letter-spacing: -0.03em; color: var(--ink); }
+.kpi em { font-style: normal; font: 600 12.5px var(--ui); }
+.dcard { background: #fff; border-radius: 16px; box-shadow: 0 1px 2px rgba(16,34,51,.04); overflow: hidden; }
+.dt { width: 100%; border-collapse: collapse; }
+.dt th { text-align: left; font: 600 12px var(--ui); color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.dt td { padding: 13px 18px; border-bottom: 1px solid var(--line); font: 400 14.5px var(--ui); vertical-align: middle; }
+.dt tr:last-child td { border-bottom: 0; }
+.dt .who { display: flex; align-items: center; gap: 12px; }
+.dt .who .avatar { width: 36px; height: 36px; font-size: 13px; }
+.dt .who b { font: 600 14.5px var(--ui); display: block; }
+.dt .who span { font-size: 12.5px; color: var(--ink-3); }
+.mini { width: 110px; height: 7px; border-radius: 7px; background: var(--b100); overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
+.mini i { display: block; height: 100%; background: var(--teal); }
+
+/* ================= Cover ================= */
+.cover { background: var(--navy); color: #fff; padding: 20mm 20mm 16mm; }
+.cover .brand { display: flex; align-items: center; gap: 12px; font: 600 17pt var(--display); color: #fff; }
+.cover h1 { font-size: 33pt; font-weight: 600; color: #fff; letter-spacing: -0.02em; margin-top: 12mm; max-width: 160mm; }
+.cover h1 em { font-style: normal; color: #f6b27f; }
+.cover .lede { color: #c6d9e6; font-size: 12.5pt; max-width: 128mm; margin-top: 2mm; }
+.cover .hero { position: absolute; right: 18mm; bottom: 24mm; display: flex; gap: 9mm; align-items: flex-end; }
+.cover .meta { position: absolute; left: 20mm; bottom: 16mm; font-size: 9pt; color: #9fbcd0; display: grid; gap: 1mm; }
+.cover .glow { position: absolute; right: -40mm; bottom: -40mm; width: 200mm; height: 200mm; border-radius: 50%; background: radial-gradient(closest-side, rgba(47,120,159,.45), transparent); }
+
+/* Loop */
+.loop { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5mm; }
+.step { background: var(--b50); border-radius: 12px; padding: 4.5mm; display: flex; flex-direction: column; gap: 1.5mm; position: relative; }
+.step .n { font: 600 17pt var(--display); color: var(--teal); line-height: 1; }
+.step p { font-size: 9pt; color: var(--ink-2); }
+.step:not(:last-child)::after { content: ""; position: absolute; right: -3.9mm; top: 50%; width: 2.6mm; height: 2.6mm; border-top: 2px solid var(--teal); border-right: 2px solid var(--teal); transform: translateY(-50%) rotate(45deg); }
+.cap-table { width: 100%; border-collapse: collapse; font-size: 9.3pt; }
+.cap-table td, .cap-table th { padding: 2.3mm 2mm; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.cap-table th { font: 600 7.5pt var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.cap-table td:first-child { font-weight: 600; color: var(--navy); width: 30%; }
+.cap-table td:last-child { width: 18%; text-align: right; }
+.q ol { margin: 0; padding-left: 4.5mm; display: grid; gap: 1.4mm; color: var(--ink-2); font-size: 9.3pt; }
+</style>
+</head>
+<body>
+
+<!-- ============ Shared SVG: icons and figures ============ -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19h16M7 16v-5M12 16V7M17 16v-8"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-vol" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5v14l-4.5-4.5H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><path d="M8 12V6.5a1.5 1.5 0 0 1 3 0V11m0-1.5V5a1.5 1.5 0 0 1 3 0v6m0-4.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-2.7L3.6 14a1.5 1.5 0 0 1 2.4-1.8L8 14"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12 20 4l-6 16-3-7z"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6.5" width="12.5" height="11" rx="2.5"/><path d="m15.5 10.5 5-3v9l-5-3z"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M2.5 10h19M6.5 15h4"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></symbol>
+    <!-- Exercise figures. viewBox 0 0 300 280. Drawn with stroke = currentColor. -->
+    <symbol id="f-bridge" viewBox="0 0 300 280"><circle cx="40" cy="236" r="19" fill="currentColor" stroke="none"/><path d="M76 240 L162 176 L230 152 L240 238 L270 244 M76 240 L150 252"/></symbol>
+    <symbol id="f-catcow" viewBox="0 0 300 280"><circle cx="46" cy="152" r="18" fill="currentColor" stroke="none"/><path d="M82 166 Q140 112 200 160 M82 166 L86 250 M200 160 L204 250 L268 252"/></symbol>
+    <symbol id="f-birddog" viewBox="0 0 300 280"><circle cx="46" cy="150" r="18" fill="currentColor" stroke="none"/><path d="M84 164 L196 164 M84 164 L18 132 M84 164 L88 250 M196 164 L200 250 L254 252 M196 164 L288 138"/></symbol>
+  </defs>
+</svg>
+
+<!-- ======================= 1 COVER ======================= -->
+<section class="page cover">
+  <div class="glow"></div>
+  <div class="brand"><span class="mark" style="width:38px;height:38px;border-radius:11px"><svg viewBox="0 0 24 24"><path d="M7 4v16M7 12l9-8M7 12l10 8" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Kynex</div>
+  <h1>Physiotherapy at home, <em>coached</em> by your phone and connected to your clinic.</h1>
+  <p class="lede">An overview of Kynex: an AI camera coach for rehab exercises, joined up with the physiotherapists who prescribe them.</p>
+  <div class="hero">
+    <div class="ph-lg" style="transform:translateY(-60px)">
+      <div class="device"><div class="scr">
+        <div class="status"><span>9:41</span><span class="ic"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5" width="3" height="7" rx="1" fill="currentColor"/><rect x="10" y="2.5" width="3" height="9.5" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg><svg width="26" height="13" viewBox="0 0 26 13"><rect x=".5" y=".5" width="22" height="12" rx="3.5" stroke="currentColor" fill="none" opacity=".4"/><rect x="2.5" y="2.5" width="15" height="8" rx="2" fill="currentColor"/><rect x="24" y="4.5" width="1.6" height="4" rx=".8" fill="currentColor" opacity=".4"/></svg></span></div>
+        <div class="body">
+          <div class="row" style="margin-top:6px"><div class="grow"><span class="u-cap">Tuesday · Week 3 of 6</span><span class="u-title">Good morning, Priya</span></div><div class="avatar">PS</div></div>
+          <div class="ucard" style="background:linear-gradient(150deg,#174a67,#0e3147);color:#fff;padding:20px;display:flex;flex-direction:column;gap:16px">
+            <div class="row"><div class="grow"><span style="font:500 14px var(--ui);color:#b8cfdd">Today's plan</span><span style="font:700 22px var(--ui);letter-spacing:-.02em">3 exercises · 12 min</span></div>
+              <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="27" stroke="rgba(255,255,255,.18)" stroke-width="7" fill="none"/><text x="32" y="38" text-anchor="middle" fill="#fff" font-family="Inter" font-weight="700" font-size="17">0/3</text></svg></div>
+            <div class="btn light"><svg class="ico" style="width:20px;height:20px"><use href="#i-play"/></svg>Start session</div>
+          </div>
+          <div class="ucard" style="display:flex;flex-direction:column;gap:14px">
+            <div class="row"><div class="tile"><svg style="color:var(--teal);stroke:var(--teal);stroke-width:20;fill:none;stroke-linecap:round;stroke-linejoin:round"><use href="#f-bridge"/></svg></div><div class="grow"><span class="u-b">Glute bridge</span><span class="u-s">2 × 10</span></div><svg class="ico chev"><use href="#i-chev"/></svg></div>
+            <div class="sep"></div>
+            <div class="row"><div class="tile"><svg style="color:var(--teal);stroke:var(--teal);stroke-width:20;fill:none;stroke-linecap:round;stroke-linejoin:round"><use href="#f-catcow"/></svg></div><div class="grow"><span class="u-b">Cat–cow</span><span class="u-s">2 × 8</span></div><svg class="ico chev"><use href="#i-chev"/></svg></div>
+            <div class="sep"></div>
+            <div class="row"><div class="tile"><svg style="color:var(--teal);stroke:var(--teal);stroke-width:20;fill:none;stroke-linecap:round;stroke-linejoin:round"><use href="#f-birddog"/></svg></div><div class="grow"><span class="u-b">Bird dog</span><span class="u-s">2 × 8, alternating</span></div><svg class="ico chev"><use href="#i-chev"/></svg></div>
+          </div>
+        </div>
+        <div class="tabbar"><span class="on"><svg class="ico"><use href="#i-home"/></svg>Today</span><span><svg class="ico"><use href="#i-chart"/></svg>Progress</span><span><svg class="ico"><use href="#i-chat"/></svg>Care team</span><span><svg class="ico"><use href="#i-cal"/></svg>Visits</span></div>
+      </div></div>
+    </div>
+    <div class="ph-lg">
+      <div class="device"><div class="scr cam dark">
+        <div class="scene"></div>
+        <div class="status" style="position:relative;z-index:2"><span>9:43</span><span class="ic"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5" width="3" height="7" rx="1" fill="currentColor"/><rect x="10" y="2.5" width="3" height="9.5" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg><svg width="26" height="13" viewBox="0 0 26 13"><rect x=".5" y=".5" width="22" height="12" rx="3.5" stroke="currentColor" fill="none" opacity=".4"/><rect x="2.5" y="2.5" width="15" height="8" rx="2" fill="currentColor"/></svg></span></div>
+        <div class="top"><span class="round"><svg class="ico"><use href="#i-x"/></svg></span><div class="title"><b>Glute bridge</b><span>Set 1 of 2</span></div><span class="round"><svg class="ico"><use href="#i-vol"/></svg></span></div>
+        <div class="hud"><span class="status-chip"><i></i>Good form</span><div class="counter"><b>7<small> /10</small></b><span>reps</span></div></div>
+        <svg class="figure" viewBox="0 0 390 300">
+          <rect x="18" y="232" width="354" height="18" rx="9" fill="#2f4656"/>
+          <g transform="translate(25,-8) scale(1.12)" stroke="#9fb6c5" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".55"><use href="#f-bridge" width="300" height="280" style="color:#9fb6c5"/></g>
+          <g transform="translate(25,-8) scale(1.12)" fill="none" stroke-linecap="round">
+            <path d="M76 240 L162 176" stroke="#fff" stroke-width="4"/><path d="M76 240 L150 252" stroke="#fff" stroke-width="4"/><path d="M240 238 L270 244" stroke="#fff" stroke-width="4"/>
+            <path d="M162 176 L230 152 L240 238" stroke="#44c08e" stroke-width="6"/>
+            <path d="M140 186 A 26 26 0 0 1 186 168" stroke="#f6b27f" stroke-width="3" stroke-dasharray="4 4"/>
+            <g fill="#fff" stroke="none"><circle cx="76" cy="240" r="7"/><circle cx="162" cy="176" r="8"/><circle cx="230" cy="152" r="7"/><circle cx="240" cy="238" r="7"/><circle cx="150" cy="252" r="6"/><circle cx="270" cy="244" r="5"/></g>
+            <text x="134" y="150" fill="#f6b27f" font-family="Inter" font-weight="600" font-size="15" stroke="none">Hip 162°</text>
+          </g>
+        </svg>
+        <div class="sheet">
+          <div class="tip"><span class="dot"><svg class="ico" style="width:18px;height:18px;color:#fff"><use href="#i-vol"/></svg></span><div><b>Push through your heels</b><span>Keep your toes light as you lift.</span></div></div>
+          <div class="range"><div class="lbl"><span>Movement</span><span>Target</span></div><div class="track"><i></i><em></em></div></div>
+          <div class="ctrls"><span class="c"><svg class="ico"><use href="#i-pause"/></svg>Pause</span><span class="c"><svg class="ico"><use href="#i-hand"/></svg>Tap to count</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <div class="meta"><span>Product overview · Draft for discussion</span><span>Shared for feedback. Please don't forward.</span></div>
+</section>
+
+<!-- ======================= 2 WHY ======================= -->
+<section class="page">
+  <div class="head">
+    <div class="eyebrow">Why Kynex</div>
+    <h2>Most rehab happens at home, where nobody can see it.</h2>
+    <p class="lede">Physiotherapy works when patients do the right exercises, the right way, often enough. Between clinic visits, that part is invisible to the patient and to the physiotherapist.</p>
+  </div>
+  <div class="grid3">
+    <div class="card"><h3>Done wrong, or not at all</h3><p>Patients go home with a printed sheet. They forget steps, cut the movement short, or stop when it gets dull.</p></div>
+    <div class="card"><h3>Physios can't see between visits</h3><p>They learn what happened at the next appointment, from memory. A problem that could be fixed in a day goes unnoticed for weeks.</p></div>
+    <div class="card"><h3>Apps that leave people out</h3><p>Most digital rehab expects a young, English-speaking user on a new phone. Many patients are older, speak other languages and use budget Android phones.</p></div>
+  </div>
+  <div class="callout">
+    <h3>Kynex in one sentence</h3>
+    <p style="margin-top:2mm">The phone's camera becomes the patient's exercise coach. It counts every rep, corrects form out loud in their own language, and gives the clinic a clear picture of how recovery is going.</p>
+  </div>
+  <div class="head" style="gap:4mm">
+    <h3>How it works</h3>
+    <div class="loop">
+      <div class="step"><span class="n">1</span><h4>Assess</h4><p>The physio sees the patient and records pain, function and goals.</p></div>
+      <div class="step"><span class="n">2</span><h4>Prescribe</h4><p>A plan built in minutes from the exercise library, with dose and days.</p></div>
+      <div class="step"><span class="n">3</span><h4>Exercise at home</h4><p>The camera coach guides each session: counting, correcting, encouraging.</p></div>
+      <div class="step"><span class="n">4</span><h4>Review & adjust</h4><p>The clinic sees reps, range, pain and red flags, and updates the plan.</p></div>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="card" style="background:#fff;box-shadow:inset 0 0 0 1px var(--line)"><span class="eyebrow">Patients</span><p>One button to start today's session, a coach that speaks their language, and progress in plain words.</p></div>
+    <div class="card" style="background:#fff;box-shadow:inset 0 0 0 1px var(--line)"><span class="eyebrow">Physiotherapists</span><p>A list sorted by who needs attention, a replay of every session, and plans that take seconds to change.</p></div>
+    <div class="card" style="background:#fff;box-shadow:inset 0 0 0 1px var(--line)"><span class="eyebrow">Clinic teams</span><p>Bookings, payments and reminders in one place, plus a live view of how patients and centres are doing.</p></div>
+  </div>
+  <div class="card" style="flex-direction:row;gap:5mm;align-items:center;background:var(--b50)">
+    <span class="mark" style="width:36px;height:36px"><svg viewBox="0 0 24 24" style="width:60%;height:60%"><circle cx="12" cy="8" r="4" stroke="#fff" stroke-width="2.2" fill="none"/><path d="M4 21a8 8 0 0 1 16 0" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg></span>
+    <p style="font-size:9.8pt;color:var(--ink)"><b>In the mockups that follow</b>, you'll meet Priya, 56, in week 3 of a six-week plan for lower-back pain, and her physiotherapist, Dr. Anjali Rao.</p>
+  </div>
+  <div class="foot"><span>Kynex · Product overview</span><span>2</span></div>
+</section>
+
+<!-- ======================= 3 PATIENT: START ======================= -->
+<section class="page">
+  <div class="head">
+    <div class="eyebrow">The patient app · 1 of 3</div>
+    <h2>One clear thing to do each time you open it</h2>
+    <p class="lede">Every screen has one main action, large type and plain words. We design for a 65-year-old on a budget phone first; that makes it effortless for everyone else.</p>
+  </div>
+  <div class="shots">
+    <div class="shot">
+      <div class="ph"><div class="device"><div class="scr" style="background:#fff">
+        <div class="status"><span>9:41</span><span class="ic"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5" width="3" height="7" rx="1" fill="currentColor"/><rect x="10" y="2.5" width="3" height="9.5" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg><svg width="26" height="13" viewBox="0 0 26 13"><rect x=".5" y=".5" width="22" height="12" rx="3.5" stroke="currentColor" fill="none" opacity=".4"/><rect x="2.5" y="2.5" width="15" height="8" rx="2" fill="currentColor"/></svg></span></div>
+        <div class="body" style="padding-top:28px;gap:10px">
+          <span class="mark" style="width:56px;height:56px;border-radius:16px"><svg viewBox="0 0 24 24"><path d="M7 4v16M7 12l9-8M7 12l10 8" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="u-title" style="margin-top:14px">Welcome to Kynex</span>
+          <span class="u-s" style="font-size:16px">Choose your language. You can change it any time.</span>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+            <div class="row" style="height:58px;padding:0 18px;border-radius:16px;box-shadow:inset 0 0 0 2px var(--teal);background:var(--b50)"><span class="u-b grow">English</span><span style="width:24px;height:24px;border-radius:50%;background:var(--teal);display:grid;place-items:center;color:#fff"><svg class="ico" style="width:16px;height:16px;stroke-width:3"><use href="#i-check"/></svg></span></div>
+            <div class="row" style="height:58px;padding:0 18px;border-radius:16px;box-shadow:inset 0 0 0 1.5px var(--line)"><span class="u-b grow dev">हिन्दी</span><span class="u-xs">Hindi</span></div>
+            <div class="row" style="height:58px;padding:0 18px;border-radius:16px;box-shadow:inset 0 0 0 1.5px var(--line)"><span class="u-b grow dev">मराठी</span><span class="u-xs">Marathi</span></div>
+            <div class="row" style="height:58px;padding:0 18px;border-radius:16px;box-shadow:inset 0 0 0 1.5px var(--line)"><span class="u-b grow" style="font-family:'Noto Sans Tamil',var(--ui)">தமிழ்</span><span class="u-xs">Tamil</span></div>
+            <div class="row" style="height:58px;padding:0 18px;border-radius:16px;box-shadow:inset 0 0 0 1.5px var(--line)"><span class="u-b grow" style="font-family:'Noto Sans Telugu',var(--ui)">తెలుగు</span><span class="u-xs">Telugu</span></div>
+            <div class="row" style="height:58px;padding:0 18px;border-radius:16px;box-shadow:inset 0 0 0 1.5px var(--line)"><span class="u-b grow" style="font-family:'Noto Sans Kannada',var(--ui)">ಕನ್ನಡ</span><span class="u-xs">Kannada</span></div>
+          </div>
+          <span style="font:600 15px var(--ui);color:var(--teal-d);text-align:center;margin-top:4px">More languages</span>
+          <div style="flex:1"></div>
+          <div class="btn">Continue</div>
+        </div>
+      </div></div></div>
+      <div class="capt"><div class="t"><h4>Welcome</h4><span class="tag planned">Planned</span></div><p>Language first. Then a check of where to place the phone, and a one-minute tutorial before the first exercise.</p></div>
+    </div>
+
+    <div class="shot">
+      <div class="ph"><div class="device"><div class="scr">
+        <div class="status"><span>9:41</span><span class="ic"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5" width="3" height="7" rx="1" fill="currentColor"/><rect x="10" y="2.5" width="3" height="9.5" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg><svg width="26" height="13" viewBox="0 0 26 13"><rect x=".5" y=".5" width="22" height="12" rx="3.5" stroke="currentColor" fill="none" opacity=".4"/><rect x="2.5" y="2.5" width="15" height="8" rx="2" fill="currentColor"/></svg></span></div>
+        <div class="body">
+          <div class="row" style="margin-top:6px"><div class="grow"><span class="u-cap">Tuesday · Week 3 of 6</span><span class="u-title">Good morning, Priya</span></div><div class="avatar">PS</div></div>
+          <div class="ucard" style="background:linear-gradient(150deg,#174a67,#0e3147);color:#fff;padding:20px;display:flex;flex-direction:column;gap:16px">
+            <div class="row"><div class="grow"><span style="font:500 14px var(--ui);color:#b8cfdd">Today's plan</span><span style="font:700 22px var(--ui);letter-spacing:-.02em">3 exercises · 12 min</span></div>
+              <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="27" stroke="rgba(255,255,255,.18)" stroke-width="7" fill="none"/><text x="32" y="38" text-anchor="middle" fill="#fff" font-family="Inter" font-weight="700" font-size="17">0/3</text></svg></div>
+            <div class="btn light"><svg class="ico" style="width:20px;height:20px"><use href="#i-play"/></svg>Start session</div>
+          </div>
+          <div class="ucard" style="display:flex;flex-direction:column;gap:6px;padding:14px 16px">
+            <span class="u-xs" style="color:var(--teal-d);font-weight:600">From Dr. Anjali Rao</span>
+            <span class="u-s" style="color:var(--ink)">Take the bird dog slowly. Stop if your back pain goes above 6.</span>
+          </div>
+          <div class="ucard" style="display:flex;flex-direction:column;gap:12px">
+            <div class="row"><div class="tile"><svg style="color:var(--teal);stroke:var(--teal);stroke-width:20;fill:none;stroke-linecap:round;stroke-linejoin:round"><use href="#f-bridge"/></svg></div><div class="grow"><span class="u-b">Glute bridge</span><span class="u-s">2 × 10</span></div><svg class="ico chev"><use href="#i-chev"/></svg></div>
+            <div class="sep"></div>
+            <div class="row"><div class="tile"><svg style="color:var(--teal);stroke:var(--teal);stroke-width:20;fill:none;stroke-linecap:round;stroke-linejoin:round"><use href="#f-catcow"/></svg></div><div class="grow"><span class="u-b">Cat–cow</span><span class="u-s">2 × 8</span></div><svg class="ico chev"><use href="#i-chev"/></svg></div>
+            <div class="sep"></div>
+            <div class="row"><div class="tile"><svg style="color:var(--teal);stroke:var(--teal);stroke-width:20;fill:none;stroke-linecap:round;stroke-linejoin:round"><use href="#f-birddog"/></svg></div><div class="grow"><span class="u-b">Bird dog</span><span class="u-s">2 × 8, alternating</span></div><svg class="ico chev"><use href="#i-chev"/></svg></div>
+          </div>
+          <div class="ucard row" style="padding:14px 16px"><span class="tile" style="width:44px;height:44px;border-radius:12px;color:var(--teal)"><svg class="ico" style="width:22px;height:22px"><use href="#i-cal"/></svg></span><div class="grow"><span class="u-b">Thursday, 10:30</span><span class="u-s">Follow-up at the centre</span></div><svg class="ico chev"><use href="#i-chev"/></svg></div>
+        </div>
+        <div class="tabbar"><span class="on"><svg class="ico"><use href="#i-home"/></svg>Today</span><span><svg class="ico"><use href="#i-chart"/></svg>Progress</span><span><svg class="ico"><use href="#i-chat"/></svg>Care team</span><span><svg class="ico"><use href="#i-cal"/></svg>Visits</span></div>
+      </div></div></div>
+      <div class="capt"><div class="t"><h4>Today</h4><span class="tag built">Built</span></div><p>Today's plan, a note from the physio and the next visit. One tap starts the session.</p></div>
+    </div>
+
+    <div class="shot">
+      <div class="ph"><div class="device"><div class="scr cam dark">
+        <div class="scene"></div>
+        <div class="status" style="position:relative;z-index:2"><span>9:43</span><span class="ic"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5" width="3" height="7" rx="1" fill="currentColor"/><rect x="10" y="2.5" width="3" height="9.5" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg><svg width="26" height="13" viewBox="0 0 26 13"><rect x=".5" y=".5" width="22" height="12" rx="3.5" stroke="currentColor" fill="none" opacity=".4"/><rect x="2.5" y="2.5" width="15" height="8" rx="2" fill="currentColor"/></svg></span></div>
+        <div class="top"><span class="round"><svg class="ico"><use href="#i-x"/></svg></span><div class="title"><b>Glute bridge</b><span>Set 1 of 2</span></div><span class="round"><svg class="ico"><use href="#i-vol"/></svg></span></div>
+        <div class="hud"><span class="status-chip"><i></i>Good form</span><div class="counter"><b>7<small> /10</small></b><span>reps</span></div></div>
+        <svg class="figure" viewBox="0 0 390 300">
+          <rect x="18" y="232" width="354" height="18" rx="9" fill="#2f4656"/>
+          <g transform="translate(25,-8) scale(1.12)" stroke="#9fb6c5" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".55"><use href="#f-bridge" width="300" height="280" style="color:#9fb6c5"/></g>
+          <g transform="translate(25,-8) scale(1.12)" fill="none" stroke-linecap="round">
+            <path d="M76 240 L162 176" stroke="#fff" stroke-width="4"/><path d="M76 240 L150 252" stroke="#fff" stroke-width="4"/><path d="M240 238 L270 244" stroke="#fff" stroke-width="4"/>
+            <path d="M162 176 L230 152 L240 238" stroke="#44c08e" stroke-width="6"/>
+            <path d="M140 186 A 26 26 0 0 1 186 168" stroke="#f6b27f" stroke-width="3" stroke-dasharray="4 4"/>
+            <g fill="#fff" stroke="none"><circle cx="76" cy="240" r="7"/><circle cx="162" cy="176" r="8"/><circle cx="230" cy="152" r="7"/><circle cx="240" cy="238" r="7"/><circle cx="150" cy="252" r="6"/><circle cx="270" cy="244" r="5"/></g>
+            <text x="134" y="150" fill="#f6b27f" font-family="Inter" font-weight="600" font-size="15" stroke="none">Hip 162°</text>
+          </g>
+        </svg>
+        <div class="sheet">
+          <div class="tip"><span class="dot"><svg class="ico" style="width:18px;height:18px;color:#fff"><use href="#i-vol"/></svg></span><div><b>Push through your heels</b><span>Keep your toes light as you lift.</span></div></div>
+          <div class="range"><div class="lbl"><span>Movement</span><span>Target</span></div><div class="track"><i></i><em></em></div></div>
+          <div class="ctrls"><span class="c"><svg class="ico"><use href="#i-pause"/></svg>Pause</span><span class="c"><svg class="ico"><use href="#i-hand"/></svg>Tap to count</span></div>
+        </div>
+      </div></div></div>
+      <div class="capt"><div class="t"><h4>Camera coach</h4><span class="tag built">Built</span></div><p>Counts reps out loud, shows how far into the movement you are, and gives one short tip when form slips.</p></div>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>Safety first</h4><p>Every session starts with pain and red-flag questions. A worrying answer stops the session and alerts the clinic.</p></div>
+    <div class="card"><h4>Tap-to-count backup</h4><p>Not enough space or light for the camera? The patient taps to count, and the session still counts.</p></div>
+    <div class="card"><h4>Weak internet is fine</h4><p>Sessions run on the phone and sync when the signal returns. <span class="tag planned">Planned</span></p></div>
+  </div>
+  <div class="foot"><span>Kynex · Product overview</span><span>3</span></div>
+</section>
+
+<!-- ======================= 4 PATIENT: PROGRESS ======================= -->
+<section class="page">
+  <div class="head">
+    <div class="eyebrow">The patient app · 2 of 3</div>
+    <h2>Progress you can see, and a care team you can reach</h2>
+    <p class="lede">After each session Priya sees what went well. Over weeks, she sees her back getting better. When something feels wrong, her physio is a message away.</p>
+  </div>
+  <div class="shots">
+    <div class="shot">
+      <div class="ph"><div class="device"><div class="scr" style="background:#fff">
+        <div class="status"><span>9:56</span><span class="ic"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5" width="3" height="7" rx="1" fill="currentColor"/><rect x="10" y="2.5" width="3" height="9.5" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg><svg width="26" height="13" viewBox="0 0 26 13"><rect x=".5" y=".5" width="22" height="12" rx="3.5" stroke="currentColor" fill="none" opacity=".4"/><rect x="2.5" y="2.5" width="15" height="8" rx="2" fill="currentColor"/></svg></span></div>
+        <div class="body" style="gap:16px">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:14px;text-align:center">
+            <span style="width:72px;height:72px;border-radius:50%;background:var(--good-s);display:grid;place-items:center;color:var(--good)"><svg class="ico" style="width:36px;height:36px;stroke-width:2.6"><use href="#i-check"/></svg></span>
+            <span class="u-title">Well done, Priya</span>
+            <span class="u-s">Session complete · 12 minutes</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <div class="ucard" style="background:var(--canvas);box-shadow:none;text-align:center;padding:14px 8px"><div style="font:700 26px var(--ui);letter-spacing:-.03em">51</div><span class="u-xs">reps</span></div>
+            <div class="ucard" style="background:var(--canvas);box-shadow:none;text-align:center;padding:14px 8px"><div style="font:700 26px var(--ui);letter-spacing:-.03em">92%</div><span class="u-xs">good form</span></div>
+            <div class="ucard" style="background:var(--good-s);box-shadow:none;text-align:center;padding:14px 8px"><div style="font:700 26px var(--ui);letter-spacing:-.03em;color:var(--good-ink)">5→3</div><span class="u-xs">back pain</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="row"><span style="color:var(--good)"><svg class="ico"><use href="#i-check"/></svg></span><span class="u-b grow">Glute bridge</span><span class="u-s">20 / 20</span></div>
+            <div class="row"><span style="color:var(--good)"><svg class="ico"><use href="#i-check"/></svg></span><span class="u-b grow">Cat–cow</span><span class="u-s">16 / 16</span></div>
+            <div class="row"><span style="color:var(--orange)"><svg class="ico"><use href="#i-check"/></svg></span><div class="grow"><span class="u-b">Bird dog</span><span class="u-xs" style="color:var(--o-ink)">Hips turned on 2 reps</span></div><span class="u-s">15 / 16</span></div>
+          </div>
+          <div class="ucard" style="background:var(--b50);box-shadow:none;display:flex;gap:12px;align-items:center">
+            <svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#dcebf4"/><path d="M12 25l6-6 4 4 7-8" stroke="#2f789f" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="u-s" style="color:var(--ink)"><b>Best hip lift: 168°</b>, up from 161° last week.</span>
+          </div>
+          <div style="flex:1"></div>
+          <div class="btn">Done</div>
+          <div class="btn ghost" style="margin-top:-4px">Watch my session</div>
+        </div>
+      </div></div></div>
+      <div class="capt"><div class="t"><h4>Session summary</h4><span class="tag built">Built</span></div><p>Reps against the plan, pain before and after, and the reps with form problems, each one replayable.</p></div>
+    </div>
+
+    <div class="shot">
+      <div class="ph"><div class="device"><div class="scr">
+        <div class="status"><span>9:41</span><span class="ic"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5" width="3" height="7" rx="1" fill="currentColor"/><rect x="10" y="2.5" width="3" height="9.5" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg><svg width="26" height="13" viewBox="0 0 26 13"><rect x=".5" y=".5" width="22" height="12" rx="3.5" stroke="currentColor" fill="none" opacity=".4"/><rect x="2.5" y="2.5" width="15" height="8" rx="2" fill="currentColor"/></svg></span></div>
+        <div class="body">
+          <span class="u-title" style="margin-top:6px">Progress</span>
+          <div class="seg"><span>Week</span><span class="on">Plan so far</span><span>All</span></div>
+          <div class="ucard" style="display:flex;flex-direction:column;gap:10px">
+            <span class="u-s">Back pain & function score</span>
+            <div class="row" style="gap:10px"><span style="font:700 38px var(--ui);letter-spacing:-.04em">28</span><span class="pill good">▼ 14 since week 1</span></div>
+            <svg viewBox="0 0 320 110" style="width:100%">
+              <g stroke="#e5eaf0"><line x1="0" y1="20" x2="320" y2="20"/><line x1="0" y1="55" x2="320" y2="55"/><line x1="0" y1="90" x2="320" y2="90"/></g>
+              <path d="M10 22 L110 50 L210 70 L310 86 L310 100 L10 100Z" fill="#2f789f" opacity=".1"/>
+              <path d="M10 22 L110 50 L210 70 L310 86" stroke="#2f789f" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <g fill="#fff" stroke="#2f789f" stroke-width="3"><circle cx="10" cy="22" r="5"/><circle cx="110" cy="50" r="5"/><circle cx="210" cy="70" r="5"/></g><circle cx="310" cy="86" r="7" fill="#2f789f"/>
+              <g font-family="Inter" font-size="12" fill="#8a97a8"><text x="2" y="110">Wk 1</text><text x="100" y="110">Wk 2</text><text x="200" y="110">Wk 3</text><text x="282" y="110">Today</text></g>
+            </svg>
+            <span class="u-xs">Lower is better. From a standard questionnaire every week.</span>
+          </div>
+          <div class="ucard" style="display:flex;flex-direction:column;gap:12px">
+            <div class="row"><span class="u-b grow">Last week</span><span class="u-s">4 of 5 sessions</span></div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center">
+              <div><div style="height:40px;border-radius:12px;background:var(--teal);display:grid;place-items:center;color:#fff"><svg class="ico" style="width:18px;height:18px;stroke-width:3"><use href="#i-check"/></svg></div><span class="u-xs">M</span></div>
+              <div><div style="height:40px;border-radius:12px;background:var(--teal);display:grid;place-items:center;color:#fff"><svg class="ico" style="width:18px;height:18px;stroke-width:3"><use href="#i-check"/></svg></div><span class="u-xs">T</span></div>
+              <div><div style="height:40px;border-radius:12px;background:var(--teal);display:grid;place-items:center;color:#fff"><svg class="ico" style="width:18px;height:18px;stroke-width:3"><use href="#i-check"/></svg></div><span class="u-xs">W</span></div>
+              <div><div style="height:40px;border-radius:12px;background:#e9eef3"></div><span class="u-xs">T</span></div>
+              <div><div style="height:40px;border-radius:12px;background:var(--teal);display:grid;place-items:center;color:#fff"><svg class="ico" style="width:18px;height:18px;stroke-width:3"><use href="#i-check"/></svg></div><span class="u-xs">F</span></div>
+              <div><div style="height:40px;border-radius:12px;background:#f3f5f8;box-shadow:inset 0 0 0 1.5px #e5eaf0"></div><span class="u-xs">S</span></div>
+              <div><div style="height:40px;border-radius:12px;background:#f3f5f8;box-shadow:inset 0 0 0 1.5px #e5eaf0"></div><span class="u-xs">S</span></div>
+            </div>
+          </div>
+          <div class="ucard" style="display:flex;flex-direction:column;gap:10px">
+            <div class="row"><span class="u-b grow">Hip lift range</span><span class="u-s">168° of 175°</span></div>
+            <div class="bar"><i style="width:84%"></i></div>
+          </div>
+        </div>
+        <div class="tabbar"><span><svg class="ico"><use href="#i-home"/></svg>Today</span><span class="on"><svg class="ico"><use href="#i-chart"/></svg>Progress</span><span><svg class="ico"><use href="#i-chat"/></svg>Care team</span><span><svg class="ico"><use href="#i-cal"/></svg>Visits</span></div>
+      </div></div></div>
+      <div class="capt"><div class="t"><h4>Progress</h4><span class="tag planned">Planned</span></div><p>Weekly pain and function scores, session streaks and range of movement, in words anyone can read.</p></div>
+    </div>
+
+    <div class="shot">
+      <div class="ph"><div class="device"><div class="scr">
+        <div class="status"><span>18:24</span><span class="ic"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5" width="3" height="7" rx="1" fill="currentColor"/><rect x="10" y="2.5" width="3" height="9.5" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg><svg width="26" height="13" viewBox="0 0 26 13"><rect x=".5" y=".5" width="22" height="12" rx="3.5" stroke="currentColor" fill="none" opacity=".4"/><rect x="2.5" y="2.5" width="15" height="8" rx="2" fill="currentColor"/></svg></span></div>
+        <div class="row" style="padding:6px 20px 14px;background:#fff;border-bottom:1px solid var(--line)"><div class="avatar" style="background:var(--b100)">AR</div><div class="grow"><span class="u-b">Dr. Anjali Rao</span><span class="u-xs">Physiotherapist · replies 9:00–18:00</span></div><span class="round" style="background:var(--b50);color:var(--teal-d)"><svg class="ico"><use href="#i-video"/></svg></span></div>
+        <div class="body" style="gap:10px;padding-top:14px">
+          <span class="msg-t">Today</span>
+          <div class="msg in">Hi Priya, I watched yesterday's session. Your bridges look strong.</div>
+          <div class="msg out">Thank you! The bird dog makes my lower back feel tight. Should I stop?</div>
+          <div class="msg in">Don't stop. Reach a little less far, and I'll make the sets shorter.</div>
+          <div class="ucard" style="align-self:flex-start;max-width:86%;display:flex;gap:12px;align-items:center;padding:12px 14px;box-shadow:inset 0 0 0 1.5px var(--b200)">
+            <span class="tile" style="width:40px;height:40px;border-radius:12px"><svg style="width:32px;height:32px;color:var(--teal);stroke:var(--teal);stroke-width:22;fill:none;stroke-linecap:round;stroke-linejoin:round"><use href="#f-birddog"/></svg></span>
+            <div><span class="u-xs" style="color:var(--teal-d);font-weight:600">Plan updated</span><div class="u-b" style="font-size:15px">Bird dog · 2 × 6, alternating</div></div>
+          </div>
+          <div class="msg out">Perfect, thank you 🙏</div>
+          <div style="flex:1"></div>
+          <div class="row" style="background:#fff;border-radius:22px;padding:0 6px 0 18px;height:54px;box-shadow:inset 0 0 0 1.5px var(--line)"><span class="grow u-s" style="color:var(--ink-3)">Write a message</span><span style="width:42px;height:42px;border-radius:50%;background:var(--teal);display:grid;place-items:center;color:#fff"><svg class="ico" style="width:20px;height:20px"><use href="#i-send"/></svg></span></div>
+        </div>
+        <div class="tabbar"><span><svg class="ico"><use href="#i-home"/></svg>Today</span><span><svg class="ico"><use href="#i-chart"/></svg>Progress</span><span class="on"><svg class="ico"><use href="#i-chat"/></svg>Care team</span><span><svg class="ico"><use href="#i-cal"/></svg>Visits</span></div>
+      </div></div></div>
+      <div class="capt"><div class="t"><h4>Care-team chat</h4><span class="tag planned">Planned</span></div><p>Messages with the physio, with clear office hours. Plan changes appear right in the conversation.</p></div>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>Rep-by-rep replay</h4><p>Any rep with a problem can be watched again on an animated figure, with the body part highlighted.</p></div>
+    <div class="card"><h4>Standard outcome scores</h4><p>Validated pain and function questionnaires arrive on schedule, so progress is measured, not guessed.</p></div>
+    <div class="card"><h4>Video visits</h4><p>A follow-up can happen on a video call from the same chat. <span class="tag planned">Planned</span></p></div>
+  </div>
+  <div class="foot"><span>Kynex · Product overview</span><span>4</span></div>
+</section>
+
+<!-- ======================= 5 PATIENT: MORE ======================= -->
+<section class="page">
+  <div class="head">
+    <div class="eyebrow">The patient app · 3 of 3</div>
+    <h2>Less explaining, less waiting, fewer phone calls</h2>
+    <p class="lede">Patients point to where it hurts instead of describing it, book and pay for visits themselves, and can look up any exercise with a video and clear steps.</p>
+  </div>
+  <div class="shots">
+    <div class="shot">
+      <div class="ph"><div class="device"><div class="scr" style="background:#fff">
+        <div class="status"><span>9:41</span><span class="ic"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5" width="3" height="7" rx="1" fill="currentColor"/><rect x="10" y="2.5" width="3" height="9.5" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg><svg width="26" height="13" viewBox="0 0 26 13"><rect x=".5" y=".5" width="22" height="12" rx="3.5" stroke="currentColor" fill="none" opacity=".4"/><rect x="2.5" y="2.5" width="15" height="8" rx="2" fill="currentColor"/></svg></span></div>
+        <div class="body">
+          <div class="row" style="margin-top:6px"><svg class="ico" style="color:var(--ink)"><use href="#i-back"/></svg><span class="u-h grow" style="text-align:center">Where does it hurt?</span><span style="width:22px"></span></div>
+          <div class="seg"><span>Front</span><span class="on">Back</span></div>
+          <svg viewBox="0 0 220 330" style="height:350px;align-self:center">
+            <defs><radialGradient id="pain" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#cf4b45" stop-opacity=".85"/><stop offset=".55" stop-color="#cf4b45" stop-opacity=".35"/><stop offset="1" stop-color="#cf4b45" stop-opacity="0"/></radialGradient></defs>
+            <g fill="#e6eef4" stroke="#c9dbe7" stroke-width="2">
+              <circle cx="110" cy="34" r="22"/>
+              <path d="M98 54h24v12H98z"/>
+              <path d="M70 70 Q110 58 150 70 L156 150 Q150 172 140 178 L80 178 Q70 172 64 150 Z"/>
+              <path d="M64 74 Q48 80 44 104 L36 176 Q34 188 44 190 Q52 190 54 178 L64 110"/>
+              <path d="M156 74 Q172 80 176 104 L184 176 Q186 188 176 190 Q168 190 166 178 L156 110"/>
+              <path d="M80 176 L140 176 L144 196 L138 306 Q136 318 124 316 Q114 314 114 302 L110 214 L106 302 Q106 314 96 316 Q84 318 82 306 L76 196 Z"/>
+            </g>
+            <path d="M110 70 L110 176" stroke="#c9dbe7" stroke-width="2"/>
+            <circle cx="110" cy="150" r="34" fill="url(#pain)"/><circle cx="110" cy="150" r="7" fill="#cf4b45" stroke="#fff" stroke-width="3"/>
+          </svg>
+          <div class="ucard" style="display:flex;flex-direction:column;gap:12px;box-shadow:inset 0 0 0 1.5px var(--line)">
+            <div class="row"><span class="u-b grow">Lower back</span><span class="pill bad">5 / 10</span></div>
+            <div style="position:relative;height:8px;border-radius:8px;background:linear-gradient(90deg,#2f9e73,#f2c14e,#f2812e,#cf4b45)"><span style="position:absolute;left:50%;top:50%;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);transform:translate(-50%,-50%)"></span></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill" style="background:var(--navy);color:#fff">Aching</span><span class="pill">Stiff</span><span class="pill">Sharp</span><span class="pill">Tingling</span></div>
+          </div>
+          <div style="flex:1"></div>
+          <div class="btn">Save</div>
+        </div>
+      </div></div></div>
+      <div class="capt"><div class="t"><h4>Pain map</h4><span class="tag planned">Planned</span></div><p>Tap the body to mark pain, its strength and how it feels. The physio sees it change over time.</p></div>
+    </div>
+
+    <div class="shot">
+      <div class="ph"><div class="device"><div class="scr">
+        <div class="status"><span>9:41</span><span class="ic"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5" width="3" height="7" rx="1" fill="currentColor"/><rect x="10" y="2.5" width="3" height="9.5" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg><svg width="26" height="13" viewBox="0 0 26 13"><rect x=".5" y=".5" width="22" height="12" rx="3.5" stroke="currentColor" fill="none" opacity=".4"/><rect x="2.5" y="2.5" width="15" height="8" rx="2" fill="currentColor"/></svg></span></div>
+        <div class="body">
+          <div class="row" style="margin-top:6px"><svg class="ico" style="color:var(--ink)"><use href="#i-back"/></svg><span class="u-h grow" style="text-align:center">Book a visit</span><span style="width:22px"></span></div>
+          <div class="seg"><span class="on">At the centre</span><span>Video call</span></div>
+          <div class="ucard row"><div class="avatar">AR</div><div class="grow"><span class="u-b">Dr. Anjali Rao</span><span class="u-s">Physiotherapist · Follow-up, 30 min</span></div></div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+            <div class="ucard" style="padding:10px 0;text-align:center;box-shadow:inset 0 0 0 1.5px var(--line)"><div class="u-xs">Mon</div><div class="u-b" style="color:var(--ink-3)">—</div></div>
+            <div class="ucard" style="padding:10px 0;text-align:center;box-shadow:inset 0 0 0 1.5px var(--line)"><div class="u-xs">Tue</div><div class="u-b" style="color:var(--ink-3)">—</div></div>
+            <div class="ucard" style="padding:10px 0;text-align:center;box-shadow:inset 0 0 0 1.5px var(--line)"><div class="u-xs">Wed</div><div class="u-b">3</div></div>
+            <div class="ucard" style="padding:10px 0;text-align:center;background:var(--navy);color:#fff"><div class="u-xs" style="color:#b8cfdd">Thu</div><div class="u-b" style="color:#fff">5</div></div>
+            <div class="ucard" style="padding:10px 0;text-align:center;box-shadow:inset 0 0 0 1.5px var(--line)"><div class="u-xs">Fri</div><div class="u-b">4</div></div>
+          </div>
+          <span class="u-xs" style="margin-top:-4px">Number of free times each day</span>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <span class="pill" style="height:44px;justify-content:center;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line);font-size:15px">9:30</span>
+            <span class="pill" style="height:44px;justify-content:center;background:var(--teal);color:#fff;font-size:15px">10:30</span>
+            <span class="pill" style="height:44px;justify-content:center;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line);font-size:15px">12:00</span>
+            <span class="pill" style="height:44px;justify-content:center;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line);font-size:15px">15:00</span>
+            <span class="pill" style="height:44px;justify-content:center;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line);font-size:15px">17:30</span>
+          </div>
+          <div style="flex:1"></div>
+          <div class="ucard" style="display:flex;flex-direction:column;gap:10px">
+            <div class="row"><span class="u-s grow">Thursday, 10:30 · at the centre</span></div>
+            <div class="row"><span class="u-b grow">Follow-up visit</span><span class="u-b">₹800</span></div>
+          </div>
+          <div class="btn"><svg class="ico" style="width:20px;height:20px"><use href="#i-card"/></svg>Pay ₹800 and book</div>
+          <span class="u-xs" style="text-align:center">We'll remind you on WhatsApp the day before.</span>
+        </div>
+      </div></div></div>
+      <div class="capt"><div class="t"><h4>Book & pay</h4><span class="tag planned">Payment planned</span></div><p>Centre or video visits, booked and paid in the app. Booking, moving and cancelling are already built.</p></div>
+    </div>
+
+    <div class="shot">
+      <div class="ph"><div class="device"><div class="scr" style="background:#fff">
+        <div style="position:relative;height:300px;background:linear-gradient(160deg,#dcebf4,#b9d6e8);flex:none">
+          <div class="status" style="position:relative"><span>9:41</span><span class="ic"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5" width="3" height="7" rx="1" fill="currentColor"/><rect x="10" y="2.5" width="3" height="9.5" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg><svg width="26" height="13" viewBox="0 0 26 13"><rect x=".5" y=".5" width="22" height="12" rx="3.5" stroke="currentColor" fill="none" opacity=".4"/><rect x="2.5" y="2.5" width="15" height="8" rx="2" fill="currentColor"/></svg></span></div>
+          <span class="round" style="position:absolute;left:20px;top:64px;background:rgba(255,255,255,.75);color:var(--ink)"><svg class="ico"><use href="#i-back"/></svg></span>
+          <svg viewBox="0 0 300 280" style="position:absolute;left:60px;top:84px;width:270px;height:180px;color:#ffffff;stroke:#ffffff;stroke-width:26;fill:none;stroke-linecap:round;stroke-linejoin:round"><use href="#f-bridge"/></svg>
+          <span class="pill" style="position:absolute;left:16px;bottom:16px;height:40px;padding:0 16px;background:rgba(14,49,71,.88);color:#fff;font-size:14px"><svg class="ico" style="width:16px;height:16px"><use href="#i-play"/></svg>Watch the instructor · 0:42</span>
+        </div>
+        <div class="body" style="padding-top:18px">
+          <div style="display:flex;flex-direction:column;gap:8px"><span class="u-title">Glute bridge</span><div style="display:flex;gap:8px"><span class="pill">Lying down</span><span class="pill">Lower back</span><span class="pill">2 × 10</span></div></div>
+          <div class="ucard row" style="background:var(--b50);box-shadow:none"><span class="tile" style="width:44px;height:44px;border-radius:12px;background:#fff;color:var(--teal)"><svg class="ico"><use href="#i-phone"/></svg></span><div class="grow"><span class="u-b" style="font-size:15px">Phone on the floor, side-on</span><span class="u-s">About 2 metres away, so your whole body is in view</span></div></div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="row" style="align-items:flex-start"><span class="avatar" style="width:28px;height:28px;font-size:13px">1</span><span class="u-s grow" style="color:var(--ink)">Lie on your back, knees bent, feet flat and hip-width apart.</span></div>
+            <div class="row" style="align-items:flex-start"><span class="avatar" style="width:28px;height:28px;font-size:13px">2</span><span class="u-s grow" style="color:var(--ink)">Squeeze your buttocks and lift your hips until your body makes a straight line.</span></div>
+            <div class="row" style="align-items:flex-start"><span class="avatar" style="width:28px;height:28px;font-size:13px">3</span><span class="u-s grow" style="color:var(--ink)">Hold for 2 seconds, then lower slowly.</span></div>
+          </div>
+          <div style="flex:1"></div>
+          <div class="btn"><svg class="ico" style="width:20px;height:20px"><use href="#i-play"/></svg>Start with the camera</div>
+        </div>
+      </div></div></div>
+      <div class="capt"><div class="t"><h4>Exercise guide</h4><span class="tag built">Built</span></div><p>Instructor video, phone placement and simple steps for every exercise in the library.</p></div>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>A growing exercise library</h4><p>Built so far: 25 exercises with camera rules. Planned: the full clinical library of 100+.</p></div>
+    <div class="card"><h4>Learn about your condition</h4><p>Short articles and videos assigned with the plan, in the patient's language. <span class="tag planned">Planned</span></p></div>
+    <div class="card"><h4>Reminders that reach people</h4><p>App notifications, WhatsApp and SMS, timed to each patient's plan. <span class="tag planned">Planned</span></p></div>
+  </div>
+  <div class="foot"><span>Kynex · Product overview</span><span>5</span></div>
+</section>
+
+<!-- ======================= 6 CAMERA COACH ======================= -->
+<section class="page">
+  <div class="head">
+    <div class="eyebrow">The camera coach</div>
+    <h2>A coach that watches every rep, and keeps the video on the phone</h2>
+    <p class="lede">Kynex tracks the body's joints from the phone camera, on the phone itself. Each exercise carries its own clinical rules: which joints matter, what a full rep looks like, and which mistakes to watch for.</p>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Counts every rep</h3><p>Full and partial reps, holds in seconds, sets, rest and each side separately. If it can't see you, it says what to fix: "Step back, I can't see your feet."</p></div>
+    <div class="card"><h3>Catches form slips</h3><p>Hips turning, knees falling in, moving too fast. One short, specific tip at a time, spoken and shown, without nagging.</p></div>
+    <div class="card"><h3>Speaks your language</h3><p>Counts, cues and corrections in a natural voice. English and Hindi today, with more Indian languages <span class="tag planned">Planned</span></p></div>
+    <div class="card"><h3>Private by design</h3><p>Video never leaves the patient's phone. Only joint angles and counts reach the clinic: enough to replay the movement on a 3D figure.</p></div>
+  </div>
+  <div class="callout" style="display:grid;grid-template-columns:1fr 1.05fr;gap:7mm;align-items:center">
+    <div><h3>What the physio sees</h3><p style="margin-top:2mm">A replay of the whole session from the joint data. Every rep sits on a timeline, form problems are marked, and the range reached is shown against the target.</p></div>
+    <svg viewBox="0 0 320 130" style="width:100%">
+      <text x="0" y="12" font-family="Source Sans 3" font-size="11" fill="#9fbcd0">Bird dog · hip level, reps 1–10</text>
+      <line x1="0" y1="36" x2="320" y2="36" stroke="#f6b27f" stroke-dasharray="4 4"/><text x="282" y="30" font-size="10" fill="#f6b27f" font-family="Source Sans 3">target</text>
+      <g><rect x="2" y="42" width="24" height="76" rx="4" fill="#57a6cf"/><rect x="34" y="40" width="24" height="78" rx="4" fill="#57a6cf"/><rect x="66" y="64" width="24" height="54" rx="4" fill="#f2812e"/><rect x="98" y="41" width="24" height="77" rx="4" fill="#57a6cf"/><rect x="130" y="39" width="24" height="79" rx="4" fill="#57a6cf"/><rect x="162" y="68" width="24" height="50" rx="4" fill="#f2812e"/><rect x="194" y="40" width="24" height="78" rx="4" fill="#57a6cf"/><rect x="226" y="38" width="24" height="80" rx="4" fill="#57a6cf"/><rect x="258" y="39" width="24" height="79" rx="4" fill="#57a6cf"/><rect x="290" y="37" width="24" height="81" rx="4" fill="#57a6cf"/></g>
+      <text x="0" y="130" font-family="Source Sans 3" font-size="10" fill="#9fbcd0">Orange: hips turned on reps 3 and 6</text>
+    </svg>
+  </div>
+  <div class="grid2">
+    <div class="card" style="background:#fff;box-shadow:inset 0 0 0 1px var(--line)"><div style="display:flex;justify-content:space-between;align-items:center"><h3>Built so far</h3><span class="tag built">Built</span></div>
+      <ul class="clean" style="margin-top:1.5mm">
+        <li>Live pose tracking on the phone, front or back camera</li>
+        <li>Counting rules, form checks and phone placement for 25 exercises</li>
+        <li>Spoken counts and tips in English and Hindi</li>
+        <li>Session reports, rep replay, and a full movement replay for physios</li>
+      </ul></div>
+    <div class="card" style="background:#fff;box-shadow:inset 0 0 0 1px var(--line)"><div style="display:flex;justify-content:space-between;align-items:center"><h3>Next</h3><span class="tag planned">Planned</span></div>
+      <ul class="clean" style="margin-top:1.5mm">
+        <li>Rules for the full clinical library of 100+ exercises</li>
+        <li>Accuracy tested against a physio's own count, per exercise</li>
+        <li>Smooth tracking on low-cost Android phones</li>
+        <li>A natural AI voice in many Indian languages</li>
+      </ul></div>
+  </div>
+  <p style="font-size:8.8pt;color:var(--ink-3)">The coach counts and gives tips. It does not diagnose, and it does not confirm that technique is clinically correct. The physiotherapist stays in charge of the plan.</p>
+  <div class="foot"><span>Kynex · Product overview</span><span>6</span></div>
+</section>
+
+<!-- ======================= 7 PHYSIO DASHBOARD ======================= -->
+<section class="page">
+  <div class="head">
+    <div class="eyebrow">For physiotherapists</div>
+    <h2>See who needs you today, and why</h2>
+    <p class="lede">The dashboard puts patients who need attention at the top: red-flag answers, rising pain, missed sessions and form problems. Each session can be replayed, and a plan changes in seconds.</p>
+  </div>
+  <div class="desk">
+    <div class="chrome"><i></i><i></i><i></i><span>kynex.app/patients</span></div>
+    <div class="dapp" style="height:612px">
+      <div class="dside">
+        <div class="brand"><span class="mark" style="width:30px;height:30px"><svg viewBox="0 0 24 24"><path d="M7 4v16M7 12l9-8M7 12l10 8" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Kynex</div>
+        <span class="nav on"><svg class="ico"><use href="#i-users"/></svg>My patients</span>
+        <span class="nav"><svg class="ico"><use href="#i-cal"/></svg>Calendar</span>
+        <span class="nav"><svg class="ico"><use href="#i-chat"/></svg>Messages<em>3</em></span>
+        <span class="nav"><svg class="ico"><use href="#i-book"/></svg>Exercise library</span>
+        <div class="me"><div class="avatar">AR</div><div><b>Dr. Anjali Rao</b><span>Physiotherapist</span></div></div>
+      </div>
+      <div class="dmain">
+        <div class="dtop"><div><h5>Good morning, Anjali</h5><div class="sub">Tuesday · 6 visits today</div></div><span class="pill" style="height:36px;padding:0 16px;font-size:14px;background:var(--navy);color:#fff">+ New plan</span></div>
+        <div class="kpis">
+          <div class="kpi"><small>Need attention</small><b>4</b><em style="color:var(--bad)">1 red flag</em></div>
+          <div class="kpi"><small>Sessions to review</small><b>7</b><em style="color:var(--ink-3)">since yesterday</em></div>
+          <div class="kpi"><small>Plan adherence</small><b>78%</b><em style="color:var(--good)">▲ 4% this week</em></div>
+          <div class="kpi"><small>Active patients</small><b>32</b><em style="color:var(--ink-3)">3 new this week</em></div>
+        </div>
+        <div class="dcard">
+          <table class="dt">
+            <tr><th>Patient</th><th>Needs attention</th><th>Sessions done · 14 days</th><th>Last session</th><th>Next visit</th></tr>
+            <tr><td><div class="who"><div class="avatar">RI</div><div><b>Rahul Iyer</b><span>Neck pain</span></div></div></td><td><span class="pill bad"><svg class="ico" style="width:14px;height:14px"><use href="#i-flag"/></svg>Red-flag answer</span></td><td><span class="mini"><i style="width:45%"></i></i></span>45%</td><td>Today, 8:10</td><td>—</td></tr>
+            <tr><td><div class="who"><div class="avatar">SK</div><div><b>Sana Khan</b><span>Knee, after surgery</span></div></div></td><td><span class="pill warn">Pain rising</span></td><td><span class="mini"><i style="width:80%"></i></span>80%</td><td>Yesterday</td><td>Wed, 11:00</td></tr>
+            <tr style="background:var(--b50)"><td><div class="who"><div class="avatar" style="background:var(--teal);color:#fff">PS</div><div><b>Priya Sharma</b><span>Lower-back pain</span></div></div></td><td><span class="pill">1 session to review</span> <span class="pill warn">Bird dog: hips</span></td><td><span class="mini"><i style="width:90%"></i></span>90%</td><td>Today, 9:55</td><td>Thu, 10:30</td></tr>
+            <tr><td><div class="who"><div class="avatar">AN</div><div><b>Arjun Nair</b><span>Shoulder</span></div></div></td><td><span class="pill warn">Missed 3 sessions</span></td><td><span class="mini"><i style="width:35%"></i></span>35%</td><td>5 days ago</td><td>Mon, 16:00</td></tr>
+            <tr><td><div class="who"><div class="avatar">MD</div><div><b>Meera Das</b><span>Lower-back pain</span></div></div></td><td><span class="pill good">On track</span></td><td><span class="mini"><i style="width:100%"></i></span>100%</td><td>Today, 7:40</td><td>Fri, 9:30</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="capt"><div class="t"><h4>My patients</h4><span class="tag built">Built</span></div></div>
+  <div class="desk">
+    <div class="chrome"><i></i><i></i><i></i><span>kynex.app/patients/priya-sharma/sessions/today</span></div>
+    <div class="dapp" style="height:500px;grid-template-columns:1fr">
+      <div class="dmain" style="display:grid;grid-template-columns:1.25fr 1fr;gap:18px">
+        <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+          <div class="dtop"><div><h5>Priya Sharma · Today's session</h5><div class="sub">Bird dog · rep 3 of 16 · replayed from joint data</div></div></div>
+          <div style="flex:1;border-radius:16px;background:radial-gradient(120% 90% at 50% 30%,#2b4352,#132230);position:relative;min-height:250px">
+            <svg viewBox="0 0 300 280" style="position:absolute;left:70px;right:70px;top:10px;height:240px;width:calc(100% - 140px)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <g stroke="#9fb6c5" stroke-width="26" opacity=".5"><use href="#f-birddog" width="300" height="280" style="color:#9fb6c5"/></g>
+              <g stroke="#fff" stroke-width="4"><path d="M84 164 L18 132 M84 164 L88 250 M196 164 L200 250 L254 252"/></g>
+              <g stroke="#cf4b45" stroke-width="6"><path d="M84 164 L196 164 L288 138"/></g>
+              <g fill="#fff"><circle cx="84" cy="164" r="6"/><circle cx="196" cy="164" r="8" fill="#cf4b45"/><circle cx="18" cy="132" r="5"/><circle cx="288" cy="138" r="5"/><circle cx="88" cy="250" r="5"/><circle cx="200" cy="250" r="5"/></g>
+            </svg>
+            <span class="pill bad" style="position:absolute;left:16px;bottom:16px">Hips turned: right hip 9° high</span>
+            <span class="pill" style="position:absolute;right:16px;bottom:16px;background:rgba(255,255,255,.14);color:#fff">½× speed</span>
+          </div>
+          <div style="display:flex;gap:5px">
+            <span style="flex:1;height:14px;border-radius:4px;background:var(--good)"></span><span style="flex:1;height:14px;border-radius:4px;background:var(--good)"></span><span style="flex:1;height:14px;border-radius:4px;background:var(--orange);box-shadow:0 0 0 2px #fff,0 0 0 4px var(--navy)"></span><span style="flex:1;height:14px;border-radius:4px;background:var(--good)"></span><span style="flex:1;height:14px;border-radius:4px;background:var(--good)"></span><span style="flex:1;height:14px;border-radius:4px;background:var(--orange)"></span><span style="flex:1;height:14px;border-radius:4px;background:var(--good)"></span><span style="flex:1;height:14px;border-radius:4px;background:var(--good)"></span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><small>Reps</small><b>51/52</b></div><div class="kpi"><small>Good form</small><b>92%</b></div><div class="kpi"><small>Back pain</small><b style="color:var(--good-ink)">5→3</b></div></div>
+          <div class="dcard" style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+            <b style="font:600 15px var(--ui)">Plan</b>
+            <div style="display:flex;justify-content:space-between"><span>Glute bridge</span><span style="color:var(--ink-2)">2 × 10</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Cat–cow</span><span style="color:var(--ink-2)">2 × 8</span></div>
+            <div style="display:flex;justify-content:space-between;background:var(--b50);margin:0 -8px;padding:8px;border-radius:10px"><span><b>Bird dog</b></span><span><s style="color:var(--ink-3)">2 × 8</s> → <b style="color:var(--teal-d)">2 × 6, alternating</b></span></div>
+          </div>
+          <div class="dcard" style="padding:14px 18px;color:var(--ink-2)">Note to Priya: <span style="color:var(--ink)">Reach a little less far and keep your hips level. Fewer reps for now.</span></div>
+          <div class="btn" style="height:48px;font-size:15px">Save plan and mark as reviewed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="capt"><div class="t"><h4>Session review with movement replay</h4><span class="tag built">Built</span></div></div>
+  <div class="foot"><span>Kynex · Product overview</span><span>7</span></div>
+</section>
+
+<!-- ======================= 8 CLINIC & MANAGEMENT ======================= -->
+<section class="page">
+  <div class="head">
+    <div class="eyebrow">For clinic teams & management</div>
+    <h2>Run every centre from one place</h2>
+    <p class="lede">Bookings, payments, reminders and staff sit alongside the clinical data, so the front desk, the physiotherapists and management all see the same picture.</p>
+  </div>
+  <div class="desk">
+    <div class="chrome"><i></i><i></i><i></i><span>kynex.app/overview</span></div>
+    <div class="dapp" style="height:600px">
+      <div class="dside">
+        <div class="brand"><span class="mark" style="width:30px;height:30px"><svg viewBox="0 0 24 24"><path d="M7 4v16M7 12l9-8M7 12l10 8" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Kynex</div>
+        <span class="nav on"><svg class="ico"><use href="#i-grid"/></svg>Overview</span>
+        <span class="nav"><svg class="ico"><use href="#i-pin"/></svg>Centres</span>
+        <span class="nav"><svg class="ico"><use href="#i-users"/></svg>Patients</span>
+        <span class="nav"><svg class="ico"><use href="#i-cal"/></svg>Bookings</span>
+        <span class="nav"><svg class="ico"><use href="#i-card"/></svg>Payments</span>
+        <span class="nav"><svg class="ico"><use href="#i-book"/></svg>Exercise library</span>
+        <div class="me"><div class="avatar">AD</div><div><b>Admin</b><span>All centres</span></div></div>
+      </div>
+      <div class="dmain">
+        <div class="dtop"><div><h5>All centres</h5><div class="sub">Last 30 days · example data</div></div><div style="display:flex;gap:8px"><span class="pill" style="height:36px;padding:0 14px;font-size:14px;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)">Last 30 days</span><span class="pill" style="height:36px;padding:0 14px;font-size:14px;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)">Export</span></div></div>
+        <div class="kpis">
+          <div class="kpi"><small>Active patients</small><b>1,240</b><em style="color:var(--good)">▲ 8% vs last month</em></div>
+          <div class="kpi"><small>Sessions completed</small><b>9,860</b><em style="color:var(--good)">▲ 12%</em></div>
+          <div class="kpi"><small>Plan adherence</small><b>74%</b><em style="color:var(--good)">▲ 3 pts</em></div>
+          <div class="kpi"><small>Average pain change</small><b>−2.4</b><em style="color:var(--ink-3)">on a 0–10 scale</em></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;flex:1;min-height:0">
+          <div class="dcard" style="padding:18px 20px;display:flex;flex-direction:column;gap:6px">
+            <b style="font:600 15px var(--ui)">Sessions completed per week</b>
+            <svg viewBox="0 0 560 220" style="width:100%;flex:1">
+              <g stroke="#e5eaf0"><line x1="40" y1="20" x2="560" y2="20"/><line x1="40" y1="80" x2="560" y2="80"/><line x1="40" y1="140" x2="560" y2="140"/><line x1="40" y1="200" x2="560" y2="200"/></g>
+              <g font-family="Inter" font-size="12" fill="#8a97a8"><text x="0" y="24">3,000</text><text x="0" y="84">2,000</text><text x="0" y="144">1,000</text><text x="18" y="204">0</text></g>
+              <path d="M60 128 L130 118 L200 112 L270 98 L340 92 L410 78 L480 70 L550 58 L550 200 L60 200Z" fill="#2f789f" opacity=".1"/>
+              <path d="M60 128 L130 118 L200 112 L270 98 L340 92 L410 78 L480 70 L550 58" stroke="#2f789f" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="550" cy="58" r="6" fill="#2f789f"/><text x="512" y="46" font-family="Inter" font-size="13" font-weight="600" fill="#16222f">2,360</text>
+            </svg>
+          </div>
+          <div class="dcard">
+            <table class="dt">
+              <tr><th>Centre</th><th>Adherence</th><th>Visits today</th></tr>
+              <tr><td><b>Centre A</b></td><td><span class="mini" style="width:80px"><i style="width:81%"></i></span>81%</td><td>42</td></tr>
+              <tr><td><b>Centre B</b></td><td><span class="mini" style="width:80px"><i style="width:76%"></i></span>76%</td><td>35</td></tr>
+              <tr><td><b>Centre C</b></td><td><span class="mini" style="width:80px"><i style="width:69%"></i></span>69%</td><td>28</td></tr>
+              <tr><td><b>Centre D</b></td><td><span class="mini" style="width:80px"><i style="width:64%"></i></span>64%</td><td>31</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="capt"><div class="t"><h4>Management overview <span style="font-weight:400;color:var(--ink-3)">· example data</span></h4><span class="tag planned">Planned</span></div></div>
+  <table class="cap-table">
+    <tr><th>Capability</th><th>What it does</th><th>Status</th></tr>
+    <tr><td>Calendar & bookings</td><td>Visits by day or week, physio hours and leave, and a waiting list that offers freed slots automatically</td><td><span class="tag built">Built</span></td></tr>
+    <tr><td>Clinic overview</td><td>Sessions, adherence, patients needing attention and today's visits for one clinic</td><td><span class="tag built">Built</span></td></tr>
+    <tr><td>Activity & audit</td><td>Every plan change, session, review and booking, with who did it and when</td><td><span class="tag built">Built</span></td></tr>
+    <tr><td>Payments</td><td>Visits and packages paid in the app, with receipts and refunds</td><td><span class="tag planned">Planned</span></td></tr>
+    <tr><td>Video visits</td><td>Video calls from the app and the dashboard, with notes after the call</td><td><span class="tag planned">Planned</span></td></tr>
+    <tr><td>Multi-centre management</td><td>All centres in one view, staff accounts, and which exercises each centre offers</td><td><span class="tag planned">Planned</span></td></tr>
+    <tr><td>Records sync</td><td>Patients and appointments kept in step with the clinic's existing records system</td><td><span class="tag planned">Planned</span></td></tr>
+  </table>
+  <div class="foot"><span>Kynex · Product overview</span><span>8</span></div>
+</section>
+
+<!-- ======================= 9 DESIGN & TRUST ======================= -->
+<section class="page">
+  <div class="head">
+    <div class="eyebrow">How we design</div>
+    <h2>Calm, minimal and usable by anyone</h2>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>One action per screen</h3><p>Each screen answers "what do I do now?" with one obvious button. Everything else stays secondary, or out of sight until it's needed.</p></div>
+    <div class="card"><h3>Designed for 65, pleasant at 25</h3><p>Large type, strong contrast, big tap targets and plain words. Tested with older and less tech-confident patients throughout.</p></div>
+    <div class="card"><h3>Automate, don't ask</h3><p>Reminders, questionnaires, education and follow-ups happen on schedule. Patients and physios do less admin, not more.</p></div>
+    <div class="card"><h3>Built for India's phones</h3><p>Smooth on budget Android phones, forgiving of weak internet, and in the patient's own language, voice included.</p></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4mm">
+    <div style="display:flex;flex-direction:column;gap:2mm"><div style="height:18mm;border-radius:12px;background:var(--navy)"></div><b style="font-size:9pt">Navy</b><span style="font-size:8.3pt;color:var(--ink-2)">Trust, headers, the main button</span></div>
+    <div style="display:flex;flex-direction:column;gap:2mm"><div style="height:18mm;border-radius:12px;background:var(--teal)"></div><b style="font-size:9pt">Teal</b><span style="font-size:8.3pt;color:var(--ink-2)">Progress and selection</span></div>
+    <div style="display:flex;flex-direction:column;gap:2mm"><div style="height:18mm;border-radius:12px;background:var(--b100)"></div><b style="font-size:9pt">Mist</b><span style="font-size:8.3pt;color:var(--ink-2)">Quiet surfaces</span></div>
+    <div style="display:flex;flex-direction:column;gap:2mm"><div style="height:18mm;border-radius:12px;background:var(--orange)"></div><b style="font-size:9pt">Orange</b><span style="font-size:8.3pt;color:var(--ink-2)">Coaching tips, used sparingly</span></div>
+    <div style="display:flex;flex-direction:column;gap:2mm"><div style="height:18mm;border-radius:12px;background:var(--good)"></div><b style="font-size:9pt">Green</b><span style="font-size:8.3pt;color:var(--ink-2)">Good form, done</span></div>
+  </div>
+  <div class="head" style="margin-top:3mm">
+    <div class="eyebrow">Trust & safety</div>
+    <h2 style="font-size:19pt">Physios stay in charge. Patients stay safe.</h2>
+  </div>
+  <div class="grid2">
+    <ul class="clean">
+      <li><b>Red-flag checks</b> before every session. A worrying answer stops the session and alerts the clinic.</li>
+      <li><b>Physio-owned plans.</b> The app never changes a plan on its own.</li>
+      <li><b>Video stays on the phone.</b> Only joint data and counts are shared.</li>
+    </ul>
+    <ul class="clean">
+      <li><b>Consent and privacy</b> built in, with every change to a patient's care recorded.</li>
+      <li><b>Role-based access:</b> patients, physios, centre teams and management each see only what they need.</li>
+      <li><b>Honest about limits:</b> the coach counts and gives tips; it does not diagnose.</li>
+    </ul>
+  </div>
+  <div class="foot"><span>Kynex · Product overview</span><span>9</span></div>
+</section>
+
+<!-- ======================= 10 TECH + FEEDBACK ======================= -->
+<section class="page">
+  <div class="head">
+    <div class="eyebrow">Under the hood</div>
+    <h2>One codebase, every screen</h2>
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>Apps</h4><p>One web app that runs in the browser and is packaged for Android and iPhone, so every update reaches everyone at once.</p></div>
+    <div class="card"><h4>On-device AI</h4><p>Pose tracking runs on the phone. Exercise rules turn joint angles into reps, holds and form tips in real time.</p></div>
+    <div class="card"><h4>Clinic platform</h4><p>A secure cloud backend for plans, sessions, bookings and payments, with connections to records systems and WhatsApp.</p></div>
+  </div>
+  <div class="head" style="margin-top:3mm">
+    <div class="eyebrow">We'd love your view</div>
+    <h2>What would make Kynex better?</h2>
+    <p class="lede">This is an early look. Honest reactions are the most useful thing you can give us. Some prompts, depending on your field:</p>
+  </div>
+  <div class="grid2">
+    <div class="q card"><h3>Designers</h3><ol><li>Which screen feels cluttered or unclear?</li><li>How would you make the camera session calmer for a first-time, older user?</li><li>What would make this feel as premium as the best health apps you use?</li></ol></div>
+    <div class="q card"><h3>Developers</h3><ol><li>What worries you about one web app packaged for the app stores?</li><li>How would you keep sessions reliable on weak internet?</li><li>What would you test first?</li></ol></div>
+    <div class="q card"><h3>AI & computer vision</h3><ol><li>How would you prove counting accuracy for each exercise?</li><li>Where would on-device tracking struggle: lying down, side-on, low light?</li><li>What would you add beyond reps and form tips?</li></ol></div>
+    <div class="q card"><h3>Physiotherapists & testers</h3><ol><li>Would you trust these session reports? What's missing?</li><li>Which exercises would be hardest for a camera to judge?</li><li>What would stop a patient from using this at home?</li></ol></div>
+  </div>
+  <div class="callout" style="display:flex;justify-content:space-between;align-items:center;gap:6mm;margin-top:auto;margin-bottom:8mm">
+    <p style="font-size:11pt;color:#fff">Thank you for reading. Please share your thoughts with the person who sent you this document.</p>
+    <span style="font:600 14pt var(--display);display:flex;gap:9px;align-items:center;flex:none;color:#fff"><span class="mark"><svg viewBox="0 0 24 24"><path d="M7 4v16M7 12l9-8M7 12l10 8" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Kynex</span>
+  </div>
+  <div class="foot"><span>Kynex · Product overview · Draft for discussion. Mockups are illustrative and may change.</span><span>10</span></div>
+</section>
+
+</body>
+</html>

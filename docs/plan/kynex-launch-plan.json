@@ -1,0 +1,1803 @@
+{
+ "title": "Kynex by QI Spine: Launch plan",
+ "subtitle": "Weekly plan from kickoff to go-live at every QI Spine centre",
+ "version": "v2 · 28 Nov 2026",
+ "start": "2026-11-23",
+ "kickoffLabel": "Tue 01 Dec 2026",
+ "goLive": "2027-03-31",
+ "goLiveLabel": "Wed 31 Mar 2027",
+ "teams": {
+  "lead": {
+   "name": "Project Head",
+   "color": "#2a78d6"
+  },
+  "dev": {
+   "name": "Developers",
+   "color": "#eb6834"
+  },
+  "physio": {
+   "name": "Physio team",
+   "color": "#1baf7a"
+  },
+  "it": {
+   "name": "Company IT / Legal",
+   "color": "#eda100"
+  },
+  "qa": {
+   "name": "QA",
+   "color": "#e87ba4"
+  },
+  "centres": {
+   "name": "Centres & Management",
+   "color": "#008300"
+  },
+  "ux": {
+   "name": "UI/UX design",
+   "color": "#6250d6"
+  }
+ },
+ "weeks": [
+  {
+   "w": 0,
+   "start": "2026-11-23",
+   "label": "W0",
+   "date": "23 Nov",
+   "month": "Nov 2026",
+   "holidays": [],
+   "light": ""
+  },
+  {
+   "w": 1,
+   "start": "2026-11-30",
+   "label": "W1",
+   "date": "30 Nov",
+   "month": "Nov 2026",
+   "holidays": [],
+   "light": ""
+  },
+  {
+   "w": 2,
+   "start": "2026-12-07",
+   "label": "W2",
+   "date": "07 Dec",
+   "month": "Dec 2026",
+   "holidays": [],
+   "light": ""
+  },
+  {
+   "w": 3,
+   "start": "2026-12-14",
+   "label": "W3",
+   "date": "14 Dec",
+   "month": "Dec 2026",
+   "holidays": [],
+   "light": ""
+  },
+  {
+   "w": 4,
+   "start": "2026-12-21",
+   "label": "W4",
+   "date": "21 Dec",
+   "month": "Dec 2026",
+   "holidays": [
+    "Christmas"
+   ],
+   "light": "Christmas week"
+  },
+  {
+   "w": 5,
+   "start": "2026-12-28",
+   "label": "W5",
+   "date": "28 Dec",
+   "month": "Dec 2026",
+   "holidays": [
+    "New Year's Day"
+   ],
+   "light": "New Year week"
+  },
+  {
+   "w": 6,
+   "start": "2027-01-04",
+   "label": "W6",
+   "date": "04 Jan",
+   "month": "Jan 2027",
+   "holidays": [],
+   "light": ""
+  },
+  {
+   "w": 7,
+   "start": "2027-01-11",
+   "label": "W7",
+   "date": "11 Jan",
+   "month": "Jan 2027",
+   "holidays": [
+    "Makar Sankranti / Pongal (14-15 Jan)"
+   ],
+   "light": ""
+  },
+  {
+   "w": 8,
+   "start": "2027-01-18",
+   "label": "W8",
+   "date": "18 Jan",
+   "month": "Jan 2027",
+   "holidays": [],
+   "light": ""
+  },
+  {
+   "w": 9,
+   "start": "2027-01-25",
+   "label": "W9",
+   "date": "25 Jan",
+   "month": "Jan 2027",
+   "holidays": [
+    "Republic Day"
+   ],
+   "light": ""
+  },
+  {
+   "w": 10,
+   "start": "2027-02-01",
+   "label": "W10",
+   "date": "01 Feb",
+   "month": "Feb 2027",
+   "holidays": [],
+   "light": ""
+  },
+  {
+   "w": 11,
+   "start": "2027-02-08",
+   "label": "W11",
+   "date": "08 Feb",
+   "month": "Feb 2027",
+   "holidays": [],
+   "light": ""
+  },
+  {
+   "w": 12,
+   "start": "2027-02-15",
+   "label": "W12",
+   "date": "15 Feb",
+   "month": "Feb 2027",
+   "holidays": [
+    "Shivaji Jayanti (Maharashtra)"
+   ],
+   "light": ""
+  },
+  {
+   "w": 13,
+   "start": "2027-02-22",
+   "label": "W13",
+   "date": "22 Feb",
+   "month": "Feb 2027",
+   "holidays": [],
+   "light": ""
+  },
+  {
+   "w": 14,
+   "start": "2027-03-01",
+   "label": "W14",
+   "date": "01 Mar",
+   "month": "Mar 2027",
+   "holidays": [
+    "Maha Shivratri (Sat)"
+   ],
+   "light": ""
+  },
+  {
+   "w": 15,
+   "start": "2027-03-08",
+   "label": "W15",
+   "date": "08 Mar",
+   "month": "Mar 2027",
+   "holidays": [
+    "Eid ul-Fitr (moon-dependent)"
+   ],
+   "light": ""
+  },
+  {
+   "w": 16,
+   "start": "2027-03-15",
+   "label": "W16",
+   "date": "15 Mar",
+   "month": "Mar 2027",
+   "holidays": [],
+   "light": ""
+  },
+  {
+   "w": 17,
+   "start": "2027-03-22",
+   "label": "W17",
+   "date": "22 Mar",
+   "month": "Mar 2027",
+   "holidays": [
+    "Holi (22-23 Mar)",
+    "Good Friday"
+   ],
+   "light": "Holi + Good Friday week"
+  },
+  {
+   "w": 18,
+   "start": "2027-03-29",
+   "label": "W18",
+   "date": "29 Mar",
+   "month": "Mar 2027",
+   "holidays": [],
+   "light": ""
+  },
+  {
+   "w": 19,
+   "start": "2027-04-05",
+   "label": "W19",
+   "date": "05 Apr",
+   "month": "Apr 2027",
+   "holidays": [
+    "Gudi Padwa / Ugadi"
+   ],
+   "light": ""
+  },
+  {
+   "w": 20,
+   "start": "2027-04-12",
+   "label": "W20",
+   "date": "12 Apr",
+   "month": "Apr 2027",
+   "holidays": [
+    "Ambedkar Jayanti / regional new years",
+    "Ram Navami"
+   ],
+   "light": ""
+  },
+  {
+   "w": 21,
+   "start": "2027-04-19",
+   "label": "W21",
+   "date": "19 Apr",
+   "month": "Apr 2027",
+   "holidays": [],
+   "light": ""
+  },
+  {
+   "w": 22,
+   "start": "2027-04-26",
+   "label": "W22",
+   "date": "26 Apr",
+   "month": "Apr 2027",
+   "holidays": [],
+   "light": ""
+  }
+ ],
+ "workstreams": [
+  {
+   "name": "1. Leadership & governance",
+   "tasks": [
+    {
+     "kind": "task",
+     "name": "Present plan, project charter & roles to management",
+     "team": "lead",
+     "start": 0,
+     "end": 1,
+     "detail": "Approval names the Project Head as the single point of contact, with final say on scope, priorities and releases.",
+     "contingency": false,
+     "from": "23 Nov",
+     "to": "04 Dec"
+    },
+    {
+     "kind": "ms",
+     "name": "Kickoff: team starts",
+     "date": "2026-12-01",
+     "dateLabel": "Tue 01 Dec 2026",
+     "start": 1,
+     "end": 1,
+     "team": "lead",
+     "detail": "Tue 1 Dec 2026"
+    },
+    {
+     "kind": "task",
+     "name": "Week 1 discovery workshops",
+     "team": "lead",
+     "start": 1,
+     "end": 1,
+     "detail": "Cover CRM, payment, video, cloud, the centre list, languages, patient data, helpdesk, reporting rhythm and the tracker app decision.",
+     "contingency": false,
+     "from": "30 Nov",
+     "to": "04 Dec"
+    },
+    {
+     "kind": "task",
+     "name": "Team size & track set-up",
+     "team": "lead",
+     "start": 1,
+     "end": 2,
+     "detail": "The Project Head decides how many developers go on each build track. That number sets the build speed.",
+     "contingency": false,
+     "from": "30 Nov",
+     "to": "11 Dec"
+    },
+    {
+     "kind": "task",
+     "name": "Team onboarding & codebase walkthrough",
+     "team": "lead",
+     "start": 1,
+     "end": 2,
+     "detail": "Each team member gets their role, the working rules and a walkthrough of the Kynex codebase.",
+     "contingency": false,
+     "from": "30 Nov",
+     "to": "11 Dec"
+    },
+    {
+     "kind": "task",
+     "name": "Module planning & reviews (every 3 weeks)",
+     "team": "lead",
+     "start": 2,
+     "end": 15,
+     "detail": "The Project Head sets each module's scope and accepts or rejects it at the module review.",
+     "contingency": false,
+     "from": "07 Dec",
+     "to": "12 Mar"
+    },
+    {
+     "kind": "task",
+     "name": "Friday status update to management",
+     "team": "lead",
+     "start": 1,
+     "end": 22,
+     "detail": "One page every Friday covering progress against the Gantt, risks and decisions needed.",
+     "contingency": false,
+     "from": "30 Nov",
+     "to": "30 Apr"
+    },
+    {
+     "kind": "ms",
+     "name": "Plan, charter & budget approved",
+     "date": "2026-12-04",
+     "dateLabel": "Fri 04 Dec 2026",
+     "start": 1,
+     "end": 1,
+     "team": "lead",
+     "detail": "Management signs off the plan, the Project Head charter and the cost list."
+    },
+    {
+     "kind": "ms",
+     "name": "Demo 1: foundations + design direction",
+     "date": "2026-12-23",
+     "dateLabel": "Wed 23 Dec 2026",
+     "start": 4,
+     "end": 4,
+     "team": "lead",
+     "detail": "Shows Module 1 and the signed-off wireframes and design system."
+    },
+    {
+     "kind": "ms",
+     "name": "Demo 2: patient app, doctor dashboard, bookings & payments",
+     "date": "2027-01-15",
+     "dateLabel": "Fri 15 Jan 2027",
+     "start": 7,
+     "end": 7,
+     "team": "lead",
+     "detail": "End of Modules 2 and 3."
+    },
+    {
+     "kind": "ms",
+     "name": "Demo 3: consults, chat, outcome scores, pain report",
+     "date": "2027-02-05",
+     "dateLabel": "Fri 05 Feb 2027",
+     "start": 10,
+     "end": 10,
+     "team": "lead",
+     "detail": "End of Modules 4 and 5."
+    },
+    {
+     "kind": "ms",
+     "name": "Demo 4: full app + feature freeze",
+     "date": "2027-02-26",
+     "dateLabel": "Fri 26 Feb 2027",
+     "start": 13,
+     "end": 13,
+     "team": "lead",
+     "detail": "End of Modules 6 and 7. No new features after this date."
+    },
+    {
+     "kind": "ms",
+     "name": "Go / no-go decision",
+     "date": "2027-03-19",
+     "dateLabel": "Fri 19 Mar 2027",
+     "start": 16,
+     "end": 16,
+     "team": "lead",
+     "detail": "The Project Head and management decide, using the dry-run results."
+    },
+    {
+     "kind": "ms",
+     "name": "Launch report + Phase 2 roadmap",
+     "date": "2027-04-30",
+     "dateLabel": "Fri 30 Apr 2027",
+     "start": 22,
+     "end": 22,
+     "team": "lead",
+     "detail": "Covers results against the success targets and the next phase."
+    }
+   ]
+  },
+  {
+   "name": "2. Product & UX design (3 phases)",
+   "tasks": [
+    {
+     "kind": "task",
+     "name": "Phase 1 · User research: patients of all ages, physios, front desk",
+     "team": "ux",
+     "start": 1,
+     "end": 2,
+     "detail": "Includes patients aged 60+ and people who are not comfortable with phones.",
+     "contingency": false,
+     "from": "30 Nov",
+     "to": "11 Dec"
+    },
+    {
+     "kind": "task",
+     "name": "Phase 1 · Personas, user flows & wireframes for all 7 modules",
+     "team": "ux",
+     "start": 2,
+     "end": 4,
+     "detail": "The structure is settled before developers build. The Project Head approves it.",
+     "contingency": false,
+     "from": "07 Dec",
+     "to": "25 Dec"
+    },
+    {
+     "kind": "task",
+     "name": "Phase 1 · Design system: 'Kynex by QI Spine'",
+     "team": "ux",
+     "start": 3,
+     "end": 4,
+     "detail": "Colours, type, components, large-text and accessibility rules.",
+     "contingency": false,
+     "from": "14 Dec",
+     "to": "25 Dec"
+    },
+    {
+     "kind": "ms",
+     "name": "Wireframes & design system signed off",
+     "date": "2026-12-23",
+     "dateLabel": "Wed 23 Dec 2026",
+     "start": 4,
+     "end": 4,
+     "team": "lead",
+     "detail": "Signed off by the Project Head."
+    },
+    {
+     "kind": "task",
+     "name": "Phase 2 · Screen design, one module ahead of development",
+     "team": "ux",
+     "start": 4,
+     "end": 11,
+     "detail": "Final screens for each module are ready before that module starts.",
+     "contingency": false,
+     "from": "21 Dec",
+     "to": "12 Feb"
+    },
+    {
+     "kind": "task",
+     "name": "Phase 2 · Usability test at the end of every module",
+     "team": "ux",
+     "start": 7,
+     "end": 13,
+     "detail": "Includes 60+ and low-tech users. Success means they finish key tasks without help.",
+     "contingency": false,
+     "from": "11 Jan",
+     "to": "26 Feb"
+    },
+    {
+     "kind": "task",
+     "name": "Phase 3 · Visual polish: motion, micro-interactions, empty and error states",
+     "team": "ux",
+     "start": 11,
+     "end": 16,
+     "detail": "A longer, dedicated polish phase near the end. This is where the app becomes 'premium'.",
+     "contingency": false,
+     "from": "08 Feb",
+     "to": "19 Mar"
+    },
+    {
+     "kind": "task",
+     "name": "Phase 3 · Accessibility audit & large-text pass",
+     "team": "ux",
+     "start": 13,
+     "end": 15,
+     "detail": "",
+     "contingency": false,
+     "from": "22 Feb",
+     "to": "12 Mar"
+    },
+    {
+     "kind": "task",
+     "name": "Phase 3 · Final usability round at the dry-run centres",
+     "team": "ux",
+     "start": 15,
+     "end": 16,
+     "detail": "",
+     "contingency": false,
+     "from": "08 Mar",
+     "to": "19 Mar"
+    }
+   ]
+  },
+  {
+   "name": "3. Core engineering · 3-week modules on 2 tracks",
+   "tasks": [
+    {
+     "kind": "task",
+     "name": "Camera engine & AI: 100+ exercises, low-end Android speed",
+     "team": "lead",
+     "start": 2,
+     "end": 13,
+     "detail": "The Project Head builds and owns this.",
+     "contingency": false,
+     "from": "07 Dec",
+     "to": "26 Feb"
+    },
+    {
+     "kind": "task",
+     "name": "M1 · Foundations: cloud, sign-in, roles, consent, audit log, pipeline",
+     "team": "dev",
+     "start": 2,
+     "end": 4,
+     "detail": "All developers. Week 3 of every module is for testing and polish. See the Build modules tab.",
+     "contingency": false,
+     "from": "07 Dec",
+     "to": "25 Dec"
+    },
+    {
+     "kind": "task",
+     "name": "Track A · M2 · Patient app & core rehab loop",
+     "team": "dev",
+     "start": 5,
+     "end": 7,
+     "detail": "Includes the New Year week (lighter).",
+     "contingency": false,
+     "from": "28 Dec",
+     "to": "15 Jan"
+    },
+    {
+     "kind": "task",
+     "name": "Track B · M3 · Doctor dashboard, plans, bookings & payments",
+     "team": "dev",
+     "start": 5,
+     "end": 7,
+     "detail": "",
+     "contingency": false,
+     "from": "28 Dec",
+     "to": "15 Jan"
+    },
+    {
+     "kind": "task",
+     "name": "Track A · M4 · Care & communication: video consults, chat, reminders",
+     "team": "dev",
+     "start": 8,
+     "end": 10,
+     "detail": "",
+     "contingency": false,
+     "from": "18 Jan",
+     "to": "05 Feb"
+    },
+    {
+     "kind": "task",
+     "name": "Track B · M5 · Clinical insights: outcome scores, 3D pain report, education",
+     "team": "dev",
+     "start": 8,
+     "end": 10,
+     "detail": "",
+     "contingency": false,
+     "from": "18 Jan",
+     "to": "05 Feb"
+    },
+    {
+     "kind": "task",
+     "name": "Track A · M6 · Languages, AI voice coach, Android & iPhone apps",
+     "team": "dev",
+     "start": 11,
+     "end": 13,
+     "detail": "",
+     "contingency": false,
+     "from": "08 Feb",
+     "to": "26 Feb"
+    },
+    {
+     "kind": "task",
+     "name": "Track B · M7 · Admin & analytics, CRM sync",
+     "team": "dev",
+     "start": 11,
+     "end": 13,
+     "detail": "",
+     "contingency": false,
+     "from": "08 Feb",
+     "to": "26 Feb"
+    },
+    {
+     "kind": "ms",
+     "name": "Feature freeze",
+     "date": "2027-02-26",
+     "dateLabel": "Fri 26 Feb 2027",
+     "start": 13,
+     "end": 13,
+     "team": "lead",
+     "detail": ""
+    },
+    {
+     "kind": "task",
+     "name": "Hardening: bug fixes, speed, security fixes, accessibility",
+     "team": "dev",
+     "start": 14,
+     "end": 15,
+     "detail": "",
+     "contingency": false,
+     "from": "01 Mar",
+     "to": "12 Mar"
+    },
+    {
+     "kind": "ms",
+     "name": "Release candidate",
+     "date": "2027-03-12",
+     "dateLabel": "Fri 12 Mar 2027",
+     "start": 15,
+     "end": 15,
+     "team": "lead",
+     "detail": "Accepted by the Project Head."
+    }
+   ]
+  },
+  {
+   "name": "4. Integrations & accounts",
+   "tasks": [
+    {
+     "kind": "task",
+     "name": "CRM: access, field mapping, data contract",
+     "team": "it",
+     "start": 2,
+     "end": 5,
+     "detail": "Company IT gives access. The Project Head approves the mapping. The build is in M7.",
+     "contingency": false,
+     "from": "07 Dec",
+     "to": "01 Jan"
+    },
+    {
+     "kind": "task",
+     "name": "Payment gateway account (needed for M3)",
+     "team": "it",
+     "start": 2,
+     "end": 4,
+     "detail": "Opened in the company's name.",
+     "contingency": false,
+     "from": "07 Dec",
+     "to": "25 Dec"
+    },
+    {
+     "kind": "task",
+     "name": "WhatsApp Business & SMS accounts (needed for M4)",
+     "team": "it",
+     "start": 2,
+     "end": 6,
+     "detail": "WhatsApp verification can take several weeks.",
+     "contingency": false,
+     "from": "07 Dec",
+     "to": "08 Jan"
+    },
+    {
+     "kind": "task",
+     "name": "Video consult service account (needed for M4)",
+     "team": "it",
+     "start": 3,
+     "end": 6,
+     "detail": "",
+     "contingency": false,
+     "from": "14 Dec",
+     "to": "08 Jan"
+    },
+    {
+     "kind": "task",
+     "name": "Patient data import (if week 1 decides yes)",
+     "team": "dev",
+     "start": 12,
+     "end": 15,
+     "detail": "",
+     "contingency": false,
+     "from": "15 Feb",
+     "to": "12 Mar"
+    }
+   ]
+  },
+  {
+   "name": "5. Clinical content & exercise videos",
+   "tasks": [
+    {
+     "kind": "task",
+     "name": "QI Spine exercise database handover (100+ exercises)",
+     "team": "physio",
+     "start": 1,
+     "end": 3,
+     "detail": "Everything downstream depends on this.",
+     "contingency": false,
+     "from": "30 Nov",
+     "to": "18 Dec"
+    },
+    {
+     "kind": "ms",
+     "name": "Exercise list received",
+     "date": "2026-12-18",
+     "dateLabel": "Fri 18 Dec 2026",
+     "start": 3,
+     "end": 3,
+     "team": "lead",
+     "detail": ""
+    },
+    {
+     "kind": "task",
+     "name": "Exercise rules & rep-count criteria, per exercise",
+     "team": "physio",
+     "start": 3,
+     "end": 11,
+     "detail": "Written with the Project Head, who encodes them in the camera engine.",
+     "contingency": false,
+     "from": "14 Dec",
+     "to": "12 Feb"
+    },
+    {
+     "kind": "task",
+     "name": "Outcome questionnaires chosen (pain, function)",
+     "team": "physio",
+     "start": 4,
+     "end": 6,
+     "detail": "Needed for M5.",
+     "contingency": false,
+     "from": "21 Dec",
+     "to": "08 Jan"
+    },
+    {
+     "kind": "task",
+     "name": "AI video pilot: 10 exercises, physio review",
+     "team": "lead",
+     "start": 5,
+     "end": 6,
+     "detail": "The preferred route is AI-generated videos.",
+     "contingency": false,
+     "from": "28 Dec",
+     "to": "08 Jan"
+    },
+    {
+     "kind": "ms",
+     "name": "Video route decided: AI, or physio shoot",
+     "date": "2027-01-08",
+     "dateLabel": "Fri 08 Jan 2027",
+     "start": 6,
+     "end": 6,
+     "team": "lead",
+     "detail": "Based on the pilot."
+    },
+    {
+     "kind": "task",
+     "name": "AI instructor videos for all exercises + physio review",
+     "team": "physio",
+     "start": 7,
+     "end": 13,
+     "detail": "The planned route.",
+     "contingency": false,
+     "from": "11 Jan",
+     "to": "26 Feb"
+    },
+    {
+     "kind": "task",
+     "name": "Contingency · Physio video shoot, 100+ exercises",
+     "team": "physio",
+     "start": 7,
+     "end": 11,
+     "detail": "Only if AI is not approved. About 15 exercises per shoot day, so 7-8 shoot days spread over 5 weeks.",
+     "contingency": true,
+     "from": "11 Jan",
+     "to": "12 Feb"
+    },
+    {
+     "kind": "task",
+     "name": "Contingency · Video editing, captions, upload",
+     "team": "dev",
+     "start": 8,
+     "end": 13,
+     "detail": "Only if the physio shoot is used.",
+     "contingency": true,
+     "from": "18 Jan",
+     "to": "26 Feb"
+    },
+    {
+     "kind": "task",
+     "name": "Education content (articles, short videos)",
+     "team": "physio",
+     "start": 6,
+     "end": 10,
+     "detail": "Needed for M5.",
+     "contingency": false,
+     "from": "04 Jan",
+     "to": "05 Feb"
+    },
+    {
+     "kind": "task",
+     "name": "Clinical acceptance testing",
+     "team": "physio",
+     "start": 13,
+     "end": 15,
+     "detail": "",
+     "contingency": false,
+     "from": "22 Feb",
+     "to": "12 Mar"
+    }
+   ]
+  },
+  {
+   "name": "6. Languages (EN, HI + 10-15 regional)",
+   "tasks": [
+    {
+     "kind": "task",
+     "name": "Language list confirmed (where the centres are)",
+     "team": "lead",
+     "start": 1,
+     "end": 1,
+     "detail": "",
+     "contingency": false,
+     "from": "30 Nov",
+     "to": "04 Dec"
+    },
+    {
+     "kind": "task",
+     "name": "AI translation of app text & exercise cues",
+     "team": "lead",
+     "start": 9,
+     "end": 11,
+     "detail": "Ready for M6.",
+     "contingency": false,
+     "from": "25 Jan",
+     "to": "12 Feb"
+    },
+    {
+     "kind": "task",
+     "name": "Native-speaker review (physios / centre staff)",
+     "team": "physio",
+     "start": 10,
+     "end": 14,
+     "detail": "",
+     "contingency": false,
+     "from": "01 Feb",
+     "to": "05 Mar"
+    },
+    {
+     "kind": "task",
+     "name": "Voice cues recorded in every language",
+     "team": "lead",
+     "start": 11,
+     "end": 14,
+     "detail": "The cues for centre-region languages are done first.",
+     "contingency": false,
+     "from": "08 Feb",
+     "to": "05 Mar"
+    }
+   ]
+  },
+  {
+   "name": "7. Mobile apps & stores",
+   "tasks": [
+    {
+     "kind": "task",
+     "name": "Google Play & Apple developer accounts (company name)",
+     "team": "it",
+     "start": 2,
+     "end": 3,
+     "detail": "The Project Head has admin access.",
+     "contingency": false,
+     "from": "07 Dec",
+     "to": "18 Dec"
+    },
+    {
+     "kind": "task",
+     "name": "Internal test builds (Play internal, TestFlight)",
+     "team": "qa",
+     "start": 12,
+     "end": 14,
+     "detail": "",
+     "contingency": false,
+     "from": "15 Feb",
+     "to": "05 Mar"
+    },
+    {
+     "kind": "ms",
+     "name": "Submitted to both app stores",
+     "date": "2027-02-26",
+     "dateLabel": "Fri 26 Feb 2027",
+     "start": 13,
+     "end": 13,
+     "team": "lead",
+     "detail": ""
+    },
+    {
+     "kind": "task",
+     "name": "Store review & fixes (buffer)",
+     "team": "dev",
+     "start": 14,
+     "end": 16,
+     "detail": "",
+     "contingency": false,
+     "from": "01 Mar",
+     "to": "19 Mar"
+    },
+    {
+     "kind": "ms",
+     "name": "Live on Play Store & App Store",
+     "date": "2027-03-19",
+     "dateLabel": "Fri 19 Mar 2027",
+     "start": 16,
+     "end": 16,
+     "team": "lead",
+     "detail": "Released before Holi."
+    }
+   ]
+  },
+  {
+   "name": "8. Quality & compliance",
+   "tasks": [
+    {
+     "kind": "task",
+     "name": "Test plan & device lab (low-end Android)",
+     "team": "qa",
+     "start": 2,
+     "end": 4,
+     "detail": "",
+     "contingency": false,
+     "from": "07 Dec",
+     "to": "25 Dec"
+    },
+    {
+     "kind": "task",
+     "name": "Module testing (week 3 of every module)",
+     "team": "qa",
+     "start": 4,
+     "end": 13,
+     "detail": "",
+     "contingency": false,
+     "from": "21 Dec",
+     "to": "26 Feb"
+    },
+    {
+     "kind": "task",
+     "name": "Full regression",
+     "team": "qa",
+     "start": 14,
+     "end": 15,
+     "detail": "",
+     "contingency": false,
+     "from": "01 Mar",
+     "to": "12 Mar"
+    },
+    {
+     "kind": "task",
+     "name": "Legal review: DPDP, consent, privacy policy, terms",
+     "team": "it",
+     "start": 2,
+     "end": 8,
+     "detail": "Company Legal decides. The Project Head supplies the data flows.",
+     "contingency": false,
+     "from": "07 Dec",
+     "to": "22 Jan"
+    },
+    {
+     "kind": "task",
+     "name": "Security review & penetration test",
+     "team": "it",
+     "start": 13,
+     "end": 15,
+     "detail": "",
+     "contingency": false,
+     "from": "22 Feb",
+     "to": "12 Mar"
+    },
+    {
+     "kind": "ms",
+     "name": "Legal & security sign-off",
+     "date": "2027-03-12",
+     "dateLabel": "Fri 12 Mar 2027",
+     "start": 15,
+     "end": 15,
+     "team": "lead",
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "name": "9. Launch & rollout",
+   "tasks": [
+    {
+     "kind": "task",
+     "name": "Helpdesk set up (team chosen in week 1)",
+     "team": "centres",
+     "start": 13,
+     "end": 16,
+     "detail": "",
+     "contingency": false,
+     "from": "22 Feb",
+     "to": "19 Mar"
+    },
+    {
+     "kind": "task",
+     "name": "Training material & how-to videos",
+     "team": "lead",
+     "start": 12,
+     "end": 14,
+     "detail": "",
+     "contingency": false,
+     "from": "15 Feb",
+     "to": "05 Mar"
+    },
+    {
+     "kind": "task",
+     "name": "Dry run at 1-2 centres",
+     "team": "centres",
+     "start": 15,
+     "end": 16,
+     "detail": "8-19 Mar. QA monitors.",
+     "contingency": false,
+     "from": "08 Mar",
+     "to": "19 Mar"
+    },
+    {
+     "kind": "task",
+     "name": "Staff training at every centre",
+     "team": "centres",
+     "start": 15,
+     "end": 17,
+     "detail": "",
+     "contingency": false,
+     "from": "08 Mar",
+     "to": "26 Mar"
+    },
+    {
+     "kind": "task",
+     "name": "Holi / Good Friday week: buffer only, no changes",
+     "team": "centres",
+     "start": 17,
+     "end": 17,
+     "detail": "",
+     "contingency": false,
+     "from": "22 Mar",
+     "to": "26 Mar"
+    },
+    {
+     "kind": "ms",
+     "name": "GO-LIVE: all QI Spine centres",
+     "date": "2027-03-31",
+     "dateLabel": "Wed 31 Mar 2027",
+     "start": 18,
+     "end": 18,
+     "team": "lead",
+     "detail": ""
+    },
+    {
+     "kind": "task",
+     "name": "Hypercare: fast fixes, daily report to management",
+     "team": "lead",
+     "start": 18,
+     "end": 22,
+     "detail": "4 weeks after go-live.",
+     "contingency": false,
+     "from": "29 Mar",
+     "to": "30 Apr"
+    },
+    {
+     "kind": "task",
+     "name": "Phase 2 planning",
+     "team": "lead",
+     "start": 21,
+     "end": 22,
+     "detail": "",
+     "contingency": false,
+     "from": "19 Apr",
+     "to": "30 Apr"
+    }
+   ]
+  }
+ ],
+ "modules": [
+  {
+   "id": "M1",
+   "name": "Foundations",
+   "track": "All developers",
+   "start": 2,
+   "end": 4,
+   "from": "07 Dec",
+   "to": "25 Dec",
+   "components": [
+    {
+     "name": "Cloud & environments",
+     "what": "India-region hosting on the company cloud. Development, test and live environments. Daily backups, monitoring and alerts.",
+     "done": "The app runs on the company cloud, and a backup restore has been tested."
+    },
+    {
+     "name": "Release pipeline",
+     "what": "Automatic tests and build on every change. Releases need the Project Head's approval.",
+     "done": "No release can go out without passing tests and the Project Head's sign-off."
+    },
+    {
+     "name": "Sign-in & accounts",
+     "what": "Patients sign in with their mobile number and a one-time code. Staff sign in with email and a second step. Roles: patient, physio/doctor, centre admin, management. Lockout and session timeout.",
+     "done": "Every role sees only what it should. Tested on low-end phones."
+    },
+    {
+     "name": "Consent & privacy",
+     "what": "Consent screens, the privacy notice, and requests to download or delete data. Wording comes from Company Legal.",
+     "done": "Legal has approved the wording, and consent is recorded per patient."
+    },
+    {
+     "name": "Audit log",
+     "what": "A record of who did what, and when, for every clinical change.",
+     "done": "Every plan change and review shows who made it and when."
+    },
+    {
+     "name": "Design system in code",
+     "what": "Shared buttons, cards, forms and charts from the UX design system, with large-text and accessibility settings.",
+     "done": "Every screen uses the shared parts, and large text never breaks a layout."
+    }
+   ]
+  },
+  {
+   "id": "M2",
+   "name": "Patient app & core rehab loop",
+   "track": "Track A",
+   "start": 5,
+   "end": 7,
+   "from": "28 Dec",
+   "to": "15 Jan",
+   "components": [
+    {
+     "name": "Onboarding",
+     "what": "Welcome screens, language choice, a phone placement check, camera permission and a first-session tutorial.",
+     "done": "A first-time user aged 60+ reaches their first exercise without help."
+    },
+    {
+     "name": "Today screen",
+     "what": "Today's exercises, start or continue the session, streak, next visit and the care team.",
+     "done": "One tap from opening the app to starting the session."
+    },
+    {
+     "name": "Guided session",
+     "what": "Pain check-in and red-flag questions, camera counting with voice, tap-to-count fallback, rest timers, 'how did it feel', and pain after.",
+     "done": "A full session finishes without help, and a red flag stops it and alerts the clinic."
+    },
+    {
+     "name": "Camera engine (Project Head)",
+     "what": "Rep counting, holds and form tips for 100+ exercises. Runs on the phone, so no video is uploaded.",
+     "done": "Counts match a physio's count in lab tests, and it runs smoothly on a low-end Android phone."
+    },
+    {
+     "name": "Exercise player",
+     "what": "Instructor video, steps, precautions and where to place the phone.",
+     "done": "Every exercise has a video, or a clear placeholder."
+    },
+    {
+     "name": "Reports & progress",
+     "what": "Session report, replay of a rep, and progress over the weeks.",
+     "done": "The patient can see their progress over the past weeks."
+    }
+   ]
+  },
+  {
+   "id": "M3",
+   "name": "Doctor dashboard, plans, bookings & payments",
+   "track": "Track B",
+   "start": 5,
+   "end": 7,
+   "from": "28 Dec",
+   "to": "15 Jan",
+   "components": [
+    {
+     "name": "Patient list & attention flags",
+     "what": "Patients sorted by urgency: red flags, rising pain, missed sessions, form problems, reports to review.",
+     "done": "A doctor finds who needs attention in under 10 seconds."
+    },
+    {
+     "name": "Plan builder",
+     "what": "Exercise library search, dose, days, notes, and templates per condition.",
+     "done": "A doctor prescribes a plan in under 2 minutes."
+    },
+    {
+     "name": "Session review",
+     "what": "Movement replay, rep timeline, notes, and 'mark as reviewed'.",
+     "done": "The doctor's note reaches the patient straight away."
+    },
+    {
+     "name": "Bookings & calendar",
+     "what": "Centre and video slots, doctor hours and leave, waiting list, booking reminders.",
+     "done": "A patient books, moves or cancels a visit without calling the centre."
+    },
+    {
+     "name": "Payments",
+     "what": "Pay for visits and packages through the payment gateway, with receipts. Refunds are done by an admin.",
+     "done": "Test payments, receipts and refunds work end to end."
+    }
+   ]
+  },
+  {
+   "id": "M4",
+   "name": "Care & communication",
+   "track": "Track A",
+   "start": 8,
+   "end": 10,
+   "from": "18 Jan",
+   "to": "05 Feb",
+   "components": [
+    {
+     "name": "Video consults",
+     "what": "Join from the app or dashboard through a ready-made video service, with a waiting room and notes after the call.",
+     "done": "A 15-minute call holds up on a 4G connection."
+    },
+    {
+     "name": "Care-team chat",
+     "what": "Patient-to-physio messages and photos, quick replies, office hours, and escalation to the doctor.",
+     "done": "Messages arrive within seconds, and office hours are shown clearly."
+    },
+    {
+     "name": "Reminders",
+     "what": "Push notifications plus WhatsApp and SMS for sessions, visits and missed sessions.",
+     "done": "Reminders reach patients in their own language and at the right time."
+    },
+    {
+     "name": "Symptoms & red-flag alerts",
+     "what": "The patient reports a symptom and the clinic is alerted, with a log of the follow-up.",
+     "done": "Every red flag reaches the clinic within a minute."
+    }
+   ]
+  },
+  {
+   "id": "M5",
+   "name": "Clinical insights",
+   "track": "Track B",
+   "start": 8,
+   "end": 10,
+   "from": "18 Jan",
+   "to": "05 Feb",
+   "components": [
+    {
+     "name": "Outcome scores",
+     "what": "Standard pain and function questionnaires, scheduled automatically, with scores shown over time.",
+     "done": "The doctor sees the score trend on the patient page."
+    },
+    {
+     "name": "3D pain map & body report",
+     "what": "The patient marks pain areas on a 3D body. The report is shared with the doctor.",
+     "done": "Pain areas are saved and shown over time."
+    },
+    {
+     "name": "Education library",
+     "what": "Articles and short videos for each condition, assigned along with the plan.",
+     "done": "Content is assigned automatically by condition."
+    },
+    {
+     "name": "Adherence & recovery trends",
+     "what": "Charts of sessions done, range of movement and pain over time, for the doctor.",
+     "done": "Every chart also has a table view."
+    }
+   ]
+  },
+  {
+   "id": "M6",
+   "name": "Languages, AI voice coach & mobile apps",
+   "track": "Track A",
+   "start": 11,
+   "end": 13,
+   "from": "08 Feb",
+   "to": "26 Feb",
+   "components": [
+    {
+     "name": "Translation system",
+     "what": "All app text in English, Hindi and 10-15 regional languages, with a language switch.",
+     "done": "Every screen is checked in every language, with no cut-off text."
+    },
+    {
+     "name": "AI voice coach",
+     "what": "Spoken counts, cues and form tips in every language.",
+     "done": "A native speaker has approved the voice for each language."
+    },
+    {
+     "name": "Android & iPhone apps",
+     "what": "The Kynex web app wrapped as store apps, with camera and notification permissions, store listings and screenshots.",
+     "done": "The apps pass Play Store and App Store review."
+    },
+    {
+     "name": "Weak-internet sessions",
+     "what": "A session keeps working on a weak connection and syncs later.",
+     "done": "A session done in airplane mode syncs once the phone is back online."
+    }
+   ]
+  },
+  {
+   "id": "M7",
+   "name": "Admin & analytics, CRM sync",
+   "track": "Track B",
+   "start": 11,
+   "end": 13,
+   "from": "08 Feb",
+   "to": "26 Feb",
+   "components": [
+    {
+     "name": "Management dashboard",
+     "what": "Centres, active patients, adherence, outcomes and revenue, as a live view.",
+     "done": "The numbers match the source data for a test week."
+    },
+    {
+     "name": "Centre admin",
+     "what": "Staff accounts, centre settings, and managing the exercise library.",
+     "done": "A centre is set up in under 30 minutes."
+    },
+    {
+     "name": "CRM sync",
+     "what": "Patients and appointments flow to and from the CRM.",
+     "done": "No duplicates or lost records over a 2-week test."
+    },
+    {
+     "name": "Activity & exports",
+     "what": "An activity feed, the audit view, and exports for management.",
+     "done": "An export opens cleanly in Excel."
+    }
+   ]
+  },
+  {
+   "id": "H",
+   "name": "Hardening",
+   "track": "All developers",
+   "start": 14,
+   "end": 15,
+   "from": "01 Mar",
+   "to": "12 Mar",
+   "components": [
+    {
+     "name": "Speed & stability",
+     "what": "App start time, camera frame rate on low-end phones, and crash fixes.",
+     "done": "99.5% of sessions crash-free in the dry run."
+    },
+    {
+     "name": "Security fixes",
+     "what": "Fixes for the issues found in the penetration test.",
+     "done": "No high-severity issues remain open."
+    },
+    {
+     "name": "Accessibility",
+     "what": "Fixes from the UX accessibility audit.",
+     "done": "Every key task works with large text and a screen reader."
+    }
+   ]
+  }
+ ],
+ "holidays": [
+  {
+   "date": "2026-12-25",
+   "label": "Fri 25 Dec 2026",
+   "name": "Christmas"
+  },
+  {
+   "date": "2027-01-01",
+   "label": "Fri 01 Jan 2027",
+   "name": "New Year's Day"
+  },
+  {
+   "date": "2027-01-14",
+   "label": "Thu 14 Jan 2027",
+   "name": "Makar Sankranti / Pongal (14-15 Jan)"
+  },
+  {
+   "date": "2027-01-26",
+   "label": "Tue 26 Jan 2027",
+   "name": "Republic Day"
+  },
+  {
+   "date": "2027-02-19",
+   "label": "Fri 19 Feb 2027",
+   "name": "Shivaji Jayanti (Maharashtra)"
+  },
+  {
+   "date": "2027-03-06",
+   "label": "Sat 06 Mar 2027",
+   "name": "Maha Shivratri (Sat)"
+  },
+  {
+   "date": "2027-03-10",
+   "label": "Wed 10 Mar 2027",
+   "name": "Eid ul-Fitr (moon-dependent)"
+  },
+  {
+   "date": "2027-03-22",
+   "label": "Mon 22 Mar 2027",
+   "name": "Holi (22-23 Mar)"
+  },
+  {
+   "date": "2027-03-26",
+   "label": "Fri 26 Mar 2027",
+   "name": "Good Friday"
+  },
+  {
+   "date": "2027-04-07",
+   "label": "Wed 07 Apr 2027",
+   "name": "Gudi Padwa / Ugadi"
+  },
+  {
+   "date": "2027-04-14",
+   "label": "Wed 14 Apr 2027",
+   "name": "Ambedkar Jayanti / regional new years"
+  },
+  {
+   "date": "2027-04-15",
+   "label": "Thu 15 Apr 2027",
+   "name": "Ram Navami"
+  }
+ ],
+ "roles": [
+  {
+   "title": "Project Head: product manager & core builder",
+   "team": "lead",
+   "duties": [
+    "Only point of contact between the project and management",
+    "Owns the vision, roadmap, scope and priorities. Every change request comes through the Project Head.",
+    "Decides the team size and how developers are split across the two build tracks",
+    "Writes the specs and acceptance criteria for every module",
+    "Builds and owns the camera engine, the AI and the architecture",
+    "Approves every design, code merge, content item and release",
+    "Runs module planning and reviews, the Friday updates and the demos",
+    "Has admin access to every company account (cloud, stores, repository, payments)"
+   ]
+  },
+  {
+   "title": "Management (sponsor)",
+   "team": "centres",
+   "duties": [
+    "Approves the plan, the budget and the team allocation",
+    "Unblocks access to other departments (IT, Legal, centres)",
+    "Attends the demos and takes the go/no-go decision with the Project Head"
+   ]
+  },
+  {
+   "title": "UI/UX designer",
+   "team": "ux",
+   "duties": [
+    "Phase 1: research, user flows, wireframes and the 'Kynex by QI Spine' design system",
+    "Phase 2: final screens, one module ahead of development, and a usability test after each module",
+    "Phase 3: visual polish, motion, accessibility and the final usability round",
+    "Works from the Project Head's specs and to the Project Head's sign-off"
+   ]
+  },
+  {
+   "title": "Developers (2 build tracks)",
+   "team": "dev",
+   "duties": [
+    "Build each 3-week module from the Project Head's specs, in the Kynex codebase",
+    "Track A builds the patient app, care and communication, languages and the mobile apps",
+    "Track B builds the doctor dashboard, bookings, payments, clinical insights, admin and the CRM",
+    "Follow the Project Head's code review and release process"
+   ]
+  },
+  {
+   "title": "Physio team (2-3, 1-2 days a week)",
+   "team": "physio",
+   "duties": [
+    "Hand over the QI Spine exercise database (100+ exercises)",
+    "Define the rules and form criteria for each exercise",
+    "Review the AI instructor videos, or do the physio shoot if it's needed",
+    "Choose the outcome measures, write the education content, and review clinical text in each language",
+    "Run the clinical acceptance tests"
+   ]
+  },
+  {
+   "title": "QA",
+   "team": "qa",
+   "duties": [
+    "Write the test plan and run the low-end Android device lab",
+    "Test in week 3 of every module, then run the full regression and the release checks",
+    "Monitor the dry run"
+   ]
+  },
+  {
+   "title": "Company IT & Legal",
+   "team": "it",
+   "duties": [
+    "Set up the cloud, store, payment, WhatsApp and video accounts in the company's name, with the Project Head as admin",
+    "Provide CRM access and the security test",
+    "Legal: DPDP, consent, privacy policy, terms and any medical-device question"
+   ]
+  },
+  {
+   "title": "Centre staff",
+   "team": "centres",
+   "duties": [
+    "Take part in the dry run and the training",
+    "Onboard patients and give first-line support"
+   ]
+  }
+ ],
+ "raciRoles": [
+  "Project Head",
+  "Management",
+  "UI/UX",
+  "Developers",
+  "Physio",
+  "QA",
+  "IT / Legal",
+  "Centres"
+ ],
+ "raci": [
+  [
+   "Vision, roadmap, scope & priorities",
+   "A/R",
+   "C",
+   "C",
+   "I",
+   "C",
+   "I",
+   "I",
+   "I"
+  ],
+  [
+   "Team size & build tracks",
+   "A/R",
+   "C",
+   "-",
+   "C",
+   "-",
+   "-",
+   "-",
+   "-"
+  ],
+  [
+   "Reporting to management",
+   "A/R",
+   "I",
+   "-",
+   "-",
+   "-",
+   "-",
+   "-",
+   "-"
+  ],
+  [
+   "UX research, design & polish",
+   "A",
+   "I",
+   "R",
+   "C",
+   "C",
+   "-",
+   "-",
+   "C"
+  ],
+  [
+   "Camera engine & AI",
+   "A/R",
+   "I",
+   "C",
+   "C",
+   "C",
+   "C",
+   "-",
+   "-"
+  ],
+  [
+   "Build modules M1-M7",
+   "A",
+   "I",
+   "C",
+   "R",
+   "C",
+   "C",
+   "-",
+   "-"
+  ],
+  [
+   "Integrations & accounts",
+   "A",
+   "I",
+   "-",
+   "R",
+   "-",
+   "C",
+   "R",
+   "-"
+  ],
+  [
+   "Clinical content & exercise videos",
+   "A",
+   "I",
+   "C",
+   "C",
+   "R",
+   "-",
+   "-",
+   "-"
+  ],
+  [
+   "Languages & voice",
+   "A/R",
+   "I",
+   "C",
+   "C",
+   "R",
+   "C",
+   "-",
+   "C"
+  ],
+  [
+   "Mobile apps & store release",
+   "A/R",
+   "I",
+   "C",
+   "R",
+   "-",
+   "C",
+   "C",
+   "-"
+  ],
+  [
+   "Testing & quality",
+   "A",
+   "I",
+   "C",
+   "C",
+   "C",
+   "R",
+   "-",
+   "-"
+  ],
+  [
+   "Legal, privacy & security",
+   "A",
+   "I",
+   "-",
+   "C",
+   "-",
+   "-",
+   "R",
+   "-"
+  ],
+  [
+   "Dry run, training & rollout",
+   "A/R",
+   "C",
+   "-",
+   "C",
+   "C",
+   "C",
+   "-",
+   "R"
+  ],
+  [
+   "Go / no-go & release",
+   "A/R",
+   "C",
+   "-",
+   "C",
+   "C",
+   "C",
+   "C",
+   "I"
+  ],
+  [
+   "Hypercare & helpdesk",
+   "A",
+   "I",
+   "-",
+   "R",
+   "C",
+   "R",
+   "-",
+   "R"
+  ]
+ ],
+ "risks": [
+  {
+   "risk": "Two build tracks need enough developers",
+   "level": "High",
+   "mitigation": "About 2 developers per track. The Project Head sets the team size in week 1. With fewer developers, modules run one after another and the go-live date is reviewed at Demo 2."
+  },
+  {
+   "risk": "Very large scope for 18 weeks",
+   "level": "High",
+   "mitigation": "3-week modules with a test week each, feature freeze on 26 Feb, a follow-up release lane, and a weekly scope review by the Project Head"
+  },
+  {
+   "risk": "Shared team members get pulled onto other work",
+   "level": "High",
+   "mitigation": "Management names each person and their % time in week 1, committed until 30 Apr"
+  },
+  {
+   "risk": "QI Spine exercise database arrives late",
+   "level": "High",
+   "mitigation": "Needed by 18 Dec. The Project Head escalates to management if it slips."
+  },
+  {
+   "risk": "AI videos not approved for 100+ exercises",
+   "level": "Medium",
+   "mitigation": "A 10-exercise pilot and a decision by 8 Jan. A physio shoot (7-8 days over 5 weeks) is kept as the backup."
+  },
+  {
+   "risk": "Delays opening WhatsApp, payment, video and CRM access",
+   "level": "Medium",
+   "mitigation": "Applications go in during week 2, before the modules that need them. Company IT owns them."
+  },
+  {
+   "risk": "Apple / Google review delays",
+   "level": "Medium",
+   "mitigation": "Submit by 26 Feb, leaving 3 weeks of buffer. Patients can use the web app link either way."
+  },
+  {
+   "risk": "Translation quality across 12-17 languages",
+   "level": "Medium",
+   "mitigation": "AI translation plus native-speaker review. Centre-region languages are done first."
+  },
+  {
+   "risk": "Camera speed on low-end Android phones",
+   "level": "Medium",
+   "mitigation": "Device lab from week 2. The Project Head owns the engine."
+  },
+  {
+   "risk": "Centre staff slow to adopt the app",
+   "level": "Medium",
+   "mitigation": "Dry run, training at every centre, helpdesk and 4 weeks of hypercare"
+  },
+  {
+   "risk": "Holiday weeks (Christmas, Sankranti, Holi/Good Friday)",
+   "level": "Low",
+   "mitigation": "Already built into the plan. Holi week is buffer only."
+  }
+ ],
+ "decisions": [
+  "Approve this plan and the Project Head charter: single point of contact, with final say on scope, priorities, team size and releases",
+  "Name the team members and their % time, committed until 30 Apr 2027. About 4 developers allows two build tracks.",
+  "Approve the budget (cost list presented in week 1)",
+  "Name the contacts for IT/cloud, CRM and Legal",
+  "Confirm the list of centres, which sets the regional languages",
+  "Decide who staffs the patient helpdesk and whether current patients are imported",
+  "Agree the reporting rhythm and whether to build a project tracker app"
+ ],
+ "targets": [
+  {
+   "area": "Centres live",
+   "target": "Every QI Spine centre is live on 31 Mar 2027"
+  },
+  {
+   "area": "Ease of use",
+   "target": "90%+ of usability-test users, including those aged 60+, finish key tasks without help"
+  },
+  {
+   "area": "Speed",
+   "target": "A patient is onboarded in under 3 minutes; a doctor prescribes a plan in under 2 minutes"
+  },
+  {
+   "area": "Adoption",
+   "target": "70% of new rehab patients at live centres are onboarded in the first 4 weeks"
+  },
+  {
+   "area": "Adherence",
+   "target": "60%+ of patients exercise at least 3 times a week"
+  },
+  {
+   "area": "Quality",
+   "target": "Crash-free sessions at 99.5% or above; app store rating of 4.5 or above"
+  },
+  {
+   "area": "Support",
+   "target": "Critical issues are fixed within 24 hours during hypercare"
+  }
+ ],
+ "assumptions": [
+  "The team starts on Tue 1 Dec 2026. Week 0 (this week) is for preparation and the pitch to management.",
+  "Every build module takes 3 weeks: week 1 build, week 2 build and connect, week 3 test and polish",
+  "Two build tracks run side by side and need about 4 developers. The Project Head decides the team size, and that sets the speed.",
+  "Team: 1 UI/UX designer, 2-3 physios at 1-2 days a week and 1 QA, all on board by week 2",
+  "UX works in three phases: structure first (research, flows, wireframes), screens one module ahead, then a long polish phase",
+  "Exercise videos are AI-generated by preference. A physio shoot of 100+ exercises (7-8 shoot days over 5 weeks) is the backup.",
+  "The phone apps wrap the existing Kynex web app; we are not writing separate native apps",
+  "Chat, video consults, payments and WhatsApp use ready-made services rather than being built from scratch",
+  "Languages: AI translation plus native-speaker review. Centre-region languages are done first.",
+  "All accounts are owned by the company, with the Project Head as admin",
+  "The success targets are proposals, to be confirmed with management in week 1"
+ ]
+}
