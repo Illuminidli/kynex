@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kynex tools and running costs</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a plain management brief for a full build and years of running.
+   IDEA: a clinic budget file: what to buy now, what runs the live service, what it costs at scale.
+   PICTURE: stacked monthly-cost bars for build and for running at 1,000 patients.
+   COLOUR and TYPE: Kynex navy, amber totals; Inter.
+   LAYOUT: finding, chart, current-vs-needed, build stack, live stack, storage, people, totals, sources. */
+:root{color-scheme:light dark;--bg:light-dark(#f3f6f8,#0c1e2a);--ink:light-dark(#10232f,#e8f0f4);--soft:light-dark(#4b6170,#9fb3c0);--card:light-dark(#fff,#132c3b);--line:light-dark(#d6e1e8,#24465a);--navy:#163d52;--a:#2a76b8;--b:#d96a1c;--c:#3f9e7a;--d:#8a6bbf;--e:#7a8c99}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,4vw,40px) max(5vw,16px);max-width:1120px;margin:0 auto}
+.top{background:var(--navy);color:#fff}
+h1{font-size:clamp(27px,4.4vw,40px);line-height:1.08;margin:0 0 10px;font-weight:800;text-wrap:balance}
+h2{font-size:22px;margin:0 0 10px}
+p{margin:0 0 10px;max-width:74ch}
+.lead{color:#cfe1ee}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
+.kpi{background:#ffffff14;border-radius:14px;padding:14px}
+.kpi b{display:block;font-size:clamp(22px,3.4vw,30px);color:#ffc23d}
+.kpi span{font-size:14px;color:#cfe1ee}
+.bars{display:flex;flex-direction:column;gap:12px}
+.row{display:grid;grid-template-columns:190px minmax(0,1fr) 80px;gap:10px;align-items:center}
+.bar{display:flex;height:26px;border-radius:6px;overflow:hidden;background:var(--line)}
+.bar i{display:block;height:100%;border-right:2px solid var(--card)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:14px;color:var(--soft);margin-top:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.num{text-align:right;font-weight:700;white-space:nowrap}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:15px;margin-top:6px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--soft);font-weight:600}
+td.r,th.r{text-align:right;white-space:nowrap}
+tr.total td{font-weight:800;background:light-dark(#fff7e6,#2a2412)}
+section{margin-top:28px}
+.tag{display:inline-block;font-size:13px;font-weight:600;padding:2px 10px;border-radius:999px;background:light-dark(#e6eef4,#24465a);margin-left:6px;vertical-align:3px}
+.note{font-size:14px;color:var(--soft)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h3{margin:0 0 6px;font-size:17px}
+.warn{border-left:5px solid var(--b)}
+.good{border-left:5px solid var(--c)}
+ul{margin:0;padding-left:20px}
+a{color:inherit}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.row{grid-template-columns:minmax(0,1fr) 70px}.row .lbl{grid-column:1/-1}table{font-size:13px}
+.stack thead{display:none}.stack tr{display:grid;padding-block:8px}.stack td{display:flow-root;border:0;padding:3px 12px;padding-inline-start:8.5em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:8em;margin-inline-start:-8.5em;font-weight:600;color:var(--soft)}.stack td:empty{display:none}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="top"><div class="band">
+  <h1>Building Kynex fully costs about $270 a month in tools; running it for 1,000 patients costs about $450 a month, before people</h1>
+  <p class="lead">A plan for the full build (polished app, automation, WhatsApp, SMS, calls, videos, voice, 3D reports) and for running it for years with patient data kept in India. Prices are list prices from the providers (November 2026), excluding 18% GST, and should be re-checked before buying. The biggest cost after launch will be people, not software.</p>
+  <div class="kpis">
+    <div class="kpi"><b>~$270/mo</b><span>Build phase tools</span></div>
+    <div class="kpi"><b>~$450/mo</b><span>Live service, 1,000 active patients</span></div>
+    <div class="kpi"><b>~$250–850</b><span>One-off: all exercise videos via the Veo API</span></div>
+    <div class="kpi"><b>Laptop</b><span>One-off, see Open decisions #4</span></div>
+  </div>
+</div></header>
+
+<div class="band">
+  <h2>Monthly cost</h2>
+  <div class="bars" role="img" aria-label="Build phase about 270 dollars a month; live service for 1,000 patients about 450 dollars a month">
+    <div class="row"><span class="lbl">Build phase</span><div class="bar"><i style="width:40%;background:var(--a)"></i><i style="width:6%;background:var(--b)"></i><i style="width:8%;background:var(--c)"></i></div><span class="num">$270</span></div>
+    <div class="row"><span class="lbl">Live, 1,000 patients</span><div class="bar"><i style="width:22%;background:var(--a)"></i><i style="width:2%;background:var(--b)"></i><i style="width:36%;background:var(--c)"></i><i style="width:20%;background:var(--d)"></i><i style="width:10%;background:var(--e)"></i></div><span class="num">$450</span></div>
+  </div>
+  <div class="legend"><span><i style="background:var(--a)"></i>AI coding (Claude)</span><span><i style="background:var(--b)"></i>Code hosting (GitHub)</span><span><i style="background:var(--c)"></i>Server, database, storage</span><span><i style="background:var(--d)"></i>WhatsApp and SMS</span><span><i style="background:var(--e)"></i>Other (monitoring, email, video delivery)</span></div>
+  <p class="note">Full bar = $500. Excludes people, the laptop, and phone-call plans (quoted per provider).</p>
+
+  <section>
+    <h2>What we use today, and what changes</h2>
+    <table class="stack">
+      <thead><tr><th>Tool</th><th>Today</th><th>Problem</th><th>Move to</th><th class="r">Per month</th></tr></thead>
+      <tbody>
+        <tr><td>Claude Code</td><td>Pro</td><td>87% of the weekly limit used by Tuesday morning; the 5-hour limit is hit almost every session.</td><td><b>Max 20x</b>. Max 5x would still run out at today's pace.</td><td class="r">$200</td></tr>
+        <tr><td>GitHub</td><td>Free</td><td>Automatic checks (Actions) use up the free minutes; on Spotter they ran out in about 20 days.</td><td><b>Team</b>, with the checks run on our own server. GitHub's docs list self-hosted runners as free, so minutes stop being a limit.</td><td class="r">$4 per person</td></tr>
+        <tr><td>Google AI Pro (Veo)</td><td>Pro</td><td>Only about 2 videos before credits run out.</td><td>Keep Pro for trying prompts. Make the final videos through the <b>Veo 3.1 API</b>, paid per second: Fast at 1080p is about $0.12 a second, so an 8-second clip is about $1.</td><td class="r">existing, plus one-off</td></tr>
+        <tr><td>Replit</td><td>Core</td><td>Its database comes from the US and its publish step changes our tables.</td><td>Keep for quick demos during the build. Drop it once the India server runs staging.</td><td class="r">$20</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Build phase <span class="tag">about 6–9 months to a polished product</span></h2>
+    <table class="stack">
+      <thead><tr><th>What</th><th>Choice</th><th>Why</th><th class="r">Per month</th></tr></thead>
+      <tbody>
+        <tr><td>AI coding</td><td>Claude Max 20x</td><td>Development at full speed without waiting for limits to reset.</td><td class="r">$200</td></tr>
+        <tr><td>Code and automatic checks</td><td>GitHub Team (2 people), runner on our server</td><td>Code history, reviews, automatic tests on every change.</td><td class="r">$8</td></tr>
+        <tr><td>Main server (development and staging)</td><td>Hostinger VPS KVM 8, Mumbai: 8 cores, 32 GB RAM, 400 GB NVMe</td><td>Runs the staging app, automations (e.g. n8n), the test runner, and voice generation on the processor. Promotional ₹2,199/month on a 24-month term; renews higher (Hostinger shows $49.99).</td><td class="r">~$25</td></tr>
+        <tr><td>File storage while building</td><td>AWS S3, Mumbai</td><td>Test videos, voice clips, 3D models.</td><td class="r">~$5</td></tr>
+        <tr><td>Replit</td><td>Core</td><td>Demos until staging is on our server.</td><td class="r">$20</td></tr>
+        <tr><td>Google AI Pro</td><td>Existing</td><td>Veo prompt testing, Gemini.</td><td class="r">existing</td></tr>
+        <tr><td>Open source</td><td>Free</td><td>MediaPipe camera tracking, Kokoro / Maya2 / IndicF5 voices, 3D figure (MakeHuman), sounds.</td><td class="r">$0</td></tr>
+        <tr class="total"><td>Build phase total</td><td></td><td></td><td class="r">~$260–270</td></tr>
+      </tbody>
+    </table>
+    <p class="note">One-off: 25 exercises × (8 s demo + about 20 s intro) ≈ 700 seconds; with 3 attempts each ≈ 2,100 s ≈ $250 on Veo 3.1 Fast or ≈ $840 on standard Veo 3.1. Later, open-source video models can run on the heavy laptop instead.</p>
+  </section>
+
+  <section>
+    <h2>Is the Hostinger KVM 8 enough as the main server?</h2>
+    <div class="cards">
+      <div class="card good"><h3>Good for</h3><ul><li>The Kynex app and API server, in Mumbai</li><li>Staging, automations, scheduled jobs, the GitHub test runner</li><li>Making voice clips on the processor (Kokoro)</li><li>Good value: 32 GB RAM for about ₹2,200 a month on the promotional term</li></ul></div>
+      <div class="card warn"><h3>Not on its own for</h3><ul><li><b>The only copy of patient data.</b> One server is a single point of failure. Patient data needs a managed database with automatic backups, plus a second copy elsewhere.</li><li><b>Years of video and call recordings.</b> 400 GB fills up within months; object storage is cheaper and safer.</li><li><b>AI that needs a graphics card</b> (Maya2, video models): it has no GPU.</li></ul></div>
+      <div class="card"><h3>Recommended setup</h3><p>The VPS runs the app. A managed database in Mumbai holds patient records. AWS S3 in Mumbai holds files and backups, with a second copy in Hyderabad. Bunny Stream delivers the instructor videos. Everything stays in India.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Live service <span class="tag">example: 1,000 active patients</span></h2>
+    <table class="stack">
+      <thead><tr><th>What</th><th>Choice</th><th>Assumption</th><th class="r">Per month</th></tr></thead>
+      <tbody>
+        <tr><td>App server</td><td>Hostinger KVM 8, Mumbai (after the promotional term)</td><td>Renewal rate</td><td class="r">~$45–50</td></tr>
+        <tr><td>Patient database</td><td>Supabase Pro, Mumbai, bigger compute, point-in-time restore</td><td>Records, plans, sessions, bookings, movement data: a few GB</td><td class="r">~$100–150</td></tr>
+        <tr><td>Files: session videos, audio, images, call recordings</td><td>AWS S3 Mumbai: 90 days on Standard ($0.025/GB), then Deep Archive ($0.002/GB)</td><td>~400 MB of video per patient per month ≈ 400 GB a month; about 1.2 TB on Standard plus the growing archive</td><td class="r">~$40–60</td></tr>
+        <tr><td>Backups, second copy</td><td>Nightly database and server backups to S3 Hyderabad</td><td>Kept 35 days</td><td class="r">~$10</td></tr>
+        <tr><td>Instructor videos to patients</td><td>Bunny Stream ($0.01/GB stored, $0.03/GB delivered in Asia)</td><td>~200 GB delivered</td><td class="r">~$10</td></tr>
+        <tr><td>WhatsApp</td><td>Meta WhatsApp Business via a provider (AiSensy, Interakt, Gupshup…)</td><td>20 reminders per patient ≈ 20,000 utility messages × ~₹0.12–0.15, plus the provider's monthly fee</td><td class="r">~$60–80</td></tr>
+        <tr><td>SMS</td><td>DLT-registered SMS provider (MSG91, Gupshup…)</td><td>Sign-in codes and fallbacks, ~10,000 a month</td><td class="r">~$20–30</td></tr>
+        <tr><td>Calls and call recordings</td><td>Cloud telephony (Exotel, MyOperator, Knowlarity…); recordings stored in S3</td><td>Plan depends on lines and minutes</td><td class="r">quote</td></tr>
+        <tr><td>AI coding for maintenance</td><td>Claude Max 5x (Max 20x while still adding features)</td><td>Fixes and small features</td><td class="r">$100</td></tr>
+        <tr><td>GitHub, monitoring, email, domain</td><td>GitHub Team, Sentry Team, UptimeRobot, business email, domain</td><td></td><td class="r">~$50</td></tr>
+        <tr class="total"><td>Live total (before people and calls)</td><td></td><td></td><td class="r">~$450–550</td></tr>
+      </tbody>
+    </table>
+    <p class="note">One-off or yearly: Apple developer $99 a year, Google Play $25 once, DLT registration for SMS, a security audit (VAPT) before launch, and the laptop.</p>
+  </section>
+
+  <section>
+    <h2>Keeping patient data for years</h2>
+    <div class="cards">
+      <div class="card"><h3>How long</h3><p>Indian medical-records rules ask clinics to keep patient records for at least 3 years. The DPDP Act then requires deleting personal data once it's no longer needed, unless a law requires keeping it. Proposed policy: keep everything for 3 years after a patient's last visit, then delete it or remove identifying details. QI Spine's legal team should confirm this.</p></div>
+      <div class="card"><h3>Cost grows slowly</h3><p>Older files move to Deep Archive at about $2 per TB a month. Three years of video for 1,000 patients (about 15 TB) costs roughly $30 a month to keep. Getting an old file back takes hours and costs a little.</p></div>
+      <div class="card warn"><h3>Change from today</h3><p>Today patients' exercise videos stay on their phones. Storing them centrally needs the patient's clear consent in the app, encryption, and access logs. The 3D reports need no extra storage: they're drawn from the movement data we already save.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>People after launch</h2>
+    <div class="cards">
+      <div class="card"><h3>Why someone is needed</h3><p>Someone has to watch the servers and backups, apply security updates, handle WhatsApp/SMS template approvals, answer clinic issues, and ship fixes. Claude speeds up the coding, but someone still has to be responsible for the live system.</p></div>
+      <div class="card"><h3>Options</h3><ul><li><b>Lean:</b> you plus Claude Max, with a freelance full-stack/DevOps developer on a monthly retainer for on-call and security.</li><li><b>Steady:</b> one full-time developer (with their own Claude seat) and a part-time QA/support person.</li></ul><p class="note">Get quotes; this will be larger than all the software costs combined.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Buy now vs later</h2>
+    <table class="stack">
+      <thead><tr><th>When</th><th>What</th></tr></thead>
+      <tbody>
+        <tr><td>Now (build)</td><td>Claude Max 20x · GitHub Team · Hostinger KVM 8 in Mumbai (24-month term) · AWS account in Mumbai · Veo 3.1 API pay-as-you-go</td></tr>
+        <tr><td>Before the pilot</td><td>Supabase Pro in Mumbai (or AWS RDS) · S3 lifecycle and backups · domain and business email · Sentry · WhatsApp provider and Meta business verification · DLT registration for SMS · telephony provider · security audit</td></tr>
+        <tr><td>At launch</td><td>Apple and Google developer accounts · maintenance developer · switch Claude to Max 5x when feature work slows</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Sources</h2>
+    <ul class="note">
+      <li>Claude Max: <a href="https://support.claude.com/en/articles/11049741-about-claude-s-max-plan">Anthropic help centre</a>, <a href="https://www.anthropic.com/max">anthropic.com/max</a></li>
+      <li>GitHub Actions: <a href="https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions">billing docs</a>, <a href="https://resources.github.com/actions/2026-pricing-changes-for-github-actions/">2026 pricing changes</a></li>
+      <li>Hostinger KVM 8: <a href="https://www.hostinger.com/in/pricing/vps-hosting">India pricing</a>, <a href="https://www.hostinger.com/vps-hosting.md">VPS page</a>, <a href="https://learnwithhasan.com/self-hosting-hub/vps-providers/hostinger-vps/">Mumbai location</a></li>
+      <li>Supabase: <a href="https://supabase.com/pricing">pricing</a> · AWS S3: <a href="https://aws.amazon.com/s3/pricing/">pricing</a>, <a href="https://itforsme.in/pricing/aws-s3-india">Mumbai rates</a> · Bunny Stream: <a href="https://bunny.net/pricing/stream/">pricing</a></li>
+      <li>WhatsApp: <a href="https://developers.facebook.com/docs/whatsapp/pricing">Meta pricing</a>, <a href="https://myoperator.com/blog/whatsapp-business-api-pricing-india-2026">India rates 2026</a></li>
+      <li>Veo 3.1 API: <a href="https://benchlm.ai/media-pricing/veo">price per second</a>, <a href="https://the-decoder.com/googles-veo-3-1-lite-cuts-video-generation-costs-by-more-than-half/">Veo 3.1 Lite</a></li>
+    </ul>
+  </section>
+</div>
+</body>
+</html>

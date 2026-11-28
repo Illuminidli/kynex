@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Kynex · Simpler session · plan and mockups</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0e3147;--teal:#2f789f;--teal-d:#1d6189;--b50:#f0f6fa;--b100:#dcebf4;--orange:#f2812e;--canvas:#f6f8fa;--line:#e5eaf0;--ink:#16222f;--mute:#5d6b7a;--good:#2f9e73;--bad:#cf4b45}
+@page{size:A4 landscape;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Source Sans 3",sans-serif;color:var(--ink);background:#d9dee4;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:297mm;height:210mm;background:#fff;margin:0 auto 10px;position:relative;overflow:hidden;padding:13mm 14mm 12mm;page-break-after:always;display:flex;flex-direction:column}
+.page:last-child{page-break-after:auto}
+@media print{body{background:#fff}.page{margin:0}}
+.eyebrow{font:600 10.5px/1 Inter;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+h1{font:700 30px/1.1 Outfit;color:var(--navy);margin-top:6px}
+h2{font:700 21px/1.15 Outfit;color:var(--navy);margin-top:5px}
+h3{font:600 14px/1.2 Outfit;color:var(--navy)}
+p.lead{font-size:14.5px;line-height:1.45;color:var(--mute);margin-top:6px;max-width:205mm}
+.foot{position:absolute;left:14mm;right:14mm;bottom:6mm;display:flex;justify-content:space-between;font:500 9px Inter;color:#8a96a3}
+.pill{display:inline-block;font:600 9.5px/1 Inter;padding:4px 8px;border-radius:20px}
+.p-new{background:#e3f4ec;color:#1f7a55}.p-cut{background:#fbe6e5;color:#a8372f}.p-keep{background:var(--b100);color:var(--teal-d)}.p-q{background:#fdeedd;color:#a85512}
+
+/* ---------- phones ---------- */
+.row{display:flex;gap:9mm;justify-content:center;align-items:flex-start;margin-top:6mm;flex:1}
+.ff .dev{zoom:.54}.ff2 .dev{zoom:.5}.ff2 .ph{width:52mm}
+.cap span.pill{display:inline-block;margin-top:0}
+.lgc{display:flex;flex-direction:column;gap:2px}.lgc i{font-style:normal;color:var(--teal);font-weight:700;margin-left:30%;line-height:1.1}
+.lb{background:var(--b50);border:1px solid var(--b100);border-radius:9px;padding:7px 10px;font-size:11.5px;line-height:1.35;color:#2c3a47}
+.lb.ok{background:#e9f6ef;border-color:#c5e8d5}.lb.bad{background:#fbecea;border-color:#f2cdc9}.lb.bad2{background:#fff4ea;border-color:#f6d3b4}
+.split2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.ff .ph{width:56mm}
+.ph{display:flex;flex-direction:column;align-items:center;width:62mm}
+.dev{width:412px;height:866px;border-radius:58px;background:#0b0f14;padding:11px;zoom:.6;box-shadow:0 30px 60px rgba(14,49,71,.22)}
+.scr{width:390px;height:844px;border-radius:47px;overflow:hidden;position:relative;background:var(--canvas);font-family:Inter,sans-serif;color:var(--ink);display:flex;flex-direction:column}
+.cap{margin-top:4mm;text-align:center}
+.cap b{display:block;font:600 12.5px Outfit;color:var(--navy)}
+.cap span{display:block;font-size:11px;line-height:1.35;color:var(--mute);margin-top:2px}
+.cap span.num{display:inline-block;margin-top:0;color:#fff;font-size:9.5px}
+.num{display:inline-block;text-align:center;line-height:17px;width:17px;height:17px;border-radius:50%;background:var(--navy);color:#fff;font:700 9.5px Inter;margin-right:5px;vertical-align:1px}
+.status{height:50px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 30px 6px;font:600 15px Inter;flex:none}
+.dark .status{color:#fff}
+.btn{height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;gap:10px;font:600 18px Inter}
+.b-pri{background:var(--orange);color:#fff}.b-nav{background:var(--navy);color:#fff}.b-ghost{background:transparent;color:var(--teal-d)}.b-line{border:1.5px solid var(--line);background:#fff;color:var(--ink)}
+.ico{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 20px 0;flex:none}
+.round{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#fff;border:1px solid var(--line)}
+.dark .round{background:rgba(255,255,255,.14);border:0;color:#fff}
+
+/* sheet */
+.sheet{position:absolute;left:0;right:0;bottom:0;top:96px;background:#fff;border-radius:30px 30px 0 0;box-shadow:0 -10px 40px rgba(14,49,71,.18);padding:12px 24px 26px;display:flex;flex-direction:column}
+.grab{width:44px;height:5px;border-radius:3px;background:#d3dbe3;margin:0 auto 18px}
+.s-h{font:700 26px/1.15 Inter;letter-spacing:-.02em}
+.s-q{font:600 15px Inter;color:var(--mute);margin:22px 0 10px}
+.faces{display:flex;justify-content:space-between}
+.faces span{width:30px;height:44px;border-radius:12px;display:grid;place-items:center;font:600 15px Inter;background:var(--canvas);color:var(--mute)}
+.faces span.on{background:var(--navy);color:#fff;transform:scale(1.15)}
+.scale-l{display:flex;justify-content:space-between;font:500 12px Inter;color:#8a96a3;margin-top:7px}
+.flags{background:var(--canvas);border-radius:18px;padding:14px 16px;font:500 14.5px/1.4 Inter;color:#33414f}
+.flags li{list-style:none;padding-left:16px;position:relative;margin:3px 0}
+.flags li:before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--bad)}
+.fine{font:500 12.5px/1.45 Inter;color:#7b8794;margin-top:14px}
+.fine u{color:var(--teal-d);text-decoration:none;font-weight:600}
+
+/* camera / split */
+.cam{position:relative;flex:1.15;background:radial-gradient(120% 80% at 50% 30%,#4a5561 0%,#2a3139 55%,#1b2026 100%);overflow:hidden}
+.cam .wall{position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.03) 0 50%,transparent 50%) 0 0/60px 100%}
+.cam .floor{position:absolute;left:0;right:0;bottom:0;height:22%;background:linear-gradient(#3a3229,#2b241d)}
+.ref{position:relative;flex:1;background:var(--b50);border-top:3px solid #fff;overflow:hidden}
+.ref .lbl{position:absolute;left:16px;top:14px;font:600 12px Inter;color:var(--teal-d);background:#fff;padding:6px 10px;border-radius:20px;display:flex;gap:6px;align-items:center}
+.ref .bar{position:absolute;left:16px;right:16px;bottom:16px;height:4px;border-radius:2px;background:#cfe1ec}
+.ref .bar i{position:absolute;left:0;top:0;bottom:0;width:58%;background:var(--teal);border-radius:2px}
+.count{position:absolute;right:18px;top:62px;text-align:right;color:#fff}
+.count b{font:800 76px/0.9 Inter;letter-spacing:-.04em}
+.count small{font:600 24px Inter;color:rgba(255,255,255,.55)}
+.count em{display:block;font:600 13px Inter;font-style:normal;color:rgba(255,255,255,.75);margin-top:6px}
+.tip{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:var(--orange);color:#fff;font:700 17px Inter;padding:11px 20px;border-radius:30px;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.ctrl{position:absolute;left:18px;top:62px;display:flex;flex-direction:column;gap:10px}
+.ctrl span{width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.35);display:grid;place-items:center;color:#fff}
+
+/* ring */
+.ringwrap{display:grid;place-items:center;position:relative}
+.ringwrap .in{position:absolute;text-align:center}
+
+/* doc blocks */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:8mm;margin-top:6mm}
+.card{border:1px solid var(--line);border-radius:12px;padding:5mm 5.5mm;background:#fff}
+.card.tint{background:var(--b50);border-color:var(--b100)}
+.card p,.card li{font-size:12.5px;line-height:1.45;color:#34424f}
+.card ul{padding-left:15px;margin-top:5px}.card li{margin:3px 0}
+table{width:100%;border-collapse:collapse;margin-top:5mm;font-size:11.5px}
+th{font:600 9.5px Inter;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--navy)}
+td{padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.38;color:#2c3a47}
+td b{color:var(--navy)}
+.quote{font:500 italic 17px/1.4 "Source Sans 3";color:var(--navy);border-left:3px solid var(--orange);padding:2px 0 2px 12px}
+.flow{display:flex;align-items:center;gap:6px;margin-top:auto;margin-bottom:5mm}
+.flow div{flex:1;background:var(--b50);border:1px solid var(--b100);border-radius:10px;padding:9px 10px}
+.flow div b{display:block;font:600 12.5px Outfit;color:var(--navy)}
+.flow div span{font-size:11px;color:var(--mute);line-height:1.3;display:block;margin-top:2px}
+.flow i{color:var(--teal);font-style:normal;font-weight:700}
+.big{font:700 34px/1 Outfit;color:var(--navy)}
+.stat{display:flex;gap:7mm;margin-top:4mm}
+.stat div span{display:block;font-size:11px;color:var(--mute);margin-top:3px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5v14l-4.5-4.5H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6.5" width="12.5" height="11" rx="2.5"/><path d="m15.5 10.5 5-3v9l-5-3z"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></symbol>
+  <symbol id="i-flip" viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></symbol>
+  <symbol id="i-phonecall" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></symbol>
+  <!-- shoulder flexion, side view, facing right. arm = raised angle -->
+  <symbol id="fig-up" viewBox="0 0 200 300"><circle cx="96" cy="44" r="17"/><path d="M98 64 L100 168 M100 168 L92 284 M100 168 L112 284 M100 82 L132 14"/></symbol>
+  <symbol id="fig-mid" viewBox="0 0 200 300"><circle cx="96" cy="44" r="17"/><path d="M98 64 L100 168 M100 168 L92 284 M100 168 L112 284 M100 82 L172 52"/></symbol>
+  <symbol id="fig-bent" viewBox="0 0 200 300"><circle cx="96" cy="44" r="17"/><path d="M98 64 L100 168 M100 168 L92 284 M100 168 L112 284 M100 82 L146 62 L128 22"/></symbol>
+  <symbol id="fig-down" viewBox="0 0 200 300"><circle cx="96" cy="44" r="17"/><path d="M98 64 L100 168 M100 168 L92 284 M100 168 L112 284 M100 82 L106 160"/></symbol>
+</svg>
+
+<!-- =========================================================== PAGE 1 -->
+<section class="page">
+  <div class="eyebrow">Kynex · Plan for approval · Patient session</div>
+  <h1>A simpler session: less to read, more to see</h1>
+  <p class="lead">From the latest feedback on the app. Nothing here is built yet. Once you approve the mockups and the change list, we build it, then demo it next week.</p>
+
+  <div class="cols" style="grid-template-columns:1.05fr 1fr">
+    <div>
+      <div class="quote">“90% of UI/UX is decluttering. If there's not too much to read, the brain automatically knows what to do.”</div>
+      <h3 style="margin-top:6mm">What we heard, and what it means for the app</h3>
+      <table style="margin-top:3mm">
+        <tr><th style="width:42%">Feedback</th><th>What we change</th></tr>
+        <tr><td><b>Too much information</b> before each exercise</td><td>The exercise screen keeps only the name, the dose and a looping demo. Steps and safety move behind one “How to do it” tap.</td></tr>
+        <tr><td><b>Split screen:</b> my tracking on top, how it should be done below</td><td>New live screen: camera with tracking on top, reference video playing underneath, in step with the reps.</td></tr>
+        <tr><td><b>Consent</b> on one sheet</td><td>Pain score, safety questions and agreement on one sheet.</td></tr>
+        <tr><td><b>One or two numbers</b> on screen (the Oura-style ring)</td><td>The live screen shows the rep count only. Rest and the session summary use a single ring.</td></tr>
+        <tr><td><b>Legal:</b> the person must be guided throughout</td><td>Voice and the reference video guide every rep. Each screen has one clear next step, and safety stays in.</td></tr>
+        <tr><td><b>Show the mistake</b>, for every exercise, before the next rep</td><td>Form-fix highlight: your rep zoomed on the joint, with the guide below doing it right. One engine for all 25 exercises.</td></tr>
+        <tr><td><b>Talk to it:</b> interactive voice</td><td>Voice commands now (pause, show again, it hurts). An AI conversation coach as phase 2.</td></tr>
+        <tr><td><b>Store session video</b> only with a signed waiver</td><td>Build an opt-in: “Let my physio see my videos”, with a privacy note. Off by default; videos stay on the phone until the patient agrees.</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="card tint">
+        <h3>Today vs proposed: before the first rep</h3>
+        <div class="stat">
+          <div><div class="big">~150&nbsp;→&nbsp;20</div><span>words to read before starting</span></div>
+          <div><div class="big">7&nbsp;→&nbsp;2</div><span>taps to start (pain + start)</span></div>
+          <div><div class="big">~9&nbsp;→&nbsp;3</div><span>blocks on the exercise screen</span></div>
+        </div>
+        <p style="margin-top:4mm">Today the patient answers a pain score and five separate yes/no questions, then reads a screen with key points, phone placement, steps, safety, camera and voice toggles and three buttons. The proposal asks for the same information in one sheet and shows the movement instead of describing it.</p>
+      </div>
+      <div class="card" style="margin-top:5mm">
+        <h3>What stays exactly the same</h3>
+        <ul>
+          <li>Any safety “yes” stops the session and alerts the clinic.</li>
+          <li>Rep counting, form checks, holds, rest timer and the session report.</li>
+          <li>“Count by tapping” for anyone without a camera.</li>
+          <li>Videos stay on the phone unless the patient opts in.</li>
+          <li>English and Hindi now, with more languages later.</li>
+        </ul>
+      </div>
+      <div class="card" style="margin-top:5mm;border-color:#f6d3b4;background:#fffaf5">
+        <h3>Out of scope for this change</h3>
+        <p style="margin-top:3px">Edge Vitals-style face-scan vitals: interesting, but a separate product idea. It's parked in the ideas list, not in this build.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow">
+    <div><b>① One sheet</b><span>Pain · safety · agree</span></div><i>›</i>
+    <div><b>② Get ready</b><span>Demo loops · Start</span></div><i>›</i>
+    <div><b>③ Split screen</b><span>Form fix · voice</span></div><i>›</i>
+    <div><b>④ Rest</b><span>One ring, next set</span></div><i>›</i>
+    <div><b>⑤ How did it feel?</b><span>One tap</span></div><i>›</i>
+    <div><b>⑥ Done</b><span>One ring · video opt-in</span></div>
+  </div>
+  <div class="foot"><span>Kynex · Simpler session · Plan v1 · 28 Nov 2026</span><span>1 / 7</span></div>
+</section>
+
+<!-- =========================================================== PAGE 2 -->
+<section class="page">
+  <div class="eyebrow">Mockups · Starting a session</div>
+  <h2>One sheet to start, and a get-ready screen that shows rather than tells</h2>
+  <div class="row">
+
+    <!-- 1 ONE SHEET -->
+    <div class="ph"><div class="dev"><div class="scr" style="background:#9fb3c2">
+      <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <div class="s-h">Before you start</div>
+        <div class="s-q">Pain right now</div>
+        <div class="faces"><span>0</span><span>1</span><span>2</span><span>3</span><span class="on">4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+        <div class="scale-l"><span>No pain</span><span>Worst</span></div>
+        <div class="s-q">Since your last session, have you had any of these?</div>
+        <ul class="flags">
+          <li>New numbness, tingling or weakness</li>
+          <li>Bladder or bowel problems</li>
+          <li>Chest pain or breathlessness</li>
+          <li>A fall or injury</li>
+          <li>New or much worse pain</li>
+        </ul>
+        <div class="btn b-line" style="margin-top:12px;height:50px;font-size:16px;color:var(--bad)">Yes, I have one of these</div>
+        <p class="fine">Kynex guides your exercises; it doesn't replace your physio. Stop if anything hurts. By starting, you agree to the <u>terms</u> and <u>privacy policy</u>.</p>
+        <div style="flex:1"></div>
+        <div class="btn b-pri">None of these · Start</div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="num">1</span>One sheet</b><span>Pain, the five safety checks and agreement together. Two taps start the session.</span></div></div>
+
+    <!-- 2 GET READY -->
+    <div class="ph"><div class="dev"><div class="scr" style="background:#fff">
+      <div class="status"><span>9:42</span><span>●●● ▮</span></div>
+      <div class="topbar"><span class="round"><svg class="ico"><use href="#i-x"/></svg></span><span style="font:600 14px Inter;color:var(--mute)">1 of 4</span><span class="round"><svg class="ico"><use href="#i-vol"/></svg></span></div>
+      <div style="margin:18px 20px 0;height:400px;border-radius:26px;background:var(--b50);position:relative;overflow:hidden">
+        <svg viewBox="0 0 200 300" style="position:absolute;left:50%;top:26px;transform:translateX(-50%);width:230px;height:345px;stroke:var(--navy);fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round"><use href="#fig-up" width="200" height="300" style="fill:none"/></svg>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:50%;top:26px;transform:translateX(-50%);width:230px;height:345px;stroke:var(--navy);opacity:.28;fill:none;stroke-width:9;stroke-linecap:round"><use href="#fig-down" width="200" height="300"/></svg>
+        <span style="position:absolute;left:14px;bottom:14px;background:#fff;border-radius:20px;padding:6px 11px;font:600 12px Inter;color:var(--teal-d);display:flex;gap:6px;align-items:center"><svg class="ico" style="width:14px;height:14px;color:var(--teal)"><use href="#i-play"/></svg>Demo · loops</span>
+      </div>
+      <div style="padding:22px 24px 0">
+        <div style="font:700 30px/1.1 Inter;letter-spacing:-.02em">Shoulder flexion</div>
+        <div style="font:600 18px Inter;color:var(--teal-d);margin-top:8px">2 sets × 10 · right arm</div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:18px;font:500 15px/1.35 Inter;color:#4a5866"><svg class="ico" style="flex:none;color:var(--teal)"><use href="#i-phone"/></svg>Stand side-on, 2 steps from the phone</div>
+      </div>
+      <div style="flex:1"></div>
+      <div style="padding:0 20px 30px">
+        <div class="btn b-pri"><svg class="ico" style="width:20px;height:20px"><use href="#i-play"/></svg>Start</div>
+        <div style="display:flex;justify-content:space-between;margin-top:12px;font:600 14px Inter;color:var(--teal-d);padding:0 8px"><span>How to do it ⌄</span><span>Count by tapping</span></div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="num">2</span>Get ready</b><span>Name, dose, a looping demo and one placement line. Steps and safety sit behind “How to do it”.</span></div></div>
+
+    <!-- 2b HOW TO DO IT expanded -->
+    <div class="ph"><div class="dev"><div class="scr" style="background:#9fb3c2">
+      <div class="status"><span>9:42</span><span>●●● ▮</span></div>
+      <div class="sheet" style="top:300px">
+        <div class="grab"></div>
+        <div class="s-h" style="font-size:22px">How to do it</div>
+        <ol style="list-style:none;margin-top:18px;font:500 16px/1.4 Inter;color:#33414f">
+          <li style="display:flex;gap:12px;margin-bottom:14px"><span style="flex:none;width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font:700 13px Inter">1</span>Stand tall, arm by your side, thumb forward</li>
+          <li style="display:flex;gap:12px;margin-bottom:14px"><span style="flex:none;width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font:700 13px Inter">2</span>Lift the arm forward and up, as high as is comfortable</li>
+          <li style="display:flex;gap:12px"><span style="flex:none;width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font:700 13px Inter">3</span>Lower slowly. Don't lean back</li>
+        </ol>
+        <div style="margin-top:18px;background:#fff4ea;border-radius:16px;padding:13px 15px;font:500 14px/1.4 Inter;color:#7a3f10">Stop if you feel sharp pain in the shoulder.</div>
+        <div style="flex:1"></div>
+        <div class="btn b-nav">Got it</div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="num">2a</span>How to do it (only if asked)</b><span>Three short steps and one safety line, read aloud by the voice too. Shown first time automatically.</span></div></div>
+
+    <!-- RED FLAG STOP -->
+    <div class="ph"><div class="dev"><div class="scr" style="background:#fff">
+      <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 30px;text-align:center">
+        <div style="width:84px;height:84px;border-radius:50%;background:#fbe6e5;margin:0 auto;display:grid;place-items:center"><svg class="ico" style="width:40px;height:40px;color:var(--bad);stroke-width:2.4"><use href="#i-x"/></svg></div>
+        <div style="font:700 28px/1.15 Inter;letter-spacing:-.02em;margin-top:26px">Please don't exercise today</div>
+        <p style="font:500 17px/1.45 Inter;color:var(--mute);margin-top:14px">Your clinic has been told. They'll call you. If it feels urgent, go to the nearest emergency department.</p>
+      </div>
+      <div style="padding:0 20px 30px">
+        <div class="btn b-nav"><svg class="ico"><use href="#i-phonecall"/></svg>Call the clinic</div>
+        <div class="btn b-ghost" style="margin-top:6px">Back to home</div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="num">1a</span>If “yes”</b><span>The same safety stop as today, with fewer words and a call button.</span></div></div>
+  </div>
+  <div class="foot"><span>Kynex · Simpler session · Mockups use the current app colours</span><span>2 / 7</span></div>
+</section>
+
+<!-- =========================================================== PAGE 3 -->
+<section class="page">
+  <div class="eyebrow">Mockups · During and after the exercise</div>
+  <h2>Split screen: you on top, the guide below, one number</h2>
+  <div class="row">
+
+    <!-- 3 SPLIT SCREEN -->
+    <div class="ph"><div class="dev"><div class="scr dark" style="background:#1b2026">
+      <div class="cam">
+        <div class="wall"></div><div class="floor"></div>
+        <div class="status" style="position:relative;z-index:2"><span>9:43</span><span>●●● ▮</span></div>
+        <!-- person silhouette -->
+        <svg viewBox="0 0 200 300" style="position:absolute;left:62px;top:56px;width:230px;height:345px;stroke:#5d6874;fill:none;stroke-width:30;stroke-linecap:round;stroke-linejoin:round"><use href="#fig-mid" width="200" height="300"/></svg>
+        <!-- skeleton -->
+        <svg viewBox="0 0 200 300" style="position:absolute;left:62px;top:56px;width:230px;height:345px;stroke:#fff;fill:none;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round"><use href="#fig-mid" width="200" height="300"/></svg>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:62px;top:56px;width:230px;height:345px">
+          <g fill="#56c3f0"><circle cx="100" cy="82" r="5.5"/><circle cx="136" cy="67" r="5"/><circle cx="172" cy="52" r="5.5"/><circle cx="100" cy="168" r="5"/><circle cx="92" cy="284" r="5"/><circle cx="112" cy="284" r="5"/></g>
+          <path d="M120 82 A20 20 0 0 0 114 70" stroke="#ffc23d" stroke-width="3" fill="none"/>
+        </svg>
+        <div class="ctrl"><span><svg class="ico"><use href="#i-pause"/></svg></span><span><svg class="ico"><use href="#i-vol"/></svg></span></div>
+        <div class="count"><b>6</b><small> /10</small><em>Set 1 of 2</em></div>
+        <div class="tip">Lift a little higher</div>
+      </div>
+      <div class="ref">
+        <div class="lbl"><svg class="ico" style="width:14px;height:14px;color:var(--teal)"><use href="#i-play"/></svg>Follow me</div>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:50%;top:44px;transform:translateX(-50%);width:200px;height:300px;stroke:var(--navy);fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round"><use href="#fig-mid" width="200" height="300"/></svg>
+        <div class="bar"><i></i></div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="num">3</span>Live: split screen</b><span>Top: camera with tracking and the rep count. Bottom: the reference video, in step with the reps. One tip at a time.</span></div></div>
+
+    <!-- 4 REST -->
+    <div class="ph"><div class="dev"><div class="scr" style="background:var(--navy);color:#fff">
+      <div class="status" style="color:#fff"><span>9:44</span><span>●●● ▮</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <div style="font:600 16px Inter;color:rgba(255,255,255,.7)">Set 1 done · 10 of 10</div>
+        <div class="ringwrap" style="margin-top:26px">
+          <svg width="250" height="250" viewBox="0 0 250 250"><circle cx="125" cy="125" r="108" stroke="rgba(255,255,255,.12)" stroke-width="16" fill="none"/><circle cx="125" cy="125" r="108" stroke="#56c3f0" stroke-width="16" fill="none" stroke-linecap="round" stroke-dasharray="678" stroke-dashoffset="250" transform="rotate(-90 125 125)"/></svg>
+          <div class="in"><div style="font:800 84px/1 Inter;letter-spacing:-.04em">19</div><div style="font:600 15px Inter;color:rgba(255,255,255,.6);margin-top:4px">seconds rest</div></div>
+        </div>
+        <div style="font:600 18px Inter;margin-top:30px">Next: set 2 of 2</div>
+      </div>
+      <div style="padding:0 20px 30px"><div class="btn" style="background:rgba(255,255,255,.12);color:#fff">Skip rest</div></div>
+    </div></div>
+    <div class="cap"><b><span class="num">4</span>Rest</b><span>One ring, one number, what's next. Nothing else.</span></div></div>
+
+    <!-- 5 FEELING -->
+    <div class="ph"><div class="dev"><div class="scr" style="background:#fff">
+      <div class="status"><span>9:45</span><span>●●● ▮</span></div>
+      <div style="padding:40px 26px 0;text-align:center">
+        <div style="width:72px;height:72px;border-radius:50%;background:#e3f4ec;margin:0 auto;display:grid;place-items:center"><svg class="ico" style="width:36px;height:36px;color:var(--good);stroke-width:2.6"><use href="#i-check"/></svg></div>
+        <div style="font:700 28px/1.15 Inter;letter-spacing:-.02em;margin-top:22px">Shoulder flexion done</div>
+        <div style="font:600 18px Inter;color:var(--teal-d);margin-top:8px">20 of 20 reps</div>
+        <div style="font:600 17px Inter;color:var(--mute);margin-top:40px">How did it feel?</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:18px 22px 0">
+        <div class="btn b-line" style="height:76px">Easy</div>
+        <div class="btn b-line" style="height:76px">Just right</div>
+        <div class="btn b-line" style="height:76px">Hard</div>
+        <div class="btn" style="height:76px;background:#fbe6e5;color:var(--bad)">It hurt</div>
+      </div>
+      <div style="flex:1"></div>
+      <div style="text-align:center;font:600 15px Inter;color:var(--teal-d);padding-bottom:36px">Tell us more (optional)</div>
+    </div></div>
+    <div class="cap"><b><span class="num">5</span>How did it feel?</b><span>One tap moves on. The six feedback chips and the note move behind “Tell us more”.</span></div></div>
+
+    <!-- 6 DONE -->
+    <div class="ph"><div class="dev"><div class="scr" style="background:#fff">
+      <div class="status"><span>9:58</span><span>●●● ▮</span></div>
+      <div style="padding:26px 24px 0;text-align:center">
+        <div style="font:700 28px/1.15 Inter;letter-spacing:-.02em">Well done, Priya</div>
+        <div class="ringwrap" style="margin-top:22px">
+          <svg width="220" height="220" viewBox="0 0 220 220"><circle cx="110" cy="110" r="94" stroke="var(--b100)" stroke-width="15" fill="none"/><circle cx="110" cy="110" r="94" stroke="var(--teal)" stroke-width="15" fill="none" stroke-linecap="round" stroke-dasharray="590.6" stroke-dashoffset="47" transform="rotate(-90 110 110)"/></svg>
+          <div class="in"><div style="font:800 64px/1 Inter;letter-spacing:-.04em;color:var(--navy)">92</div><div style="font:600 14px Inter;color:var(--mute);margin-top:2px">form score</div></div>
+        </div>
+        <div style="display:flex;justify-content:center;gap:26px;margin-top:22px;font:500 14px Inter;color:var(--mute)">
+          <div><b style="display:block;font:700 22px Inter;color:var(--ink)">4 / 4</b>exercises</div>
+          <div><b style="display:block;font:700 22px Inter;color:var(--ink)">18 min</b>today</div>
+        </div>
+        <div style="font:600 15px Inter;color:var(--mute);margin-top:22px;text-align:left">Pain now</div>
+        <div class="faces" style="margin-top:10px"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+      </div>
+      <div style="margin:22px 20px 0;border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;gap:12px;align-items:center">
+        <svg class="ico" style="flex:none;color:var(--teal)"><use href="#i-video"/></svg>
+        <div style="flex:1;font:500 13.5px/1.35 Inter;color:#3c4a57"><b style="display:block;color:var(--ink);font-size:15px">Share videos with my physio</b>Off. Videos stay on this phone.</div>
+        <span style="width:50px;height:30px;border-radius:15px;background:#d3dbe3;position:relative;flex:none"><i style="position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff"></i></span>
+      </div>
+      <div style="flex:1"></div>
+      <div style="padding:0 20px 30px"><div class="btn b-nav">Finish</div></div>
+    </div></div>
+    <div class="cap"><b><span class="num">6</span>Done</b><span>One ring, pain after, and the optional video sharing switch.</span></div></div>
+  </div>
+  <div class="foot"><span>Kynex · Simpler session · Example data</span><span>3 / 7</span></div>
+</section>
+
+<!-- =========================================================== PAGE FORM FIX -->
+<section class="page">
+  <div class="eyebrow">Form-fix replay · Example: shoulder flexion (same logic for every exercise)</div>
+  <h2>When the form slips: show the mistake, then show the fix</h2>
+  <div style="display:flex;gap:7mm;margin-top:5mm;flex:1">
+  <div class="row ff" style="margin-top:0;flex:none;gap:5mm">
+
+    <div class="ph"><div class="dev"><div class="scr dark" style="background:#1b2026">
+      <div class="cam">
+        <div class="wall"></div><div class="floor"></div>
+        <div class="status" style="position:relative;z-index:2"><span>9:43</span><span>●●● ▮</span></div>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:62px;top:56px;width:230px;height:345px;stroke:#5d6874;fill:none;stroke-width:30;stroke-linecap:round;stroke-linejoin:round"><use href="#fig-bent" width="200" height="300"/></svg>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:62px;top:56px;width:230px;height:345px;stroke:#fff;fill:none;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round"><use href="#fig-bent" width="200" height="300"/></svg>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:62px;top:56px;width:230px;height:345px"><g fill="#56c3f0"><circle cx="100" cy="82" r="5.5"/><circle cx="128" cy="22" r="5"/><circle cx="100" cy="168" r="5"/></g><circle cx="146" cy="62" r="7" fill="#ff5a52"/><circle cx="146" cy="62" r="14" fill="none" stroke="#ff5a52" stroke-width="2.5"/></svg>
+        <div class="ctrl"><span><svg class="ico"><use href="#i-pause"/></svg></span><span><svg class="ico"><use href="#i-vol"/></svg></span></div>
+        <div class="count"><b>5</b><small> /10</small><em>Set 1 of 2</em></div>
+        <div class="tip" style="background:#cf4b45">Rep not counted</div>
+      </div>
+      <div class="ref">
+        <div class="lbl"><svg class="ico" style="width:14px;height:14px;color:var(--teal)"><use href="#i-play"/></svg>Follow me</div>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:50%;top:44px;transform:translateX(-50%);width:200px;height:300px;stroke:var(--navy);fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round"><use href="#fig-up" width="200" height="300"/></svg>
+        <div class="bar"><i style="width:58%"></i></div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="num">A</span>The rep slips</b><span>The elbow bends past the limit. The joint turns red, the rep isn't counted and the set pauses.</span></div></div>
+
+    <div class="ph"><div class="dev"><div class="scr dark" style="background:#1b2026">
+      <div class="cam" style="flex:1">
+        <div class="wall"></div>
+        <svg viewBox="0 0 390 400" style="position:absolute;inset:0;width:390px;height:400px">
+      <path d="M-10 420 L70 330" stroke="#58626d" stroke-width="90" stroke-linecap="round"/>
+      <path d="M70 330 L230 195 L180 58" stroke="#6a7480" stroke-width="58" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M70 330 L230 195 L180 58" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="70" cy="330" r="10" fill="#56c3f0"/><circle cx="180" cy="58" r="10" fill="#56c3f0"/>
+      <circle cx="230" cy="195" r="34" fill="none" stroke="#ff5a52" stroke-width="4" stroke-dasharray="7 6"/>
+      <circle cx="230" cy="195" r="12" fill="#ff5a52"/>
+    </svg>
+        <div class="status" style="position:relative;z-index:2"><span>9:43</span><span>●●● ▮</span></div>
+        <div style="position:absolute;left:16px;top:58px;font:700 13px Inter;color:#fff;background:#cf4b45;padding:6px 11px;border-radius:20px">Your rep 6 · replay</div>
+        <div style="position:absolute;right:20px;top:150px;text-align:right;color:#fff"><b style="font:800 40px/1 Inter">112°</b><div style="font:600 13px Inter;color:rgba(255,255,255,.7)">elbow bent</div></div>
+        <div style="position:absolute;left:16px;bottom:16px;right:16px;display:flex;align-items:center;gap:10px"><span style="font:700 12px Inter;color:#fff;background:rgba(0,0,0,.45);padding:5px 9px;border-radius:12px">0.5×</span><span style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.25);position:relative"><i style="position:absolute;left:0;top:0;bottom:0;width:62%;background:#fff;border-radius:2px"></i></span></div>
+      </div>
+      <div style="flex:none;background:var(--orange);color:#fff;font:700 21px Inter;text-align:center;padding:14px 10px">Keep your elbow straight</div>
+      <div class="ref" style="flex:1;border-top:0;background:var(--b50)">
+        <svg viewBox="0 0 390 400" style="position:absolute;inset:0;width:390px;height:400px">
+          <path d="M-10 420 L70 330" stroke="#c9dbe7" stroke-width="90" stroke-linecap="round"/>
+          <path d="M70 330 L230 195 L330 110" stroke="#c9dbe7" stroke-width="58" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M70 330 L230 195 L330 110" stroke="#0e3147" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="230" cy="195" r="34" fill="none" stroke="#2f9e73" stroke-width="4" stroke-dasharray="7 6"/><circle cx="230" cy="195" r="12" fill="#2f9e73"/>
+        </svg>
+        <div style="position:absolute;left:16px;top:16px;font:700 13px Inter;color:#fff;background:var(--good);padding:6px 11px;border-radius:20px">How it should look</div>
+        <div style="position:absolute;left:20px;top:190px;color:var(--navy)"><b style="font:800 40px/1 Inter">180°</b><div style="font:600 13px Inter;color:var(--mute)">straight arm</div></div>
+        <div style="position:absolute;right:16px;bottom:16px;background:#fff;border-radius:16px;padding:10px 16px;font:700 15px Inter;color:var(--ink);box-shadow:0 4px 14px rgba(14,49,71,.15)">Try again · 3</div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="num">B</span>Replay: you vs. how it should look</b><span>Your last 2 seconds, zoomed on the elbow, in slow motion. The guide below is zoomed the same way. The voice says the fix.</span></div></div>
+
+    <div class="ph"><div class="dev"><div class="scr dark" style="background:#1b2026">
+      <div class="cam">
+        <div class="wall"></div><div class="floor"></div>
+        <div class="status" style="position:relative;z-index:2"><span>9:43</span><span>●●● ▮</span></div>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:62px;top:56px;width:230px;height:345px;stroke:#5d6874;fill:none;stroke-width:30;stroke-linecap:round;stroke-linejoin:round"><use href="#fig-up" width="200" height="300"/></svg>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:62px;top:56px;width:230px;height:345px;stroke:#fff;fill:none;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round"><use href="#fig-up" width="200" height="300"/></svg>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:62px;top:56px;width:230px;height:345px"><g fill="#56c3f0"><circle cx="100" cy="82" r="5.5"/><circle cx="132" cy="14" r="5"/><circle cx="100" cy="168" r="5"/></g><circle cx="116" cy="48" r="7" fill="#5fd39b"/></svg>
+        <div class="ctrl"><span><svg class="ico"><use href="#i-pause"/></svg></span><span><svg class="ico"><use href="#i-vol"/></svg></span></div>
+        <div class="count"><b>6</b><small> /10</small><em>Set 1 of 2</em></div>
+        <div class="tip" style="background:var(--good)">That's it. Elbow straight</div>
+      </div>
+      <div class="ref">
+        <div class="lbl"><svg class="ico" style="width:14px;height:14px;color:var(--teal)"><use href="#i-play"/></svg>Follow me</div>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:50%;top:44px;transform:translateX(-50%);width:200px;height:300px;stroke:var(--navy);fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round"><use href="#fig-up" width="200" height="300"/></svg>
+        <div class="bar"><i style="width:20%"></i></div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="num">C</span>Back to the set</b><span>After a 3-second countdown (or “carry on”) the set resumes. A good rep gets a short green “that's it”.</span></div></div>
+  </div>
+
+  <div style="flex:1;display:flex;flex-direction:column;gap:4mm">
+    <div class="card tint">
+      <h3>How it works</h3>
+      <ul>
+        <li>The phone already records the session and tracks body points. The replay plays on the phone; nothing new is uploaded.</li>
+        <li>When a form rule breaks (shoulder flexion: elbow bent below 140°, or leaning back), the app takes the last 2 seconds and zooms on that joint.</li>
+        <li>The guide is zoomed on the same joint at the same point in the movement.</li>
+        <li>The cue line and the voice come from the same rule: one message, not three.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Keeping it simple</h3>
+      <ul>
+        <li><b>Every wrong rep is highlighted before the next rep.</b></li>
+        <li>The first time a mistake happens in a set, a full slow-motion replay. If the same mistake happens again, a quick 1.5-second zoomed highlight with the cue.</li>
+        <li>Say “carry on” or tap to skip.</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color:#f6d3b4;background:#fffaf5">
+      <h3>To check while building</h3>
+      <p style="margin-top:3px">Zooming needs a sharp picture. On older phones we may show the zoomed body points only. We'll test on a low-end Android first.</p>
+    </div>
+  </div>
+  </div>
+  <div class="foot"><span>Kynex · Simpler session · Example data</span><span>4 / 7</span></div>
+</section>
+
+<!-- =========================================================== PAGE ALL EXERCISES -->
+<section class="page">
+  <div class="eyebrow">Form-fix logic · Every exercise</div>
+  <h2>One rule for every exercise: a wrong rep is shown before the next one</h2>
+  <div style="display:flex;gap:7mm;margin-top:4mm;flex:1">
+    <div style="width:96mm;flex:none">
+      <div class="lgc">
+        <div class="lb">Rep starts</div><i>↓</i>
+        <div class="lb">Every frame is checked against <b>this exercise's form rules</b></div><i>↓</i>
+        <div class="split2">
+          <div class="lb ok"><b>Form OK</b><br>Rep counts. Next rep.</div>
+          <div class="lb bad"><b>Mistake</b><br>Rep not counted. Set (or hold timer) pauses.</div>
+        </div>
+        <i style="margin-left:60%">↓</i>
+        <div class="lb bad2"><b>Highlight, before the next rep</b><br>Zoom on the joints that rule watches · your rep on top, the guide below at the same moment · one cue on screen and by voice</div><i style="margin-left:60%">↓</i>
+        <div class="lb">Countdown, or say <b>“carry on”</b> · back to the set</div>
+      </div>
+      <table style="margin-top:4mm">
+        <tr><th>Exercise</th><th>Mistake</th><th>Zoom on</th></tr>
+        <tr><td>Shoulder flexion</td><td>Elbow bends</td><td>Elbow</td></tr>
+        <tr><td>Squat · sit to stand</td><td>Knees cave in</td><td>Both knees</td></tr>
+        <tr><td>Forward lunge</td><td>Knee past toes</td><td>Front knee and ankle</td></tr>
+        <tr><td>Plank</td><td>Hips sag or pike</td><td>Hips, against a straight line</td></tr>
+        <tr><td>Calf raise</td><td>Leaning forward</td><td>Trunk</td></tr>
+        <tr><td>Side bend</td><td>Twisting</td><td>Shoulders</td></tr>
+      </table>
+      <p style="font-size:11px;color:var(--mute);margin-top:3mm">All 25 exercises in the library already have form rules (about 30 in all), each with its own cue in English and Hindi and the joints it watches. The highlight is built once and works for all of them, including new exercises added later.</p>
+    </div>
+    <div class="row ff ff2" style="margin-top:0;flex:1;gap:4mm;justify-content:flex-end"><div class="ph"><div class="dev"><div class="scr dark" style="background:#1b2026">
+      <div class="cam" style="flex:1"><div class="wall"></div>
+        <svg viewBox="0 0 390 400" style="position:absolute;inset:0;width:390px;height:400px"><path d="M135 70 L178 215 L130 360" stroke="#6a7480" stroke-width="46" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M135 70 L178 215 L130 360" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M255 70 L212 215 L260 360" stroke="#6a7480" stroke-width="46" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M255 70 L212 215 L260 360" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="178" cy="215" r="30" fill="none" stroke="#ff5a52" stroke-width="4" stroke-dasharray="7 6"/><circle cx="178" cy="215" r="11" fill="#ff5a52"/><circle cx="212" cy="215" r="30" fill="none" stroke="#ff5a52" stroke-width="4" stroke-dasharray="7 6"/><circle cx="212" cy="215" r="11" fill="#ff5a52"/></svg>
+        <div class="status" style="position:relative;z-index:2"><span>9:43</span><span>●●● ▮</span></div>
+        <div style="position:absolute;left:16px;top:58px;font:700 13px Inter;color:#fff;background:#cf4b45;padding:6px 11px;border-radius:20px">Squat · rep 4</div>
+      </div>
+      <div style="flex:none;background:var(--orange);color:#fff;font:700 19px Inter;text-align:center;padding:13px 10px">Push your knees out over your toes</div>
+      <div class="ref" style="flex:1;border-top:0;background:var(--b50)">
+        <svg viewBox="0 0 390 400" style="position:absolute;inset:0;width:390px;height:400px"><path d="M135 70 L120 215 L130 360" stroke="#c9dbe7" stroke-width="46" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M135 70 L120 215 L130 360" stroke="#0e3147" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M255 70 L270 215 L260 360" stroke="#c9dbe7" stroke-width="46" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M255 70 L270 215 L260 360" stroke="#0e3147" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="120" cy="215" r="30" fill="none" stroke="#2f9e73" stroke-width="4" stroke-dasharray="7 6"/><circle cx="120" cy="215" r="11" fill="#2f9e73"/><circle cx="270" cy="215" r="30" fill="none" stroke="#2f9e73" stroke-width="4" stroke-dasharray="7 6"/><circle cx="270" cy="215" r="11" fill="#2f9e73"/></svg>
+        <div style="position:absolute;left:16px;top:16px;font:700 13px Inter;color:#fff;background:var(--good);padding:6px 11px;border-radius:20px">How it should look</div>
+        <div style="position:absolute;right:16px;bottom:16px;background:#fff;border-radius:16px;padding:10px 16px;font:700 15px Inter;color:var(--ink);box-shadow:0 4px 14px rgba(14,49,71,.15)">Try again · 3</div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="num">1</span>Squat: knees cave in</b><span>Zooms on both knees, front view.</span></div></div><div class="ph"><div class="dev"><div class="scr dark" style="background:#1b2026">
+      <div class="cam" style="flex:1"><div class="wall"></div>
+        <svg viewBox="0 0 390 400" style="position:absolute;inset:0;width:390px;height:400px"><path d="M40 170 L195 265 L360 185" stroke="#6a7480" stroke-width="46" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 170 L195 265 L360 185" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="195" cy="265" r="30" fill="none" stroke="#ff5a52" stroke-width="4" stroke-dasharray="7 6"/><circle cx="195" cy="265" r="11" fill="#ff5a52"/><path d="M40 170 L360 185" stroke="#fff" stroke-width="2" stroke-dasharray="6 7" opacity=".6"/></svg>
+        <div class="status" style="position:relative;z-index:2"><span>9:43</span><span>●●● ▮</span></div>
+        <div style="position:absolute;left:16px;top:58px;font:700 13px Inter;color:#fff;background:#cf4b45;padding:6px 11px;border-radius:20px">Plank · hold paused</div>
+      </div>
+      <div style="flex:none;background:var(--orange);color:#fff;font:700 19px Inter;text-align:center;padding:13px 10px">Lift your hips a little</div>
+      <div class="ref" style="flex:1;border-top:0;background:var(--b50)">
+        <svg viewBox="0 0 390 400" style="position:absolute;inset:0;width:390px;height:400px"><path d="M40 170 L200 178 L360 185" stroke="#c9dbe7" stroke-width="46" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 170 L200 178 L360 185" stroke="#0e3147" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="178" r="30" fill="none" stroke="#2f9e73" stroke-width="4" stroke-dasharray="7 6"/><circle cx="200" cy="178" r="11" fill="#2f9e73"/></svg>
+        <div style="position:absolute;left:16px;top:16px;font:700 13px Inter;color:#fff;background:var(--good);padding:6px 11px;border-radius:20px">How it should look</div>
+        <div style="position:absolute;right:16px;bottom:16px;background:#fff;border-radius:16px;padding:10px 16px;font:700 15px Inter;color:var(--ink);box-shadow:0 4px 14px rgba(14,49,71,.15)">18 s left · resume 3</div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="num">2</span>Plank: hips sag (a hold)</b><span>The hold timer pauses, then picks up where it stopped.</span></div></div><div class="ph"><div class="dev"><div class="scr dark" style="background:#1b2026">
+      <div class="cam" style="flex:1"><div class="wall"></div>
+        <svg viewBox="0 0 390 400" style="position:absolute;inset:0;width:390px;height:400px"><path d="M195 30 L195 380" stroke="#fff" stroke-width="2" stroke-dasharray="6 7" opacity=".6"/><path d="M95 86 L205 94" stroke="#6a7480" stroke-width="46" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M95 86 L205 94" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M195 340 L150 90" stroke="#6a7480" stroke-width="46" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M195 340 L150 90" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="150" cy="90" r="30" fill="none" stroke="#ff5a52" stroke-width="4" stroke-dasharray="7 6"/><circle cx="150" cy="90" r="11" fill="#ff5a52"/></svg>
+        <div class="status" style="position:relative;z-index:2"><span>9:43</span><span>●●● ▮</span></div>
+        <div style="position:absolute;left:16px;top:58px;font:700 13px Inter;color:#fff;background:#cf4b45;padding:6px 11px;border-radius:20px">Hip abduction · rep 7</div>
+      </div>
+      <div style="flex:none;background:var(--orange);color:#fff;font:700 19px Inter;text-align:center;padding:13px 10px">Stay tall, don't lean</div>
+      <div class="ref" style="flex:1;border-top:0;background:var(--b50)">
+        <svg viewBox="0 0 390 400" style="position:absolute;inset:0;width:390px;height:400px"><path d="M195 30 L195 380" stroke="#0e3147" stroke-width="2" stroke-dasharray="6 7" opacity=".35"/><path d="M135 90 L255 90" stroke="#c9dbe7" stroke-width="46" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M135 90 L255 90" stroke="#0e3147" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M195 340 L195 95" stroke="#c9dbe7" stroke-width="46" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M195 340 L195 95" stroke="#0e3147" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="195" cy="95" r="30" fill="none" stroke="#2f9e73" stroke-width="4" stroke-dasharray="7 6"/><circle cx="195" cy="95" r="11" fill="#2f9e73"/></svg>
+        <div style="position:absolute;left:16px;top:16px;font:700 13px Inter;color:#fff;background:var(--good);padding:6px 11px;border-radius:20px">How it should look</div>
+        <div style="position:absolute;right:16px;bottom:16px;background:#fff;border-radius:16px;padding:10px 16px;font:700 15px Inter;color:var(--ink);box-shadow:0 4px 14px rgba(14,49,71,.15)">Try again · 3</div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="num">3</span>Hip abduction: leaning</b><span>Zooms on the trunk, against an upright line.</span></div></div></div>
+  </div>
+  <div class="foot"><span>Kynex · Simpler session · Example data</span><span>5 / 7</span></div>
+</section>
+
+<!-- =========================================================== PAGE VOICE -->
+<section class="page">
+  <div class="eyebrow">New suggestion · Talk to the coach</div>
+  <h2>Hands-free: the patient talks, the coach answers</h2>
+  <div style="display:flex;gap:7mm;margin-top:4mm;flex:1">
+    <div class="row ff" style="margin-top:0;flex:none;gap:5mm"><div class="ph"><div class="dev"><div class="scr" style="background:var(--canvas)">
+      <div style="flex:none;height:330px;position:relative;background:#1b2026;overflow:hidden" class="dark"><div class="wall" style="position:absolute;inset:0"></div><svg viewBox="0 0 390 400" style="position:absolute;left:0;top:-20px;width:390px;height:400px"><path d="M70 330 L230 195 L180 58" stroke="#6a7480" stroke-width="46" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M70 330 L230 195 L180 58" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="230" cy="195" r="30" fill="none" stroke="#ff5a52" stroke-width="4" stroke-dasharray="7 6"/><circle cx="230" cy="195" r="11" fill="#ff5a52"/></svg>
+        <div class="status" style="position:relative;z-index:2;color:#fff"><span>9:43</span><span>●●● ▮</span></div>
+        <div style="position:absolute;left:16px;top:58px;font:700 13px Inter;color:#fff;background:#cf4b45;padding:6px 11px;border-radius:20px">Replay · elbow</div></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:10px;padding:16px 18px 0"><div style="max-width:86%;background:#fff;border:1px solid var(--line);border-radius:20px 20px 20px 6px;padding:12px 15px;font:500 16px/1.35 Inter;color:var(--ink)"><b style="display:block;font:700 12px Inter;color:var(--teal);margin-bottom:3px">Coach</b>Your elbow bent on that one. Want to see it again, or carry on?</div><div style="align-self:flex-end;max-width:80%;background:var(--navy);color:#fff;border-radius:20px 20px 6px 20px;padding:12px 15px;font:500 16px/1.35 Inter">Show me again</div><div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-top:auto;padding:14px 0 6px"><span style="width:58px;height:58px;border-radius:50%;background:var(--orange);display:grid;place-items:center;box-shadow:0 0 0 10px rgba(242,129,46,.18)"><svg class="ico" style="color:#fff;width:26px;height:26px"><use href="#i-mic"/></svg></span><span style="display:flex;gap:4px;align-items:center"><i style="width:4px;height:10px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:22px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:34px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:18px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:28px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:12px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:24px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:8px;border-radius:2px;background:var(--orange)"></i></span><span style="font:600 14px Inter;color:var(--mute)">Listening…</span></div><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding-bottom:26px"><span style="border:1.5px solid var(--b100);background:#fff;border-radius:20px;padding:8px 13px;font:600 14px Inter;color:var(--teal-d)">Show me again</span><span style="border:1.5px solid var(--b100);background:#fff;border-radius:20px;padding:8px 13px;font:600 14px Inter;color:var(--teal-d)">Carry on</span><span style="border:1.5px solid var(--b100);background:#fff;border-radius:20px;padding:8px 13px;font:600 14px Inter;color:var(--teal-d)">It hurts</span></div></div>
+    </div></div>
+    <div class="cap"><b><span class="num">1</span>After a highlight</b><span>The coach asks one question. Answer by voice or tap.</span></div></div><div class="ph"><div class="dev"><div class="scr" style="background:var(--canvas)">
+      <div style="flex:none;height:330px;position:relative;background:#1b2026;overflow:hidden" class="dark"><div class="wall" style="position:absolute;inset:0"></div>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:80px;top:40px;width:200px;height:300px;stroke:#5d6874;fill:none;stroke-width:28;stroke-linecap:round;stroke-linejoin:round"><use href="#fig-mid" width="200" height="300"/></svg>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:80px;top:40px;width:200px;height:300px;stroke:#fff;fill:none;stroke-width:3.5;stroke-linecap:round"><use href="#fig-mid" width="200" height="300"/></svg>
+        <div style="position:absolute;inset:0;background:rgba(14,49,71,.55)"></div>
+        <div class="status" style="position:relative;z-index:2;color:#fff"><span>9:44</span><span>●●● ▮</span></div>
+        <div style="position:absolute;left:0;right:0;top:130px;text-align:center;color:#fff"><div style="font:800 30px Inter">Paused</div><div style="font:600 15px Inter;opacity:.8;margin-top:6px">Shoulder flexion · set 1</div></div></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:10px;padding:16px 18px 0"><div style="align-self:flex-end;max-width:80%;background:var(--navy);color:#fff;border-radius:20px 20px 6px 20px;padding:12px 15px;font:500 16px/1.35 Inter">It hurts</div><div style="max-width:86%;background:#fff;border:1px solid var(--line);border-radius:20px 20px 20px 6px;padding:12px 15px;font:500 16px/1.35 Inter;color:var(--ink)"><b style="display:block;font:700 12px Inter;color:var(--teal);margin-bottom:3px">Coach</b>OK, I've stopped this exercise. Is it sharp pain, or just tired?</div><div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-top:auto;padding:14px 0 6px"><span style="width:58px;height:58px;border-radius:50%;background:var(--orange);display:grid;place-items:center;box-shadow:0 0 0 10px rgba(242,129,46,.18)"><svg class="ico" style="color:#fff;width:26px;height:26px"><use href="#i-mic"/></svg></span><span style="display:flex;gap:4px;align-items:center"><i style="width:4px;height:10px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:22px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:34px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:18px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:28px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:12px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:24px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:8px;border-radius:2px;background:var(--orange)"></i></span><span style="font:600 14px Inter;color:var(--mute)">Listening…</span></div><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding-bottom:26px"><span style="border:1.5px solid var(--b100);background:#fff;border-radius:20px;padding:8px 13px;font:600 14px Inter;color:var(--teal-d)">Sharp pain</span><span style="border:1.5px solid var(--b100);background:#fff;border-radius:20px;padding:8px 13px;font:600 14px Inter;color:var(--teal-d)">Just tired</span><span style="border:1.5px solid var(--b100);background:#fff;border-radius:20px;padding:8px 13px;font:600 14px Inter;color:var(--teal-d)">Carry on</span></div></div>
+    </div></div>
+    <div class="cap"><b><span class="num">2</span>Any time: “It hurts”</b><span>“Stop”, “pause” and “it hurts” work even mid-rep. Sharp pain ends the exercise and tells the clinic.</span></div></div><div class="ph"><div class="dev"><div class="scr" style="background:var(--canvas)">
+      <div style="flex:none;height:330px;position:relative;background:#1b2026;overflow:hidden" class="dark"><div class="wall" style="position:absolute;inset:0"></div>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:80px;top:40px;width:200px;height:300px;stroke:#5d6874;fill:none;stroke-width:28;stroke-linecap:round;stroke-linejoin:round"><use href="#fig-mid" width="200" height="300"/></svg>
+        <svg viewBox="0 0 200 300" style="position:absolute;left:80px;top:40px;width:200px;height:300px;stroke:#fff;fill:none;stroke-width:3.5;stroke-linecap:round"><use href="#fig-mid" width="200" height="300"/></svg>
+        <div style="position:absolute;inset:0;background:rgba(14,49,71,.55)"></div>
+        <div class="status" style="position:relative;z-index:2;color:#fff"><span>9:45</span><span>●●● ▮</span></div>
+        <div style="position:absolute;left:0;right:0;top:130px;text-align:center;color:#fff"><div style="font:800 30px Inter">Paused</div><div style="font:600 15px Inter;opacity:.8;margin-top:6px">Shoulder flexion · set 1</div></div></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:10px;padding:16px 18px 0"><div style="align-self:flex-end;max-width:80%;background:var(--navy);color:#fff;border-radius:20px 20px 6px 20px;padding:12px 15px;font:500 16px/1.35 Inter">Why does my elbow keep bending?</div><div style="max-width:86%;background:#fff;border:1px solid var(--line);border-radius:20px 20px 20px 6px;padding:12px 15px;font:500 16px/1.35 Inter;color:var(--ink)"><b style="display:block;font:700 12px Inter;color:var(--teal);margin-bottom:3px">Coach</b>Your arm may be tired. Lift only as high as you can with a straight elbow; that still counts. Dr. Rao will see this in your report.</div><div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-top:auto;padding:14px 0 6px"><span style="width:58px;height:58px;border-radius:50%;background:var(--orange);display:grid;place-items:center;box-shadow:0 0 0 10px rgba(242,129,46,.18)"><svg class="ico" style="color:#fff;width:26px;height:26px"><use href="#i-mic"/></svg></span><span style="display:flex;gap:4px;align-items:center"><i style="width:4px;height:10px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:22px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:34px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:18px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:28px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:12px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:24px;border-radius:2px;background:var(--orange)"></i><i style="width:4px;height:8px;border-radius:2px;background:var(--orange)"></i></span><span style="font:600 14px Inter;color:var(--mute)">Listening…</span></div><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding-bottom:26px"><span style="border:1.5px solid var(--b100);background:#fff;border-radius:20px;padding:8px 13px;font:600 14px Inter;color:var(--teal-d)">Carry on</span><span style="border:1.5px solid var(--b100);background:#fff;border-radius:20px;padding:8px 13px;font:600 14px Inter;color:var(--teal-d)">Show me again</span></div></div>
+    </div></div>
+    <div class="cap"><b><span class="num">3</span>Ask anything about the exercise <span class="pill p-q" style="vertical-align:2px">Phase 2</span></b><span>An AI coach answers from physio-approved content. No diagnosis: medical questions go to the physio.</span></div></div></div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:4mm">
+      <div class="card tint">
+        <h3>Phase 1: voice commands (this build)</h3>
+        <table style="margin-top:2mm;font-size:11.5px"><tr><td style="padding:3px 4px"><b>Pause</b></td><td style="padding:3px 4px">रुको</td></tr><tr><td style="padding:3px 4px"><b>Carry on</b></td><td style="padding:3px 4px">आगे चलो</td></tr><tr><td style="padding:3px 4px"><b>Show me again</b></td><td style="padding:3px 4px">फिर दिखाओ</td></tr><tr><td style="padding:3px 4px"><b>Skip</b></td><td style="padding:3px 4px">छोड़ो</td></tr><tr><td style="padding:3px 4px"><b>How many left?</b></td><td style="padding:3px 4px">कितने बचे?</td></tr><tr><td style="padding:3px 4px"><b style="color:var(--bad)">It hurts</b></td><td style="padding:3px 4px">दर्द हो रहा है</td></tr></table><p style="margin-top:2mm">Fixed phrases plus close variations. Free to run.</p>
+      </div>
+      <div class="card">
+        <h3>When it listens</h3>
+        <ul>
+          <li>Fully during pauses: highlights, rest, between exercises.</li>
+          <li>During reps it hears only “stop”, “pause” and “it hurts”, so it doesn't react to its own voice.</li>
+          <li>A mic icon shows whenever it is listening. Audio isn't stored; only the command is.</li>
+        </ul>
+      </div>
+      <div class="card" style="border-color:#f6d3b4;background:#fffaf5">
+        <h3>Phase 2: AI conversation</h3>
+        <p style="margin-top:3px">Open questions answered by an AI coach, held to physio-approved content and safety rules. It has a running cost, so it needs budget approval and physio sign-off first.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Kynex · Simpler session · Example data</span><span>6 / 7</span></div>
+</section>
+
+<!-- =========================================================== PAGE 4 -->
+<section class="page">
+  <div class="eyebrow">Change list · for your approval</div>
+  <h2>What we build, in order</h2>
+  <div class="cols" style="grid-template-columns:1.55fr 1fr;gap:7mm;margin-top:2mm">
+    <div>
+      <table>
+        <tr><th style="width:4%">#</th><th style="width:22%">Change</th><th>What it involves</th><th style="width:11%">Type</th><th style="width:10%">Size</th></tr>
+        <tr><td>1</td><td><b>Split-screen live view</b></td><td>Camera and tracking on top, reference video below, playing in step with the rep count. Rep count and set as the only numbers. Voice keeps guiding every rep.</td><td><span class="pill p-new">New</span></td><td>2–3 days</td></tr>
+        <tr><td>2</td><td><b>Form-fix highlight, all exercises</b></td><td>One engine for every exercise: on a mistake the rep isn't counted and the set or hold pauses. Zoom on the rule's joints, guide below, one cue. Full replay the first time, a quick highlight on repeats.</td><td><span class="pill p-new">New</span></td><td>3–4 days</td></tr>
+        <tr><td>3</td><td><b>Voice commands</b></td><td>Pause, carry on, show me again, skip, how many left, it hurts, in English and Hindi. Listens fully in pauses; only stop, pause and “it hurts” mid-rep.</td><td><span class="pill p-new">New</span></td><td>2–3 days</td></tr>
+        <tr><td>4</td><td><b>One-sheet check-in</b></td><td>Pain scale, the five safety checks as one list with “None of these · Start” or “Yes, I have one of these”, and the terms line. Replaces two screens.</td><td><span class="pill p-new">New</span></td><td>1 day</td></tr>
+        <tr><td>5</td><td><b>Get-ready screen</b></td><td>Demo, name, dose, one placement line, Start. Key points, steps, safety and camera/voice toggles move to “How to do it” (auto-shown the first time).</td><td><span class="pill p-cut">Declutter</span></td><td>1 day</td></tr>
+        <tr><td>6</td><td><b>One-tap feeling</b></td><td>Four big answers. The feedback chips and note move behind “Tell us more”.</td><td><span class="pill p-cut">Declutter</span></td><td>½ day</td></tr>
+        <tr><td>7</td><td><b>Ring for rest and summary</b></td><td>Single ring with one number on the rest screen and the end screen.</td><td><span class="pill p-keep">Restyle</span></td><td>½ day</td></tr>
+        <tr><td>8</td><td><b>Video sharing opt-in</b></td><td>Switch plus a consent sheet. The switch is built now; uploading and storing videos waits for an India-region store and the waiver text.</td><td><span class="pill p-q">Phase 2</span></td><td>1 day now</td></tr>
+        <tr><td>9</td><td><b>Test and demo</b></td><td>Run all the screens end to end on Android and iPhone, then the demo next week.</td><td><span class="pill p-keep">Test</span></td><td>1 day</td></tr>
+      <tr><td>10</td><td><b>AI voice conversation</b></td><td>Open questions answered by an AI coach from physio-approved content. After budget and physio sign-off.</td><td><span class="pill p-q">Phase 2</span></td><td>~2 weeks, later</td></tr>
+      </table>
+      <p style="font-size:11.5px;color:var(--mute);margin-top:4mm">About 13–15 working days for changes 1–9 (the AI coach comes later). Next week's demo covers the core: split screen, form-fix highlight, one-sheet check-in and get-ready, with voice commands if ready.</p>
+    </div>
+    <div>
+      <div class="card tint">
+        <h3>Decisions needed from you</h3>
+        <ul>
+          <li><b>Approve the screens</b> as drawn, or mark changes.</li>
+          <li><b>Safety checks as one list:</b> is one “None of these” tap acceptable, or must each question be answered? This needs a physio and legal OK.</li>
+          <li><b>Terms:</b> agree once at sign-up and show a one-line reminder each session (proposed), or agree every session?</li>
+          <li><b>Reference video:</b> use the animated figure for the demo until the AI or physio videos are ready?</li>
+          <li><b>Repeated mistakes:</b> full replay only the first time, then a quick highlight (proposed), or a full replay every time?</li>
+          <li><b>Voice in the web link:</b> browser speech recognition may send audio to Google. Allow it with a privacy note, or voice only in the Android and iPhone apps?</li>
+          <li><b>AI voice coach (phase 2):</b> add to the week-1 budget request?</li>
+          <li><b>Split direction:</b> camera on top (as asked) on phones; side by side on tablets and laptops?</li>
+        </ul>
+      </div>
+      <div class="card" style="margin-top:5mm">
+        <h3>How we'll work</h3>
+        <p style="margin-top:3px">Plan and mockups first, on Claude Sonnet 5.5. Nothing is built until you approve. Then development switches to Claude Haiku 5.5, one change at a time, each shown to you before the next.</p>
+      </div>
+      <div class="card" style="margin-top:5mm">
+        <h3>Video storage, later</h3>
+        <p style="margin-top:3px">Storing videos needs patient consent (the waiver), a privacy policy update and India-region storage (DPDP). It is heavy on storage, so it's planned as its own step.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Kynex · Simpler session · Plan v1 · awaiting approval</span><span>7 / 7</span></div>
+</section>
+</body>
+</html>
